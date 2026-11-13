@@ -1,0 +1,48 @@
+# Plainchant Prose
+
+Plainchant Prose is a planned long-form writing application for novelists and non-fiction authors. A book remains a
+folder that a person can read without the application: `book.txt` records metadata and reading order, while each
+chapter is a Markdown (`.md`) file. The application supplies structure, preview, recovery, versions, and a one-way
+EPUB 3.3 handoff to Plainchant Scribe.
+
+This repository currently contains the product and engineering blueprint. Application code has not been copied or
+implemented.
+
+## Product boundary
+
+Prose owns drafting. The sibling application Plainchant Scribe owns layout and publication after handoff.
+Prose does not provide page design, covers, print output, accounts, collaboration, cloud sync, or generated writing.
+
+The first release is designed around five constraints:
+
+1. The writer's `book.txt` and `.md` chapter files are authoritative.
+2. The app changes only text the writer edits or explicitly moves.
+3. The frontend is static HTML, CSS, and vanilla JavaScript, with no build step or runtime package dependency.
+4. The app works offline; IndexedDB supplies recovery and a working copy, and Tauri v2 supplies desktop folder access.
+5. Sending to Scribe creates a valid EPUB 3.3. It does not create a live two-way link.
+
+## Start here
+
+- [BRIEF.md](BRIEF.md) is the maintainer's original product brief.
+- [ROADMAP.md](ROADMAP.md) breaks the work into independently verifiable phases and release gates.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) defines the planned components, data flow, and invariants.
+- [docs/DECISIONS.md](docs/DECISIONS.md) records accepted choices, proposals, and questions requiring maintainer input.
+- [docs/TESTING.md](docs/TESTING.md) defines the proof expected at each boundary.
+- [docs/HANDOFF.md](docs/HANDOFF.md) records the repository's current state.
+
+## Current status
+
+Blueprint only. The next implementation step is `P0-02`, repository initialization and baseline verification, followed
+by the recorded Plainchant code copy in `P0-03`. See [the roadmap](ROADMAP.md) for acceptance evidence.
+
+## Documentation check
+
+The blueprint uses the Manifold repository-memory scheme. Check its internal links, identifiers, placeholders, and
+handoff state with:
+
+```bash
+python3 tools/check_docs.py
+```
+
+This check proves that the documents agree with one another. It does not prove that planned application behaviour
+exists.

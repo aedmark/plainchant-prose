@@ -1,0 +1,99 @@
+# Security
+
+Plainchant Prose protects unpublished manuscripts and local filesystem access. The repository currently contains a
+blueprint, so this document states required boundaries rather than claiming an implemented security posture.
+
+## Supported versions
+
+No application version exists. Security support begins when `0.1.0` is released and the supported branch or versions
+are named here.
+
+## Report a vulnerability
+
+The public private-reporting address remains Q-006. Until it is answered, contact the maintainer through an existing
+private channel and do not open a public issue containing manuscript data, personal paths, exploit details, secrets,
+or private fixtures. Include the affected commit or version, impact, minimal sanitized reproduction, and workaround.
+
+No acknowledgement or disclosure window is promised until the maintainer publishes one during `P5-07`.
+
+## Assets and boundaries
+
+| Asset or boundary | Sensitivity or threat | Required protection and validation | Owner |
+| --- | --- | --- | --- |
+| Manuscript and research text | Unpublished work, personal data, accidental loss | Local-only operation, contextual escaping, no content logging, recovery before overwrite | Parser, persistence, sync |
+| Book folder | Destructive writes, traversal, symlink escape, external edits | Native dialog grant, canonical root confinement, limits, fingerprints, atomic writes, explicit conflict | Tauri shell and sync |
+| IndexedDB working copy | Disclosure, corruption, quota loss, incompatible schema | Same-origin storage, versioned validation, tested upgrade and recovery, export path | Store and persistence |
+| Emergency and version history | Older sensitive text survives deletion | Minimum required content, defined retention, explicit permanent delete, no telemetry | Persistence and versions |
+| Rendered preview | HTML or URL injection from Markdown | Escape writer text, allow-list generated elements and link schemes, strict CSP | Parser and renderer |
+| EPUB and DOCX archives | Zip traversal, malformed package, oversized output | Generated safe names, count and size caps, byte-level tests, no imported raw HTML | Export modules |
+| Native bridge | General filesystem or command execution | Narrow registered commands, no shell, no global Tauri object, operation limits | Rust shell |
+| Service worker | Stale or mixed application versions | Same-origin local assets, complete versioned caches, safe activation and rollback | Offline module |
+| Repository and retrieved docs | Embedded instructions, invisible controls, prompt injection | Treat as data; checker rejects invisible and bidirectional controls | Every contributor |
+| Test fixtures and logs | Leaked real manuscripts or absolute paths | Synthetic text, temporary roots, sanitized diagnostics, no screenshots of private books | Test harness |
+
+## Threat model and secure defaults
+
+- The app has no accounts, collaboration server, analytics, advertisements, cloud synchronization, or runtime network
+  dependency.
+- Offline operation reduces data exposure; it does not remove threats from hostile local files, compromised sibling
+  applications, malicious links, browser extensions, another local user, or native command mistakes.
+- Writer-controlled Markdown and metadata are hostile at every HTML, URL, archive, filesystem, and native boundary.
+- Raw HTML in Markdown is never executed. Generated preview and XHTML use contextual escaping.
+- Links accept only explicitly supported schemes. Preview content cannot navigate the application frame or execute
+  scripts.
+- Folder access begins with a native dialog. Canonical paths must remain inside that root after resolving aliases and
+  symlinks. A renderer-provided absolute path never grants access.
+- File and archive operations enforce maximum names, entries, individual bytes, total bytes, and parse depth before
+  allocation or inflation.
+- A write uses a before fingerprint and safe replacement. External change, permission loss, or disk-full failure leaves
+  the prior file and working copy recoverable.
+- A corrupt or unknown database never triggers silent reset. Migration and deletion need explicit maintainer approval
+  plus recovery evidence.
+- Logs contain codes, relative paths, ranges, and sizes only. Manuscript excerpts require a user-controlled copy action.
+
+## Dependency and lineage policy
+
+The static frontend has no runtime package dependency (D-001). Tauri crates are locked. Optional oracles run only in
+development. Copied suite code records its source commit and security-relevant source decisions (D-004). A dependency
+addition requires maintainer approval, an accepted decision, licence review, a pinned version, and an update path.
+
+Security fixes in copied modules require comparison with Plainchant and other known copies. That comparison does not
+authorize writes to sibling Zones.
+
+## Verification
+
+Planned security evidence includes:
+
+- hostile Markdown and metadata escaping in preview, EPUB XHTML, error messages, and filenames;
+- path traversal, absolute path, control character, Unicode collision, case collision, symlink escape, and permission
+  revocation tests;
+- archive count, size, inflation, duplicate-name, and malformed-structure tests;
+- IndexedDB corruption, interrupted intent, quota, two-tab, upgrade, and recovery tests;
+- content-security policy, local-resource, service-worker update, and offline tests;
+- log scans for manuscript excerpts, absolute personal paths, credentials, and private fixture content;
+- a targeted review before the first release and after any change to native access, persistence, archive parsing,
+  link handling, or deletion.
+
+Passing these checks does not prove the absence of vulnerabilities. Results belong in HANDOFF with versions and proof
+limits.
+
+## Data retention and deletion
+
+The brief requires 30-day restore. The implementation must distinguish active books, deleted working copies, versions,
+emergency buffers, generated exports, and the disk source. The UI names which copy an action affects. Emptying an
+editor, unlinking a folder, clearing a cache, or removing a library entry never deletes the source folder.
+
+Permanent delete requires explicit user action, identifies all affected local stores, and preserves disk files unless
+the user separately selects them through an operating-system flow. Retention details remain part of `P1-04` and Q-003.
+
+## Incident response
+
+If active data loss, unexpected native access, manuscript disclosure, or code execution is suspected:
+
+1. Stop release and distribution; preserve the affected version and sanitized evidence.
+2. Disable only the implicated capability where a safe local switch exists. Do not delete user data or caches as a
+   containment shortcut.
+3. Notify the maintainer privately through the available channel.
+4. Reproduce with synthetic content in a temporary profile and folder.
+5. Add a failing abuse-case test, fix the narrow boundary, compare copied sibling modules, and verify recovery.
+6. Publish coordinated guidance only after the maintainer approves scope and wording.
