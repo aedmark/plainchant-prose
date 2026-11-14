@@ -50,9 +50,9 @@ The maintainer and coding agents may create commits. An agent commits or pushes 
 asks. The maintainer controls remote creation, default-branch selection, merge, release, publication, dependencies,
 destructive data operations, and migrations.
 
-No Git repository exists as of 2026-11-12. `P0-02` records the chosen default branch, remote, licence, and initial
-history. Once established, commit subjects use imperative mood and include the roadmap ID when implementing an item.
-Do not force-push or rewrite shared history.
+The default branch is `master`; `origin` is `https://github.com/aedmark/plainchant-prose.git` (P0-02). `LICENSE`
+contains the D-014 terms. Commit subjects use imperative mood and include the roadmap ID when implementing an item. Do
+not force-push or rewrite shared history.
 
 A change is ready when its scope is clear, relevant checks pass, recovery and security impact are addressed, unrelated
 files are absent, and every invalidated document is updated.

@@ -83,7 +83,8 @@ recovery, binder and corkboard keyboard movement, preview escaping, find and rep
 focus order, accessible names, service-worker update, and offline reload. It injects quota failures and interrupted
 writes. A green banner alone is insufficient; the runner checks a final summary and process exit code.
 
-Browser tests never claim support for another engine. Q-004 and Q-005 determine the release matrix.
+Browser tests run against Chromium for the v0.1 support claim. Results from another engine remain additional evidence
+and do not extend the supported matrix without a later decision (D-013).
 
 ## Planned desktop checks
 
@@ -130,7 +131,7 @@ EPUBCheck validity, Scribe compatibility, and reading-system appearance remain t
 - Navigate, reorder, and undo with keyboard only; inspect focus, announcements, zoom, reduced motion, and both themes.
 - Disconnect storage permission and fill a test filesystem; confirm source files and working copy remain recoverable.
 - Send novel and non-fiction fixtures to Scribe, inspect their reading order and notes, then export from Scribe.
-- Install and upgrade the PWA and desktop package on each platform selected in Q-005.
+- Install and upgrade the PWA in Chromium and the desktop package on Linux (D-013).
 - Open release EPUBs in available real reading systems. Record the device, application, and version.
 
 ## Performance method

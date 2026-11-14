@@ -60,13 +60,20 @@ Part: Two
 
 ### Chapter source
 
-- The first `# Title` is the chapter title. Q-001 settles lower-level headings.
+- The first `# Title` is the chapter title. `##` through `######` are printable section headings at their standard
+  Markdown levels (D-010).
 - `* * *` alone is a printable scene break. An immediately associated `= Synopsis` is non-printing scene metadata.
 - `[[note]]`, including its accepted multiline form once specified, is a non-printing author note.
 - `/* ... */` is a non-printing boneyard. The grammar defines closure and malformed recovery before implementation.
 - `*italic*`, `**bold**`, and `> quote` are printable Markdown-core constructs.
 - `[^label]` and `[^label]: definition` form printable notes after validation.
 - Unknown syntax remains visible source. Rendered writer text is escaped; raw HTML is never executed.
+
+### Research files
+
+An optional `research/` directory contains ordinary supporting files (D-011). It is outside manuscript order and is
+ignored by parsing, binder construction, manuscript search, counts, preview, and export. Folder backup still carries
+it as part of the writer-owned book folder. Prose does not interpret citations from it in v0.1.
 
 The parser returns source ranges and diagnostics. It does not mutate text or touch environment APIs.
 
@@ -136,7 +143,7 @@ code with recorded lineage, not package dependencies (D-004).
 
 | Dependency | Version policy | For | Boundary |
 | --- | --- | --- | --- |
-| Modern browser APIs | Supported matrix remains Q-005 | Static app, IndexedDB, service worker | Feature detection and explicit unsupported messages |
+| Chromium browser APIs | Release-tested version recorded for each release | Static app, IndexedDB, service worker, explicit import and export | No persistent browser directory handles in v0.1 (D-012, D-013) |
 | Node.js | Minimum selected at `P0-05` | Pure and structure tests | Development only |
 | Tauri | v2, exact crates locked at implementation | Desktop shell | Build and native runtime only |
 | Python | 3.x standard library | `tools/check_docs.py` and static server | Development only |
@@ -153,7 +160,7 @@ Any new dependency requires maintainer approval and an accepted decision.
 | Working books and dirty files | IndexedDB `plainchant-prose` | Persistence adapter | Recovery UI; never silently reset | No |
 | Versions and deleted books | IndexedDB | Store and versions modules | Retention rules and explicit action | No |
 | Multi-file intent and emergency text | IndexedDB plus minimal localStorage buffer | Persistence adapter | Reconciled at startup | No |
-| Targets, streaks, handoff log | Location pending Q-003 | Stats and handoff modules | Explicit reset or portable backup design | No |
+| Targets, streaks, handoff log | IndexedDB `plainchant-prose` | Stats and handoff modules | Explicit reset; portable backup is later work (`P6-05`) | No |
 | Folder grants and fingerprints | IndexedDB and Tauri process state | Folder adapter | Permission revocation or unlink | No |
 | Offline application copy | Cache API | Service worker | Versioned cache activation | No |
 | Test profiles and generated archives | Fresh temporary directories | Test runners | Deleted by runner | No, except named fixtures |
@@ -165,7 +172,7 @@ Any new dependency requires maintainer approval and an accepted decision.
 | IndexedDB unavailable or full | Editing stops before an unsafe promise; export or copy text remains available | Rejected transaction and quota classification | Free space, export, or retry; disk source stays unchanged |
 | Tab or process closes mid-edit | Recovery view identifies dirty files and pending intent | Emergency buffer and intent record | Reconcile into a new working revision before sync |
 | Disk file changed elsewhere | Conflict names every changed file and shows both revisions | Fingerprint differs from last sync | Load disk, keep working copy as a new file, or compare; no automatic overwrite |
-| Folder permission disappears | Linked status pauses with relink action | Native or browser permission failure | Select the folder again; IndexedDB copy remains available |
+| Tauri folder permission disappears | Linked status pauses with relink action | Native permission failure | Select the folder again; IndexedDB copy remains available |
 | `book.txt` is invalid | Binder shows source-located problems; editing remains possible | Pure index diagnostics | Writer fixes explicit lines; no guessed order |
 | Parser sees malformed marks | Source remains editable; preview omits unsafe interpretation and shows diagnostics | Pure parser diagnostics | Writer closes or escapes the mark |
 | Multi-file scene move is interrupted | Startup reports an incomplete operation | Intent state and before fingerprints | Complete or roll back from stored before images |
@@ -181,6 +188,6 @@ manuscript text, research notes, absolute personal paths, or recovered version c
 - The repository contains no application code as of 2026-11-12. Every component above is a blueprint.
 - The Plainchant source reference `173a2ff` is an observed short commit on 2026-11-12; no files have been copied.
 - EPUBCheck and Scribe compatibility are planned evidence. No Prose EPUB has been generated or tested.
-- Browser and desktop support remain undefined until Q-004 and Q-005 are answered.
-- The IndexedDB transaction design in D-007 and native boundary in D-008 remain proposed until their roadmap items
-  supply executable evidence and maintainer acceptance.
+- The supported v0.1 environments are Linux Tauri and Chromium browser or PWA (D-013). No release evidence exists yet.
+- The IndexedDB transaction design in D-007 is accepted but remains unimplemented. The native boundary in D-008 stays
+  proposed until its roadmap item supplies executable evidence and maintainer acceptance.

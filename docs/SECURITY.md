@@ -10,11 +10,14 @@ are named here.
 
 ## Report a vulnerability
 
-The public private-reporting address remains Q-006. Until it is answered, contact the maintainer through an existing
-private channel and do not open a public issue containing manuscript data, personal paths, exploit details, secrets,
-or private fixtures. Include the affected commit or version, impact, minimal sanitized reproduction, and workaround.
+Use the repository's private vulnerability-reporting form in GitHub's Security area (D-015). The maintainer controls
+and enables that repository setting. Until the GitHub repository and form exist, contact the maintainer through an
+established private channel. Do not open a public issue containing manuscript data, personal paths, exploit details,
+secrets, or private fixtures. Include the affected commit or version, impact, minimal sanitized reproduction, and
+workaround.
 
-No acknowledgement or disclosure window is promised until the maintainer publishes one during `P5-07`.
+No acknowledgement window is promised until the maintainer publishes one during `P5-07`. Disclosure is coordinated
+through the private report; public details wait for maintainer approval and an available fix or mitigation.
 
 ## Assets and boundaries
 
@@ -57,6 +60,8 @@ The static frontend has no runtime package dependency (D-001). Tauri crates are 
 development. Copied suite code records its source commit and security-relevant source decisions (D-004). A dependency
 addition requires maintainer approval, an accepted decision, licence review, a pinned version, and an update path.
 
+The repository is distributed under the AI-assisted MIT terms in `LICENSE` (D-014).
+
 Security fixes in copied modules require comparison with Plainchant and other known copies. That comparison does not
 authorize writes to sibling Zones.
 
@@ -84,7 +89,8 @@ emergency buffers, generated exports, and the disk source. The UI names which co
 editor, unlinking a folder, clearing a cache, or removing a library entry never deletes the source folder.
 
 Permanent delete requires explicit user action, identifies all affected local stores, and preserves disk files unless
-the user separately selects them through an operating-system flow. Retention details remain part of `P1-04` and Q-003.
+the user separately selects them through an operating-system flow. Retention details remain part of `P1-04` under
+D-007.
 
 ## Incident response
 

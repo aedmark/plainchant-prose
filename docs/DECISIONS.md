@@ -100,7 +100,7 @@ EPUBCheck-only test misses application-level interpretation.
 **Consequences:** CI can pass deterministic tests while reporting an unavailable oracle separately. Release evidence
 must name every oracle that actually ran.
 
-## D-007 Offline-first working copy with controlled folder synchronization  (2026-11-12, status: proposed)
+## D-007 Offline-first working copy with controlled folder synchronization  (2026-11-12, status: accepted 2026-11-13)
 
 **Context:** The browser needs crash recovery and installability; the desktop app needs real book folders. A multi-file
 working copy can diverge from disk.
@@ -113,8 +113,9 @@ use a recoverable intent record so interruption can be completed or rolled back.
 **Alternatives:** Writing disk on every keystroke increases partial-write and watcher risk. Treating disk modification
 time as identity misses replacements and coarse timestamp changes. Treating IndexedDB as authoritative violates D-002.
 
-**Consequences:** Schema adoption waits for upgrade and recovery tests in `P1-04`. Directory support outside Tauri
-remains Q-004.
+**Consequences:** Schema adoption waits for upgrade and recovery tests in `P1-04`. Targets, streaks, versions, and
+handoff records remain in IndexedDB for v0.1. A portable backup is later work, and moving only the book folder does not
+move this history.
 
 ## D-008 Native access is dialog-scoped and folder-confined  (2026-11-12, status: proposed)
 
@@ -145,23 +146,104 @@ same rate. Chat-only decisions disappear between sessions.
 **Consequences:** Changes update the owning document in the same work. A clean checker run proves internal document
 consistency only.
 
-## D-010 Source grammar remains deliberately smaller than Markdown  (2026-11-12, status: proposed)
+## D-010 Source grammar remains deliberately smaller than Markdown  (2026-11-12, status: accepted 2026-11-13)
 
 **Context:** The `.md` extension improves portability, while the app promises predictable structure and avoids layout
 syntax. The brief defines only a small Markdown core plus Fountain-derived marks.
 
-**Decision:** The first parser recognizes only documented Prose constructs. Raw HTML, tables, reference links, and
-unlisted Markdown syntax stay literal or produce diagnostics; they are never executed or silently discarded. The
-grammar defines precedence, escaping, malformed-input recovery, and exact source ranges before implementation.
+**Decision:** The first parser recognizes only documented Prose constructs. The first `#` heading is the chapter
+title; `##` through `######` are printable section headings with their standard Markdown levels. Raw HTML, tables,
+reference links, and unlisted Markdown syntax stay literal or produce diagnostics; they are never executed or silently
+discarded. The grammar defines precedence, escaping, malformed-input recovery, and exact source ranges before
+implementation.
 
 **Alternatives:** Full CommonMark expands the parser and creates ambiguity with Prose notes, boneyards, and scene
 cards. Silently normalizing unknown syntax would rewrite author intent.
 
-**Consequences:** Q-001 and Q-002 must settle headings and research conventions before `P1-01` accepts the grammar.
+**Consequences:** Heading depth remains portable to ordinary Markdown editors. The narrower inline and block grammar
+still needs explicit fixtures before implementation.
+
+## D-011 Research stays in an optional ignored directory  (2026-11-13, status: accepted)
+
+**Context:** Q-002 asked how supporting research belongs beside a book without leaking into manuscript order or
+handoff output. The maintainer selected an optional directory of ordinary files.
+
+**Decision:** A book folder may contain `research/` with any ordinary supporting files. `book.txt` does not list the
+directory. Prose ignores its contents during binder construction, manuscript search, word counts, preview, and export.
+Footnotes are the only v0.1 citation mechanism interpreted by Prose.
+
+**Alternatives:** Listing research in `book.txt` mixes source material with reading order. Leaving the convention
+undefined weakens book-folder portability.
+
+**Consequences:** Prose never promises to open, index, synchronize independently, or validate research files. Folder
+backup tools still carry the directory because it is inside the writer's book folder.
+
+**Review trigger:** Authors need searchable research, citation-library integration, or selective handoff attachments.
+
+## D-012 Linked folders belong to Tauri in v0.1  (2026-11-13, status: accepted)
+
+**Context:** Q-004 asked whether the browser build should use Chromium's File System Access API. Supporting two folder
+adapters would double the conflict and permission surface before the workflow is proven.
+
+**Decision:** Tauri owns linked-folder editing in v0.1. The Chromium browser and PWA use IndexedDB books plus explicit
+book-folder import and export. Browser directory handles are outside the supported release contract.
+
+**Alternatives:** Direct Chromium folder access offers convenience but adds a browser-specific permission and watcher
+model. Calling it experimental would still create user data that needs support.
+
+**Consequences:** Browser import and export need a safe, explicit folder package or multi-file workflow. The browser UI
+does not show a linked-folder control.
+
+**Review trigger:** The Tauri workflow is stable and browser users demonstrate demand for persistent directory access.
+
+## D-013 Linux desktop and Chromium PWA are the v0.1 platforms  (2026-11-13, status: accepted)
+
+**Context:** Q-005 asked which release environments the maintainer can test.
+
+**Decision:** v0.1 supports the Tauri desktop application on Linux and the browser or installable PWA in Chromium.
+Windows, macOS, Firefox, Safari, mobile browsers, and other Chromium-derived browsers receive no v0.1 support claim
+without separately recorded evidence.
+
+**Alternatives:** A three-desktop release would claim platforms unavailable for maintainer verification. A browser-only
+release would omit the authoritative linked-folder workflow.
+
+**Consequences:** Automated checks may run elsewhere, but release evidence must include real Linux desktop and Chromium
+results. Documentation names untested environments directly.
+
+**Review trigger:** Repeatable test access becomes available for another platform or browser.
+
+## D-014 AI-assisted MIT licence  (2026-11-13, status: accepted)
+
+**Context:** The maintainer supplied the BeSpoke repository's AI-assisted MIT licence as the source and requested the
+Plainchant Prose title with only Andrew Edmark and Arantor as the human contributors.
+
+**Decision:** `LICENSE` adapts that text to Plainchant Prose, retains the permissive MIT grant and human-computer
+contribution acknowledgment, and names Andrew Edmark and Arantor as the Humans.
+
+**Alternatives:** The standard short MIT text omits the requested AI-assistance acknowledgment. GPLv3 would impose a
+copyleft condition the maintainer did not select.
+
+**Consequences:** Copies or substantial portions include the copyright notice, acknowledgment, and permission notice.
+Security reporting is governed separately by D-015.
+
+## D-015 GitHub private vulnerability reporting  (2026-11-13, status: accepted)
+
+**Context:** Q-006 still needed a private security-reporting path. The maintainer will enable GitHub's private
+vulnerability reporting for the repository.
+
+**Decision:** SECURITY directs reporters to the repository's private vulnerability-reporting form in GitHub's
+Security area. Reports remain private while the maintainer investigates and coordinates disclosure. Enabling and
+maintaining the repository setting belongs to the maintainer.
+
+**Alternatives:** A published email address adds a separate inbox and spam surface. Public issues expose details before
+assessment.
+
+**Consequences:** The reporting form is unavailable until the maintainer enables the setting on the existing GitHub
+repository. Before then, reporters use an established private channel with the maintainer.
 
 ## Held tensions
 
-### T-001 Portable writing history and clean book folders  (2026-11-12, status: held)
+### T-001 Portable writing history and clean book folders  (2026-11-12, status: resolved by D-007)
 
 **Owner:** Maintainer.
 
@@ -173,10 +255,10 @@ state that another editor might damage.
 **Why both hold:** Portability is part of the plain-files promise, while histories and versions are not manuscript
 content and may be large.
 
-**Cost of holding both:** The blueprint cannot promise that writing history survives moving only the folder. Q-003
-blocks the storage location for these aids.
+**Cost of holding both:** The blueprint cannot promise that writing history survives moving only the folder.
 
-**Review trigger:** `P1-04` schema design or `P4-02` target implementation begins.
+**Resolution:** v0.1 keeps this history in IndexedDB and documents the portability limit. A later explicit backup may
+carry it without placing an opaque sidecar inside every book folder.
 
 ### T-002 Product independence and copied-code drift  (2026-11-12, status: held)
 
@@ -195,22 +277,16 @@ repositories.
 
 ## Open questions
 
-- **Q-001** Which additional headings belong to the Prose grammar: `##` through `######`, a smaller subset, or a
-  dedicated mark? This blocks the complete grammar in `P1-01`; recommendation: support `##` through `######` as
-  printable section headings while reserving the first `#` for the chapter title. (asked 2026-11-12 by Codex)
-- **Q-002** What are the allowed research-file and citation conventions inside a book folder, and are research files
-  listed in `book.txt` or ignored by manuscript order? This blocks research claims and part of `P1-01`;
-  recommendation: reserve an optional `research/` directory, ignore it during export, and use footnotes as the only
-  v0.1 citation mechanism. (asked 2026-11-12 by Codex)
-- **Q-003** Where should targets, streak history, versions, and handoff records live for portability: IndexedDB only,
-  an optional sidecar directory, or explicit export and import? This blocks the final `P1-04` schema and `P4-02`;
-  recommendation: IndexedDB for v0.1 plus an explicit portable backup after the core manuscript path works. (asked
-  2026-11-12 by Codex)
-- **Q-004** Does v0.1 promise linked-folder editing in supported Chromium browsers through the File System Access API,
-  or only in Tauri? This blocks the browser half of `P1-06`; recommendation: Tauri owns linked folders in v0.1, while
-  the browser app owns IndexedDB books and explicit folder import or export. (asked 2026-11-12 by Codex)
-- **Q-005** Which desktop operating systems and browsers are release targets for `0.1.0`? This blocks packaging and
-  the release matrix in `P5-02` and `P5-05`; recommendation: choose only platforms the maintainer can run or arrange
-  to test. (asked 2026-11-12 by Codex)
-- **Q-006** What licence and private security-reporting address should the repository publish? This blocks the final
-  licence file in `P0-02` and the release-ready security policy in `P5-07`. (asked 2026-11-12 by Codex)
+- **Q-001** ~~Which additional headings belong to the Prose grammar?~~ Answered 2026-11-13: `##` through `######`,
+  with the first `#` reserved for the chapter title (D-010).
+- **Q-002** ~~How do research files and citations live in a book folder?~~ Answered 2026-11-13: optional `research/`,
+  ignored by manuscript features and export; footnotes are the interpreted v0.1 citation form (D-011).
+- **Q-003** ~~Where do targets, streaks, versions, and handoff records live in v0.1?~~ Answered 2026-11-13: IndexedDB;
+  portable backup is later work (D-007).
+- **Q-004** ~~Does v0.1 support linked folders in Chromium?~~ Answered 2026-11-13: no; Tauri owns linked folders, and
+  the browser uses IndexedDB with explicit import and export (D-012).
+- **Q-005** ~~Which platforms does v0.1 support?~~ Answered 2026-11-13: Linux desktop and Chromium browser or PWA
+  (D-013).
+- **Q-006** ~~What licence and private security-reporting path should the repository publish?~~ Answered 2026-11-13:
+  the supplied AI-assisted MIT terms (D-014) and GitHub private vulnerability reporting, enabled by the maintainer
+  (D-015).

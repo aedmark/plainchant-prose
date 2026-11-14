@@ -79,9 +79,9 @@ The maintainer and coding agents may create commits. An agent commits or pushes 
 asks. The maintainer controls remote creation, merges, releases, publication, dependency additions, destructive data
 operations, and migrations unless a later instruction grants narrower authority.
 
-- No Git repository, default branch, or remote exists as of 2026-11-12. `P0-02` establishes them when the maintainer
-  requests initialization.
-- Until a default branch is chosen, use short-lived `feature/<topic>` branches only when the maintainer requests one.
+- Default branch: `master`.
+- Remote: `origin` at `https://github.com/aedmark/plainchant-prose.git`.
+- Use short-lived `feature/<topic>` branches only when the maintainer requests one.
 - Commit subjects use imperative mood and name the roadmap ID when the commit implements a roadmap item.
 - Releases use semantic versions; the first planned release is `0.1.0`. Git tags become the release source of truth
   once release work begins.
@@ -128,6 +128,7 @@ permission.
 | Path | Purpose |
 | --- | --- |
 | `BRIEF.md` | Maintainer-owned product brief |
+| `LICENSE` | AI-assisted MIT terms and contribution acknowledgment (D-014) |
 | `AGENTS.md` | Canonical agent instructions and authority |
 | `ROADMAP.md` | Planned work and release gates with stable IDs |
 | `docs/README.md` | Documentation ownership and update triggers |
@@ -159,13 +160,14 @@ Planned code paths appear in `docs/ARCHITECTURE.md`; do not create empty directo
   with recorded lineage.
 - Generated EPUBs and test artifacts are reproducible outputs and are not committed unless a fixture has an explicit
   test purpose.
-- Supported platforms and browser scope remain open in Q-005. Do not claim support from a headless test alone.
+- The v0.1 support targets are Linux Tauri and Chromium browser or PWA (D-013). Do not claim support from a headless
+  test alone.
 
 ## Environments
 
 | Environment | Can access | Cannot access / caveats |
 | --- | --- | --- |
-| Static browser app | IndexedDB, service worker under HTTP(S), downloads; directory access only where explicitly supported | No assumed native path, folder watcher, or Java process |
+| Chromium browser or PWA | IndexedDB, service worker under HTTP(S), downloads, explicit book import and export | No linked directory, native path, folder watcher, or Java process in v0.1 |
 | Tauri v2 desktop app | Native dialogs and allow-listed book folders through narrow Rust commands | Web content receives no general filesystem or shell access |
 | Node test process | Pure UMD modules and in-memory fixtures | Does not prove DOM, IndexedDB, service worker, or native behaviour |
 | CI, once configured | Deterministic unit, structure, browser, Rust, and documentation checks | External oracles and real reading systems may be unavailable and must report "not run" |

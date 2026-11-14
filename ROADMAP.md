@@ -11,9 +11,10 @@ Goal: establish a truthful project repository and a testable static application 
 
 - [x] P0-01 Adopt the Manifold for Plainchant Prose: replace the template placeholders with the product blueprint,
   decisions, roadmap, test plan, security boundaries, and handoff. Evidence: `python3 tools/check_docs.py` (2026-11-12).
-- [ ] P0-02 Initialize Git when requested by the maintainer; choose the default branch and remote, add the suite's
-  licence and ignore rules, then record the initial commit in HANDOFF. No remote operation occurs without an explicit
-  request.
+- [x] P0-02 Establish Git on `master` with `origin` at `https://github.com/aedmark/plainchant-prose.git`, add ignore
+  rules for local tools and generated output, verify the D-014 licence, and record the repository state in HANDOFF.
+  Evidence: existing baseline commit `5f04650`, `git remote -v`, clean documentation check, and maintainer-authorized
+  commit and push (2026-11-13).
 - [ ] P0-03 Copy the minimum reusable modules and application shell from Plainchant at a recorded commit; write
   `docs/archive/plainchant-lineage.md` with each copied file, relevant source decisions, removed features, and known
   traps. Begin from the observed reference `173a2ff` (2026-11-12) or record the newer chosen commit before copying.
@@ -29,8 +30,8 @@ absent, the service-worker file list agrees with the page, and all configured ba
 
 Goal: open, edit, recover, and safely synchronize a multi-file book without reformatting untouched source.
 
-- [ ] P1-01 Specify the complete Prose source grammar with fixtures: `book.txt`, chapter headings, scene breaks,
-  synopses, notes, boneyards, emphasis, quotes, and footnotes. Resolve Q-001 and Q-002 before accepting the grammar.
+- [ ] P1-01 Specify the complete Prose source grammar with fixtures: `book.txt`, `#` chapter titles, `##` through
+  `######` section headings, scene breaks, synopses, notes, boneyards, emphasis, quotes, and footnotes (D-010, D-011).
 - [ ] P1-02 Build a pure parser that returns source ranges, diagnostics, book metadata, parts, chapters, scenes,
   printable blocks, notes, and footnotes. Rendering always escapes writer text; malformed marks remain editable.
 - [ ] P1-03 Build the pure book-index reader and range-splice writer. It preserves comments, spacing, unknown metadata,
@@ -39,9 +40,9 @@ Goal: open, edit, recover, and safely synchronize a multi-file book without refo
   handoff records. Include upgrade, rollback or recovery, quota-failure, and two-tab tests before adopting the schema.
 - [ ] P1-05 Implement debounced autosave, a synchronous emergency buffer, 30-day soft-delete recovery, and crash
   reconciliation for all dirty book files. Empty editor state never destroys the last durable chapter.
-- [ ] P1-06 Implement folder linking and conflict decisions with canonical newlines and content fingerprints. The app
-  never overwrites a file changed outside Prose; missing, added, renamed, and simultaneous edits produce explicit
-  choices. Resolve Q-004 for browser scope.
+- [ ] P1-06 Implement Tauri folder linking and conflict decisions with canonical newlines and content fingerprints.
+  The app never overwrites a file changed outside Prose; missing, added, renamed, and simultaneous edits produce
+  explicit choices. Browser books use explicit import and export instead of persistent directory handles (D-012).
 - [ ] P1-07 Implement narrow Tauri commands for native folder selection, reading, writing, and watching. Commands
   accept only canonical paths under a folder selected in a native dialog, enforce size limits, and expose no shell.
 
@@ -96,8 +97,9 @@ Goal: add high-value drafting aids without placing manuscript truth in an opaque
 
 - [ ] P4-01 Implement chapter, scene, selection, and book word counts from printable text; define the word boundary
   rule in tests.
-- [ ] P4-02 Implement optional book and chapter targets plus daily history after resolving Q-003. Failure to load
-  statistics never blocks opening or editing the manuscript.
+- [ ] P4-02 Implement optional book and chapter targets plus daily history in IndexedDB (D-007). Failure to load
+  statistics never blocks opening or editing the manuscript; v0.1 documents that moving only the book folder leaves
+  this history behind.
 - [ ] P4-03 Adapt versions to multi-file transactions with manual snapshots, retention, and scene-aware comparison.
   Restore previews every affected file and creates a version of the state it replaces.
 - [ ] P4-04 Adapt narration estimates to prose reading rates, with a documented default and user setting. Estimates
@@ -116,18 +118,19 @@ Goal: ship a recoverable, accessible browser application and Tauri desktop appli
 
 - [ ] P5-01 Complete the installable offline web application: manifest, update-safe network strategy, cache migration,
   and offline browser tests. No asset loads from another host.
-- [ ] P5-02 Complete Tauri v2 packaging for the platforms selected in Q-005; use a strict content-security policy,
-  disable the global Tauri object, and test every native allow-list.
+- [ ] P5-02 Complete Tauri v2 packaging for Linux (D-013); use a strict content-security policy, disable the global
+  Tauri object, and test every native allow-list.
 - [ ] P5-03 Complete keyboard, focus, screen-reader naming, reduced-motion, zoom, and theme-contrast checks. Record
   manual results separately from automated accessibility claims.
 - [ ] P5-04 Exercise quota exhaustion, corrupt IndexedDB, missing folders, permission revocation, disk-full writes,
   interrupted multi-file saves, hostile Markdown, oversized files, and malicious folder layouts.
-- [ ] P5-05 Run release fixtures through supported browsers, desktop packages, EPUBCheck, Scribe, and the available
-  reading systems; record exact versions and untested platforms.
+- [ ] P5-05 Run release fixtures through Chromium, the Linux desktop package, EPUBCheck, Scribe, and the available
+  reading systems; record exact versions and name unsupported or untested platforms (D-013).
 - [ ] P5-06 Write user help for the source format, folder backups, conflict choices, restore, handoff ownership, and
   late revisions. Help describes only implemented behaviour.
 - [ ] P5-07 Cut `0.1.0` only after every earlier gate passes or the maintainer explicitly accepts a named limitation;
-  update the changelog, handoff, security support table, and release evidence.
+  confirm GitHub private vulnerability reporting is enabled (D-015), publish an acknowledgement window, and update the
+  changelog, handoff, security support table, and release evidence.
 
 ## Phase 6: Later candidates
 
@@ -139,4 +142,7 @@ This phase is uncommitted. Each item needs a fresh decision after `0.1.0` eviden
   layout-preservation tests, and explicit ownership transfer. Prose remains one-way until accepted.
 - [ ] P6-03 Evaluate a one-file-per-scene storage option only if real books show that range moves are unsafe or too
   slow. Migration requires explicit maintainer approval and a reversible conversion.
-- [ ] P6-04 Evaluate portable research files and citations after the conventions in Q-006 are answered by user work.
+- [ ] P6-04 Evaluate searchable research and richer citation tooling after v0.1 user work tests the ignored
+  `research/` convention and footnote-only interpretation (D-011).
+- [ ] P6-05 Design an explicit portable backup for IndexedDB-only targets, streaks, versions, and handoff history after
+  the v0.1 schema and real book sizes are known (D-007).

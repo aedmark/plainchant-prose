@@ -9,18 +9,20 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-12, session 1, with no Git branch or commit: the Manifold template has been adopted as a
-Plainchant Prose blueprint; application code, Git history, a licence, and release configuration do not exist._
+_Last updated: 2026-11-13, session 2, on `master` tracking `origin/master`: P0-01 and P0-02 are complete, all six design
+questions have answers, and application code does not exist._
 
-**Session owner:** None after session 1 closes. Claim ownership here before editing overlapping files.
+**Session owner:** None after session 2 closes. Claim ownership here before editing overlapping files.
 
-**Where things stand:** `BRIEF.md` remains the maintainer-owned source. The active documents now define the product
-boundary, planned architecture, accepted and proposed decisions, open questions, security model, verification method,
-and phased roadmap. The confirmed choices are the Plainchant Prose name, `.md` chapters, one file per chapter, recorded
-code copying, later shared-API investigation, and explicit requests before agent commits or pushes. No application
-behaviour exists yet.
+**Where things stand:** `BRIEF.md` remains the maintainer-owned source. Plainchant Prose uses `.md` chapters, standard
+`##` through `######` headings, an ignored optional `research/` directory, IndexedDB-only writing history in v0.1,
+Tauri-only linked folders, and Linux desktop plus Chromium browser or PWA support. `LICENSE` contains the supplied
+AI-assisted MIT terms adapted for Plainchant Prose and names Andrew Edmark and Arantor as the Humans. The private
+security channel is GitHub private vulnerability reporting, which the maintainer will enable on the existing
+repository. Git uses `master` and the GitHub `origin`; the blueprint commit is the current HEAD after this handoff is
+committed. No application behaviour exists yet.
 
-**Verified** (2026-11-12, documentation-only workspace, Python 3.14.10)
+**Verified** (2026-11-13, documentation-only workspace, Python 3.14.10)
 
 | Suite | Result |
 | --- | --- |
@@ -29,15 +31,15 @@ behaviour exists yet.
 **What works**
 
 - The original brief is preserved unchanged.
+- The repository contains the selected licence text with the requested project and contributor names.
 - The blueprint separates observed sibling-repository evidence, accepted product choices, proposed implementation
-  choices, and unanswered maintainer questions.
+  choices, and the resolved maintainer questions.
 - The roadmap puts safe multi-file storage before UI expansion and places the Scribe handoff before secondary writing
   aids.
 
 **Not verified**
 
 - No parser, editor, storage, folder sync, Tauri shell, service worker, EPUB, DOCX, or application test exists.
-- No Git repository or remote exists; the `.git` directory is empty in this workspace.
 - No output has run through EPUBCheck or Plainchant Scribe.
 
 **Gotchas for the next session**
@@ -51,22 +53,43 @@ behaviour exists yet.
 
 ## Next steps
 
-1. The maintainer answers the release-blocking questions that affect the next chosen item, especially Q-006 before
-   repository licensing and Q-001 before final grammar fixtures.
-2. On explicit request, complete `P0-02`: initialize Git, choose a default branch and remote, add the selected licence,
-   run the documentation check, and record the commit.
-3. Complete `P0-03` as one reviewable lineage copy before adapting storage or UI.
+1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
+2. Complete `P0-03` as one reviewable lineage copy before adapting storage or UI.
 
 ## Open questions for maintainers
 
-- Q-001 defines printable subheadings and blocks the complete grammar.
-- Q-002 defines research and citation file conventions.
-- Q-003 defines portability for targets, histories, versions, and handoff records.
-- Q-004 defines linked-folder support in the browser build.
-- Q-005 defines release operating systems and browsers.
-- Q-006 defines the repository licence and private security contact.
+- None. Q-001 through Q-006 are answered in DECISIONS.
 
 ## Session log
+
+### Session 2: 2026-11-13: settle blueprint choices and add the licence
+
+**Contributor:** Maintainer and Codex
+
+**Goal:** Answer the six open design choices and adapt the supplied AI-assisted MIT licence.
+
+**Done:** `P0-02`; design questions Q-001 through Q-006.
+
+**Changed:** Added `LICENSE` and `.gitignore`; recorded `master`, the GitHub `origin`, and baseline commit `5f04650`;
+accepted D-007 and D-010; added D-011 through D-015; resolved T-001; updated the roadmap, architecture, testing,
+security, contribution, README, AGENTS, and handoff claims.
+
+**Decisions:** Standard `##` through `######` headings; optional ignored `research/`; IndexedDB-only histories in v0.1;
+Tauri-only linked folders; Linux desktop and Chromium browser or PWA support; AI-assisted MIT terms with Andrew Edmark
+and Arantor as the Humans; GitHub private vulnerability reporting as the maintainer-enabled security channel.
+
+**Verified:** `python3 tools/check_docs.py`: 0 errors, 0 warnings in 13 files.
+
+**Not verified:** Licence interpretation by counsel; every application behaviour; no code exists.
+
+**Problems / surprises:** Q-006 combined licence and reporting contact; separate decisions record each part.
+
+**Corrections:** Research and platform conventions are now decided. Earlier current-state text that called them open is
+superseded by this session.
+
+**Left undone:** Enabling private vulnerability reporting, source copy, and all implementation.
+
+**Next session should start with:** Claim `P0-03` and record the exact Plainchant source commit before copying.
 
 ### Session 1: 2026-11-12: adopt the Plainchant Prose blueprint
 

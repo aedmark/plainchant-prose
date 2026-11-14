@@ -7,6 +7,7 @@ Each project fact has one authoritative home. Other documents link to that owner
 | Document | Primary audience | Owns | Does not own |
 | --- | --- | --- | --- |
 | `../BRIEF.md` | Maintainer and product designer | Original requested product and feature scope | Later decisions, implementation detail, or session state |
+| `../LICENSE` | Users and distributors | Permission, conditions, warranty disclaimer, and contribution acknowledgment | Contribution workflow or security reporting |
 | `../README.md` | Newcomers | Purpose, boundary, current entry points | Internal workflow or detailed architecture |
 | `../AGENTS.md` | Contributors and coding agents | Standing rules, authority, conventions, protected areas | Feature history or design rationale |
 | `../ROADMAP.md` | Maintainers and contributors | Planned scope, order, gates, and item status | Component contracts or current test results |
@@ -31,6 +32,7 @@ Each project fact has one authoritative home. Other documents link to that owner
 | Threat, trust boundary, retention rule, dependency, reporting path, or incident process change | SECURITY |
 | Work starts, pauses, or materially changes repository state | HANDOFF; roadmap status when applicable |
 | Contribution, authority, branch, commit, or release workflow change | CONTRIBUTING and AGENTS when agents are affected |
+| Licence grant, attribution, or disclaimer change | LICENSE and a decision; README if the public summary changes |
 | New planned work or changed gate | ROADMAP, with origin and acceptance evidence |
 | Completed roadmap phase or an overlong session log | Move exact history to `archive/` and leave a pointer |
 

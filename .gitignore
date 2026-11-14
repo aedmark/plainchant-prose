@@ -1,0 +1,19 @@
+.idea/
+.vscode/
+node_modules/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+Thumbs.db
+
+# Local development oracles and generated output
+.tools/
+*.epub
+*.docx
+!test/fixtures/*.epub
+!test/fixtures/*.docx
+
+# Tauri build output
+src-tauri/target/
+src-tauri/dist/

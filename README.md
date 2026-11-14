@@ -32,8 +32,8 @@ The first release is designed around five constraints:
 
 ## Current status
 
-Blueprint only. The next implementation step is `P0-02`, repository initialization and baseline verification, followed
-by the recorded Plainchant code copy in `P0-03`. See [the roadmap](ROADMAP.md) for acceptance evidence.
+Blueprint only. Git and the GitHub remote are established. The next implementation step is the recorded Plainchant code
+copy in `P0-03`. See [the roadmap](ROADMAP.md) for acceptance evidence.
 
 ## Documentation check
 
@@ -46,3 +46,8 @@ python3 tools/check_docs.py
 
 This check proves that the documents agree with one another. It does not prove that planned application behaviour
 exists.
+
+## Licence
+
+Plainchant Prose uses the [AI-assisted MIT licence](LICENSE), with Andrew Edmark and Arantor identified as the human
+contributors.
