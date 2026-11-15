@@ -9,10 +9,10 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-14, session 5, on `master` tracking `origin/master`: P0-01 through P0-05 are complete; the
-Scribe-derived foundation is renamed, hardened, and trimmed to the seams retained for Prose._
+_Last updated: 2026-11-14, session 6, on `master` tracking `origin/master`: Phase 0 is complete; the Scribe-derived
+foundation is renamed, hardened, trimmed, and covered by maintained Node, Chromium, Rust, and documentation commands._
 
-**Session owner:** None. The next session may claim P0-06.
+**Session owner:** None. The next session may claim P1-01.
 
 **Where things stand:** `BRIEF.md` remains the maintainer-owned source. Plainchant Prose uses `.md` chapters, standard
 `##` through `######` headings, an ignored optional `research/` directory, IndexedDB-only writing history in v0.1,
@@ -22,16 +22,19 @@ security channel is GitHub private vulnerability reporting, which the maintainer
 repository. Git uses `master` and the GitHub `origin`. The application foundation comes from Plainchant Scribe commit
 `e2b22186a481afb6b0180d0883ce21d393ae7352`; P0-04 renames its identifiers and hardens its page boundary. P0-05
 removes Scribe-only publication, reader, layout, cover, font, checking, preview-server, file-association, and help
-surfaces. The retained shell still has generic studio concepts; no Prose source grammar or book model exists yet. The
-complete provenance and removal map are in `docs/archive/plainchant-lineage.md`.
+surfaces. P0-06 adapts the retained tests, removes dormant oracle references to discarded modules, and adds maintained
+browser and Rust commands. The retained shell still has generic studio concepts; no Prose source grammar or book model
+exists yet. The complete provenance and removal map are in `docs/archive/plainchant-lineage.md`.
 
 **Verified** (2026-11-14; Node 22.23.5, Rust and Cargo 1.99.1, Google Chrome 157.0.8103.78, Python 3.14.10)
 
 | Suite | Result |
 | --- | --- |
-| `npm test` | **197/197 passed** |
-| `cargo test --manifest-path src-tauri/Cargo.toml` | **5 passed, 0 failed** |
-| One-off exact-CSP headless Chrome smoke | **Generic starter Stage and bridge loaded; no errors or policy violations** |
+| `npm test` | **198/198 passed**; LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| Explicit all-oracle skip run | **197/197 passed**; EPUBCheck, Ace, and LibreOffice each reported `not run` with its configured reason |
+| `npm run test:browser` | **1/1 passed twice** after the final timing adjustment, in disposable Chrome profiles under the exact CSP |
+| Browser-runner mutation | **Expected failure** for the deliberately changed page title; production title restored |
+| `npm run tauri:test` | **5 passed, 0 failed** |
 | `python3 tools/check_docs.py` | **0 errors, 0 warnings in 14 files** |
 
 **What works**
@@ -45,6 +48,8 @@ complete provenance and removal map are in `docs/archive/plainchant-lineage.md`.
 - The native page has a strict local-only CSP, no public Tauri global, and a tested internal invoke bridge.
 - Structure checks reject the removed Scribe-only source, tests, HTML controls, CSS surfaces, native commands,
   capabilities, EPUB association, and inherited manual.
+- `npm test`, `npm run test:browser`, and `npm run tauri:test` are maintained entry points for the retained foundation;
+  optional oracles distinguish a named skip from a pass.
 - The blueprint separates observed sibling-repository evidence, accepted product choices, proposed implementation
   choices, and the resolved maintainer questions.
 - The roadmap puts safe multi-file storage before UI expansion and places the Scribe handoff before secondary writing
@@ -61,8 +66,7 @@ complete provenance and removal map are in `docs/archive/plainchant-lineage.md`.
 
 - `BRIEF.md` contains an unavailable embedded-plan marker. The maintainer called it noise and instructed the blueprint
   to ignore it on 2026-11-12.
-- The retained shell is still a generic web studio. P0-06 adapts its inherited tests; Prose domain work starts at
-  P1-01.
+- The retained shell is still a generic web studio. Prose domain work starts at P1-01.
 - The D-017 Stage nonce is an authorization marker, not a secret. The generic Stage strips imported scripts before
   inserting its marked interaction bridge.
 - `test/epub-fixture.js` is test-only. It preserves direct coverage for retained EPUB packaging without restoring an
@@ -74,14 +78,53 @@ complete provenance and removal map are in `docs/archive/plainchant-lineage.md`.
 ## Next steps
 
 1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
-2. Complete P0-06 by adapting the retained Node, structure, and Rust suites to the trimmed shell and adding the
-   disposable-profile Chromium runner.
+2. Complete P1-01 by specifying the Prose source grammar and its fixtures before implementing the parser.
 
 ## Open questions for maintainers
 
 - None. Q-001 through Q-006 are answered in DECISIONS.
 
 ## Session log
+
+### Session 6: 2026-11-14: adapt the foundation harness
+
+**Contributor:** Codex
+
+**Goal:** Complete P0-06 without compiling unimplemented Prose domain claims into the retained foundation tests.
+
+**Done:** P0-06 and Phase 0.
+
+**Changed:** Added maintained `test:browser` and `tauri:test` package commands; added a dependency-free Chromium runner
+that uses a disposable profile, temporary origin, and the exact Tauri CSP; renamed the runtime example-book test helper
+as an explicitly test-only EPUB fixture; removed inherited source-roadmap citations from retained tests; rewrote the
+optional EPUBCheck and Ace suites so installed tools no longer call P0-05 modules; and added a structure guard for the
+adapted harness.
+
+**Decisions:** No new product decision. The browser runner remains a foundation smoke until Phase 1 adds Prose
+workflows. Node 18 is the declared minimum because the maintained commands use only Node platform APIs.
+
+**Verified:** `npm test` passed 198/198 with LibreOffice running and EPUBCheck and Ace reporting named absences; the
+explicit all-oracle skip run passed 197/197 with three named `not run` reasons; `npm run test:browser` passed 1/1 in
+Chrome 157 under the exact CSP; a deliberate page-title mutation produced the expected browser failure; and
+`npm run tauri:test` passed 5/5. The documentation result is recorded in Current state after the final run.
+
+**Not verified:** EPUBCheck, Ace, a packaged Tauri window, Prose grammar or persistence behaviour, manual accessibility,
+or reading-system output.
+
+**Problems / surprises:** The optional suites appeared green only because their tools were absent. If installed, both
+would have referenced modules removed by P0-05. The temporary CSP smoke also depended on an environment-owned browser
+library and was not a repository command. A final browser rerun exposed that a four-second virtual-time budget could
+dump the DOM before the asynchronous probe finished.
+
+**Corrections:** Optional suites now exercise retained handoff seams only. The browser runner uses no project runtime
+dependency and fails on runtime errors, policy violations, missing Stage content, a missing bridge, or the wrong title.
+Its virtual-time budget is ten seconds with a 45-second process limit; two consecutive final runs passed.
+
+**Left undone:** The complete Prose source grammar, parser, book model, durable working copy, browser workflows, native
+folder confinement, and all later domain implementation.
+
+**Next session should start with:** Claim P1-01, read the BRIEF grammar examples and D-010/D-011, then specify ambiguous
+syntax and malformed-input recovery in fixtures before writing parser code.
 
 ### Session 5: 2026-11-14: trim the Scribe foundation
 

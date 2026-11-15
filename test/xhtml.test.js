@@ -15,7 +15,7 @@ const xhEl = (name, attrs, ...kids) => ({
 const xhFrag = (...kids) => ({ nodeType: 11, childNodes: kids.map((k) => (typeof k === 'string' ? { nodeType: 3, data: k } : k)) });
 const xhNorm = (...kids) => Xhtml.normalize(xhFrag(...kids)).xhtml;
 
-test('xhtml: the template chapter and the fixture chapter check clean (P1-06)', () => {
+test('xhtml: the template chapter and the fixture chapter check clean', () => {
     const t = BookTemplate.create().files['OEBPS/text/chapter-1.xhtml'];
     assert.deepEqual(xhCodes(t), []);
     assert.deepEqual(xhCodes(xhFixture('chapter.xhtml')), [], 'its own &thinsp; is declared in the DOCTYPE, so it is not an HTML-entity problem');

@@ -1,4 +1,4 @@
-const bkBook = () => ExampleBook.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
+const bkBook = () => EpubFixture.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
 const bkCh = (n) => 'OEBPS/text/chapter-' + n + '.xhtml';
 const bkP = (text, k) => XmlAst.parse(text).elements.filter((e) => e.local === 'p')[k].start;
 const BK_IMG = 'OEBPS/images/map of the town.png';
@@ -8,7 +8,7 @@ const bkClean = (f) => {
     assert.deepEqual(Book.read(f, { assets: [BK_IMG] }).problems.map((p) => p.severity + ' ' + p.code), []);
 };
 
-test('book-blocks: a figure goes after the selected paragraph, with its image in the manifest (P4-05)', () => {
+test('book-blocks: a figure goes after the selected paragraph, with its image in the manifest', () => {
     const f = bkInsert('figure', { image: BK_IMG, alt: 'A map of "the" town & river', caption: 'The town <then>.' });
     const t = f[bkCh(1)];
     assert.ok(t.indexOf('the whole book.</p>\n    <figure class="figure">\n      <img src="../images/map%20of%20the%20town.png" alt="A map of &quot;the&quot; town &amp; river"/>\n      <figcaption>The town &lt;then&gt;.</figcaption>\n    </figure>\n    <ul>') !== -1, t);

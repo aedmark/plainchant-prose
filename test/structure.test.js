@@ -94,7 +94,7 @@ test('structure: link following (Ctrl/Cmd+Click and the Follow Link button) is w
     ['pc-navigate', 'pc-follow-link'].forEach((type) => assert.includes(stage, type));
 });
 
-test('structure: the Parts tab, Make Part button, and parts scripts are wired in (P7-10)', () => {
+test('structure: the Parts tab, Make Part button, and parts scripts are wired in', () => {
     ['data-insp="parts"', 'id="partsCountBadge"', 'id="inspPartsPane"', 'id="partsList"', 'id="inspPartBtn"'].forEach((needle) => assert.includes(html, needle));
     const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/parts.js') > order.indexOf('src/project.js'), 'parts.js loads after project.js');
@@ -102,7 +102,7 @@ test('structure: the Parts tab, Make Part button, and parts scripts are wired in
     assert.ok(listed.indexOf('parts-ui.js') > listed.indexOf('inspector-ui.js'), 'parts-ui.js loads after inspector-ui.js');
 });
 
-test('structure: the line-number gutter and find bar are wired in (P6-01)', () => {
+test('structure: the line-number gutter and find bar are wired in', () => {
     ['id="editorGutter"', 'id="findBar"', 'id="findInput"', 'id="replaceInput"', 'id="replaceBtn"', 'id="replaceAllBtn"', 'id="findCaseBtn"', 'id="findCount"'].forEach((needle) => assert.includes(html, needle));
     const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/finding.js') !== -1 && order.indexOf('src/finding.js') < order.indexOf('src/app/core.js'), 'finding.js loads before the app scripts');
@@ -121,7 +121,7 @@ test('structure: the floating Inspector wraps its header and clips overflow so c
     assert.includes(rule('.inspector-panel.floating'), 'overflow: hidden');
 });
 
-test('structure: the Inspector can dock bottom, top, left, right, or float, with a menu and a side resizer (P7-16)', () => {
+test('structure: the Inspector can dock bottom, top, left, right, or float, with a menu and a side resizer', () => {
     ['id="canvasBody"', 'id="inspDockBtn"', 'id="dockMenu"', 'id="inspectorResizer"'].forEach((needle) => assert.includes(html, needle));
     ['bottom', 'top', 'left', 'right', 'float'].forEach((dock) => assert.includes(html, 'data-dock="' + dock + '"'));
     assert.ok(listed.indexOf('dock-ui.js') > listed.indexOf('panes.js'), 'dock-ui.js loads after panes.js');
@@ -131,7 +131,7 @@ test('structure: the Inspector can dock bottom, top, left, right, or float, with
     assert.ok(/\.dock-left \.insp-grid,\s*\.dock-right \.insp-grid \{ grid-template-columns: minmax\(0, 1fr\); \}/.test(css), 'side docks use one column');
 });
 
-test('structure: the Explorer file menu, dirty markers, and explorer-ui.js are wired in (P6-02)', () => {
+test('structure: the Explorer file menu, dirty markers, and explorer-ui.js are wired in', () => {
     ['id="fileMenu"', 'data-file-cmd="rename"', 'data-file-cmd="duplicate"', 'data-file-cmd="delete"'].forEach((needle) => assert.includes(html, needle));
     assert.ok(listed.indexOf('explorer-ui.js') > listed.indexOf('typing.js'), 'explorer-ui.js loads after typing.js');
     const core = readRoot('src/app/core.js');
@@ -141,7 +141,7 @@ test('structure: the Explorer file menu, dirty markers, and explorer-ui.js are w
     assert.includes(css, '.file-tab.dirty .tab-label::after');
 });
 
-test('structure: the Problems tab, links.js, and problems-ui.js are wired in (P7-04)', () => {
+test('structure: the Problems tab, links.js, and problems-ui.js are wired in', () => {
     ['data-insp="problems"', 'id="problemsCountBadge"', 'id="inspProblemsPane"', 'id="problemsList"', 'id="problemsRecheckBtn"'].forEach((needle) => assert.includes(html, needle));
     const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/links.js') > order.indexOf('src/project.js') && order.indexOf('src/links.js') < order.indexOf('src/app/core.js'), 'links.js loads after project.js and before the app scripts');
@@ -149,14 +149,14 @@ test('structure: the Problems tab, links.js, and problems-ui.js are wired in (P7
     assert.includes(readRoot('src/app/core.js'), 'scheduleProblemsCheck');
 });
 
-test('structure: the project-wide search scope, results list, and find-project.js are wired in (P7-05)', () => {
+test('structure: the project-wide search scope, results list, and find-project.js are wired in', () => {
     ['id="findScopeBtn"', 'id="findResults"', 'id="findResultsList"', 'id="findResultsSummary"'].forEach((needle) => assert.includes(html, needle));
     assert.ok(listed.indexOf('find-project.js') > listed.indexOf('find.js'), 'find-project.js loads after find.js');
     const find = readRoot('src/app/find.js');
     ['onFindChanged', 'setFindProject', 'replaceAcrossProject', 'hideFindResults'].forEach((hook) => assert.includes(find, hook));
 });
 
-test('structure: the Export dialog offers a whole-project .zip built by zip.js (P7-13)', () => {
+test('structure: the Export dialog offers a whole-project .zip built by zip.js', () => {
     ['id="zipExportSection"', 'id="exportZipBtn"'].forEach((needle) => assert.includes(html, needle));
     const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/zip.js') !== -1 && order.indexOf('src/zip.js') < order.indexOf('src/app/core.js'), 'zip.js loads before the app scripts');
@@ -164,7 +164,7 @@ test('structure: the Export dialog offers a whole-project .zip built by zip.js (
     assert.includes(readRoot('src/app/zip-ui.js'), 'Zip.build');
 });
 
-test('structure: the Problems filter, hints.js, and the problemsFilter setting are wired in (P7-11)', () => {
+test('structure: the Problems filter, hints.js, and the problemsFilter setting are wired in', () => {
     ['id="problemsFilterBar"', 'data-filter="accessibility"', 'data-filter="markup"'].forEach((needle) => assert.includes(html, needle));
     const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/hints.js') !== -1 && order.indexOf('src/hints.js') < order.indexOf('src/importing.js'), 'hints.js loads before importing.js');
@@ -172,14 +172,14 @@ test('structure: the Problems filter, hints.js, and the problemsFilter setting a
     assert.includes(readRoot('src/app/settings.js'), "problemsFilter: 'all'");
 });
 
-test('structure: the Explorer + Folder button, folder rows, and explorer-move.js are wired in (P7-08)', () => {
+test('structure: the Explorer + Folder button, folder rows, and explorer-move.js are wired in', () => {
     assert.includes(html, 'id="newFolderBtn"');
     assert.ok(listed.indexOf('explorer-move.js') > listed.indexOf('asset-ui.js') && listed.indexOf('explorer-move.js') > listed.indexOf('explorer-ui.js'), 'explorer-move.js loads after explorer-ui.js and asset-ui.js');
     assert.includes(readRoot('src/app/core.js'), 'decorateExplorerDir', 'directory rows are decorated');
     assert.includes(readRoot('src-tauri/src/main.rs'), 'dirs: Option<Vec<String>>', 'the desktop export creates empty folders');
 });
 
-test('structure: the Assets modal, Browse button, image library, and asset-ui.js are wired in (P7-02)', () => {
+test('structure: the Assets modal, Browse button, image library, and asset-ui.js are wired in', () => {
     ['id="assets-modal"', 'id="assetsBtn"', 'id="assetGrid"', 'id="assetSearch"', 'id="assetAddBtn"', 'id="assetFileInput"', 'id="propSrcBrowseBtn"'].forEach((needle) => assert.includes(html, needle));
     const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/imagelib.js') !== -1 && order.indexOf('src/imagelib.js') < order.indexOf('src/app/core.js'), 'imagelib.js loads before the app scripts');
@@ -194,7 +194,7 @@ test('structure: the Assets modal, Browse button, image library, and asset-ui.js
 });
 
 
-test('structure: the Format button, format.js, and the Alt+Shift+F shortcut are wired in (P7-14)', () => {
+test('structure: the Format button, format.js, and the Alt+Shift+F shortcut are wired in', () => {
     assert.includes(html, 'id="formatBtn"');
     const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/format.js') !== -1 && order.indexOf('src/format.js') < order.indexOf('src/app/core.js'), 'format.js loads before the app scripts');
@@ -203,7 +203,7 @@ test('structure: the Format button, format.js, and the Alt+Shift+F shortcut are 
     ['Format.byPath', 'Editing.diffEdit', "e.code === 'KeyF'"].forEach((needle) => assert.includes(ui, needle));
 });
 
-test('structure: the Help guide renders the shortcut cheat sheet from shortcuts.js (P7-15)', () => {
+test('structure: the Help guide renders the shortcut cheat sheet from shortcuts.js', () => {
     ['id="shortcutList"', 'id="shortcutsHeading"'].forEach((needle) => assert.includes(html, needle));
     const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/shortcuts.js') !== -1 && order.indexOf('src/shortcuts.js') < order.indexOf('src/app/core.js'), 'shortcuts.js loads before the app scripts');
@@ -218,7 +218,7 @@ test('structure: Explorer folders collapse and an image click opens Assets inste
     assert.includes(readRoot('src/app/explorer-move.js'), 'expandExplorerTo');
 });
 
-test('structure: the File and Edit menus hold the moved toolbar buttons and menus.js drives them (D-032)', () => {
+test('structure: the File and Edit menus hold the moved toolbar buttons and menus.js drives them', () => {
     ['id="fileMenuBtn"', 'id="editMenuBtn"', 'id="fileMenuPanel"', 'id="editMenuPanel"'].forEach((needle) => assert.includes(html, needle));
     const panel = (id) => html.slice(html.indexOf('id="' + id + '"'), html.indexOf('class="menu-wrap"', html.indexOf('id="' + id + '"')) === -1 ? html.indexOf('class="insert-dropdown-wrap"') : html.indexOf('class="menu-wrap"', html.indexOf('id="' + id + '"')));
     ['newBtn', 'libraryBtn', 'folderBtn', 'exportBtn'].forEach((id) => assert.includes(panel('fileMenuPanel'), 'id="' + id + '"'));
@@ -228,7 +228,7 @@ test('structure: the File and Edit menus hold the moved toolbar buttons and menu
     assert.ok(listed.indexOf('menus.js') > listed.indexOf('typing.js') && listed.indexOf('menus.js') > listed.indexOf('find.js'), 'menus.js loads after typing.js and find.js');
 });
 
-test('structure: Open file / Open folder / Open project, saved folder links, and Reload from disk are wired in (D-033)', () => {
+test('structure: Open file / Open folder / Open project, saved folder links, and Reload from disk are wired in', () => {
     ['id="openFileBtn"', 'id="folderBtn"', 'id="libraryBtn"', 'id="fileReloadBtn"'].forEach((needle) => assert.includes(html, needle));
     const panel = html.slice(html.indexOf('id="fileMenuPanel"'), html.indexOf('</div>', html.indexOf('id="fileMenuPanel"')));
     ['openFileBtn', 'folderBtn', 'libraryBtn'].forEach((id) => assert.includes(panel, 'id="' + id + '"'));
@@ -264,7 +264,7 @@ test('structure: the syntax colour layer is emptied when the language changes or
     assert.ok(!/if \(shadeLang !== activeTab\) shadeKeys = \[\];/.test(shade), 'resetting only the keys leaves the old lines in the layer');
 });
 
-test('structure: Prism is vendored unmodified with its licence, loaded before code-shade.js with auto-highlighting off, and credited in LICENSE (D-034)', () => {
+test('structure: Prism is vendored unmodified with its licence, loaded before code-shade.js with auto-highlighting off, and credited in LICENSE', () => {
     const order = Array.from(html.matchAll(/<script src="([^"]+)"[^>]*><\/script>/g)).map((m) => m[1]);
     assert.ok(order.indexOf('src/vendor/prism/prism.js') !== -1 && order.indexOf('src/vendor/prism/prism.js') < order.indexOf('src/code-shade.js'), 'prism.js loads before code-shade.js');
     assert.includes(html, '<script src="src/vendor/prism/prism.js" data-manual></script>');
@@ -299,7 +299,7 @@ test('structure: Plainchant Prose owns every application, storage, cache, packag
     assert.includes(readRoot('src/app/persistence.js'), "'plainchant_prose_emergency'");
 });
 
-test('desktop: the Prose shell has a strict CSP and uses only Tauri internals (P0-04, D-008)', () => {
+test('desktop: the Prose shell has a strict CSP and uses only Tauri internals (P0-04, D-017)', () => {
     const conf = JSON.parse(readRoot('src-tauri/tauri.conf.json'));
     assert.equal(conf.app.withGlobalTauri, false);
     const csp = conf.app.security.csp;
@@ -363,7 +363,7 @@ test('offline: the service worker touches only Prose\'s own caches, so an app on
     assert.ok(offline.opened.every((k) => k === 'plainchant-prose-v1'), offline.opened.join());
 });
 
-test('offline: app files come from the network first and refresh the cache, so an update shows on the next load (P0-07)', () => {
+test('offline: app files come from the network first and refresh the cache, so an update shows on the next load', () => {
     const fresh = { ok: true, body: 'new app', clone: () => ({ ok: true, body: 'new app (copy)' }) };
     const sw = runServiceWorker((url) => sw.Sync.resolve(/missing/.test(url) ? { ok: false, status: 404, clone: () => { throw new Error('a failed response is not stored'); } } : fresh));
     const r = sw.get(sw.origin + '/app.html?fresh=2#top');
@@ -432,4 +432,18 @@ test('structure: Scribe-only publication surfaces and native boundaries stay rem
     assert.deepEqual(JSON.parse(readRoot('src-tauri/capabilities/default.json')).permissions, []);
     const main = readRoot('src-tauri/src/main.rs');
     ['single_instance', 'save_cover_file', 'epubcheck::', 'preview::', 'open_files::'].forEach((needle) => assert.excludes(main, needle));
+});
+
+test('structure: the P0-06 harness targets the trimmed shell and exposes maintained browser and Rust commands', () => {
+    const pkg = JSON.parse(readRoot('package.json'));
+    assert.equal(pkg.scripts['test:browser'], 'node test/browser.js');
+    assert.equal(pkg.scripts['tauri:test'], 'cargo test --manifest-path src-tauri/Cargo.toml');
+    assert.ok(fs.existsSync(path.join(root, 'test', 'browser.js')), 'the maintained browser runner is missing');
+    const retainedTests = fs.readdirSync(path.join(root, 'test'))
+        .filter((file) => file.endsWith('.js') && file !== 'structure.test.js')
+        .map((file) => fs.readFileSync(path.join(root, 'test', file), 'utf8')).join('\n');
+    [
+        'BookMeta', 'BookA11y', 'BookRoles', 'BookPages', 'BookMatter', 'BookCover', 'BookFonts',
+        'BookOrder', 'BookImages', 'BookLayout', 'BookNcx', 'BookCheck', 'EpubcheckReport', 'ExampleBook'
+    ].forEach((name) => assert.excludes(retainedTests, name, name + ' returned to the retained test harness'));
 });

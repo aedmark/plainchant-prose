@@ -1,4 +1,4 @@
-/* The round-trip tool and its corpus manifest (P5-06, D-042); the books themselves run with npm run roundtrip. */
+/* The round-trip tool and its corpus manifest; the books themselves run with npm run roundtrip. */
 const RoundTrip = require('../tools/roundtrip.js');
 const rtCorpus = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'corpus.json'), 'utf8'));
 

@@ -1,7 +1,7 @@
 const marksOf = (line) => line.runs.filter((r) => r.mark).map((r) => r.mark + ':' + r.text);
 const kinds = (text, lang) => CodeShade.shade(text, lang);
 
-test('CodeShade (Prism): nested CSS rules, data: URLs, and quoted semicolons colour correctly (D-034)', () => {
+test('CodeShade (Prism): nested CSS rules, data: URLs, and quoted semicolons colour correctly', () => {
     const nested = kinds('@media (max-width:600px){\n  .a{\n    color:red;\n  }\n}', 'css');
     assert.ok(marksOf(nested[0]).includes('keyword:@media '), 'the at-rule is a keyword');
     assert.ok(marksOf(nested[1]).includes('selector:.a'), 'a rule inside @media still has a selector');
@@ -11,7 +11,7 @@ test('CodeShade (Prism): nested CSS rules, data: URLs, and quoted semicolons col
     assert.ok(marksOf(url).includes('string:"a;b"'), 'a quoted semicolon stays inside the string');
 });
 
-test('CodeShade (Prism): multi-line tags, embedded <style> and <script>, and multi-line template literals (D-034)', () => {
+test('CodeShade (Prism): multi-line tags, embedded <style> and <script>, and multi-line template literals', () => {
     const tag = kinds('<a\n  href="x"\n  class="y">t</a>', 'html');
     assert.ok(marksOf(tag[1]).includes('attr:href') && marksOf(tag[2]).includes('attr:class'), 'attributes on later lines are still attributes');
     assert.ok(marksOf(tag[1]).includes('punct:='), 'the equals sign is punctuation');
@@ -24,7 +24,7 @@ test('CodeShade (Prism): multi-line tags, embedded <style> and <script>, and mul
     assert.ok(marksOf(kinds('const r = /ab\\/c"/g;', 'js')[0]).includes('string:/ab\\/c"/g'), 'a regex with a quote is not a string start');
 });
 
-test('CodeShade (Prism): blank lines, unknown languages, and oversized files stay safe and lossless (D-034)', () => {
+test('CodeShade (Prism): blank lines, unknown languages, and oversized files stay safe and lossless', () => {
     assert.equal(kinds('a\n\n  \nb', 'js').map((l) => l.kind).join(','), 'js,blank,blank,js');
     const odd = kinds('plain words', 'markdown');
     assert.equal(odd[0].runs.map((r) => r.text).join(''), 'plain words');

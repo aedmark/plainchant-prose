@@ -147,7 +147,7 @@ and local font files with their licence notices.
 | Dependency | Version policy | For | Boundary |
 | --- | --- | --- | --- |
 | Chromium browser APIs | Release-tested version recorded for each release | Static app, IndexedDB, service worker, explicit import and export | No persistent browser directory handles in v0.1 (D-012, D-013) |
-| Node.js | Minimum selected at `P0-05` | Pure and structure tests | Development only |
+| Node.js | 18 or newer (`package.json`) | Pure, structure, and browser-runner tests | Development only |
 | Tauri | v2, exact crates locked at implementation | Desktop shell | Build and native runtime only |
 | Python | 3.x standard library | `tools/check_docs.py` and static server | Development only |
 | EPUBCheck | Exact observed version in each result | EPUB conformance oracle | Optional development and release tool |

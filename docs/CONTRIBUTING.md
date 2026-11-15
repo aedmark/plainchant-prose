@@ -28,19 +28,18 @@ one roadmap item or one design question easier to review and verify.
 
 ## Verify
 
-The current foundation checks are:
+The current fast checks are:
 
 ```bash
 python3 tools/check_docs.py
 npm test
-cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-After P0-06 adapts the inherited suites, TESTING defines the normal Prose fast set.
+The full foundation checks add:
 
 ```bash
-npm test
-python3 tools/check_docs.py
+npm run test:browser
+npm run tauri:test
 ```
 
 Run additional suites from [TESTING.md](TESTING.md) according to the changed boundary. Report exact commands, results,

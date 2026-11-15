@@ -1,5 +1,5 @@
 const epZlib = require('zlib');
-const epBook = () => ExampleBook.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
+const epBook = () => EpubFixture.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
 const epPng = () => Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64'));
 
 // A raw zip writer for hostile archives Zip.build refuses to make. Each entry: { name, data, deflate, size, crc,
@@ -29,7 +29,7 @@ const epRefused = async (bytes, code, pattern, options) => {
     throw new Error('expected the archive to be refused with ' + code);
 };
 
-test('epub: an exported book imports back to the same files, text and binaries apart (P5-02)', async () => {
+test('epub: an exported book imports back to the same files, text and binaries apart', async () => {
     const files = withTestCover(epBook(), 'OEBPS/images/cover.png');
     const r = await Epub.read((await BookExport.pack(files, { 'OEBPS/images/cover.png': epPng() })).bytes);
     Object.keys(files).forEach((p) => assert.equal(r.entries[p], files[p], p));

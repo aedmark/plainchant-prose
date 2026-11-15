@@ -1,4 +1,4 @@
-/* P7-03 (D-048): .docx import. Word documents are built here as zip archives of WordprocessingML parts. */
+/* .docx import. Word documents are built here as zip archives of WordprocessingML parts. */
 
 const DX_W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
 const DX_PNG = Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64'));
@@ -99,7 +99,7 @@ test('docx: the archive and its parts are checked as untrusted input', async () 
 
 test('docx-import: chapters at each Heading 1, with notes, images, lists, tables, and figures in Prose\'s markup', async () => {
     const doc = await Docx.read(dxSample());
-    const e = ExampleBook.create().files;
+    const e = EpubFixture.create().files;
     const r = DocxImport.importInto(e, doc, 'OEBPS/text/chapter-1.xhtml', { name: 'my-draft.docx', assets: [] });
     assert.deepEqual(r.added, ['OEBPS/text/my-draft.xhtml', 'OEBPS/text/first-chapter.xhtml', 'OEBPS/text/second-chapter.xhtml']);
     assert.deepEqual(Object.keys(r.binaries), ['OEBPS/images/image1.png']);

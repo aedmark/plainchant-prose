@@ -2,7 +2,7 @@
 
 This document defines the evidence required as Plainchant Prose is implemented. The repository currently carries
 trimmed Scribe-derived Node and Rust suites as foundation checks. Their results prove the retained foundation seams
-and P0-05 removal guards; Prose-specific claims wait for adapted tests.
+and P0-05 removal guards; Prose domain claims wait for Phase 1 tests.
 
 ## Suites
 
@@ -11,17 +11,20 @@ and P0-05 removal guards; Prose-specific claims wait for adapted tests.
 | Documentation, current | `python3 tools/check_docs.py` | Active documents agree on IDs, links, paths, placeholders, and handoff shape | Product design is correct or code exists | Python 3 |
 | Retained Node foundation, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, and P0-05 removals remain green | Prose behaviour, DOM, real IndexedDB, native files, or writing UI | Node and optional external tools |
 | Retained Rust foundation, current | `cargo test --manifest-path src-tauri/Cargo.toml` | Retained native unit tests remain green | Prose path policy, native dialogs, or a packaged window | Rust and Cargo |
-| Prose unit and structure, planned | Adapted `npm test` | Parser, splice, book, sync, store-rule, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | P0-06 adaptation |
-| Browser, planned | `npm run test:browser` | Editor, undo, IndexedDB, recovery, accessibility mechanics, service worker, and main workflows in one headless engine | Other browsers, real assistive technology, or a human-visible layout | Headless browser, disposable profile |
-| Desktop shell, planned | `npm run tauri:test` | Path confinement, size limits, atomic-write rules, permission state, command registration | Native dialogs and a real packaged window | Rust and Cargo |
-| EPUB oracle, planned | Part of `npm test` when configured | Generated fixtures satisfy the observed EPUBCheck version | Scribe interpretation or reading-system rendering | Java and EPUBCheck |
+| Prose unit and structure, planned | Expanded `npm test` | Parser, splice, book, sync, store-rule, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | Phase 1 implementation |
+| Browser foundation, current | `npm run test:browser` | The starter Stage and interaction bridge load under the exact Tauri CSP in Chromium with a disposable profile | Editing workflows, IndexedDB recovery, service-worker upgrades, other browsers, assistive technology, or visible layout | Installed Chrome or Chromium |
+| Browser workflows, planned | Expanded `npm run test:browser` | Editor, undo, IndexedDB, recovery, accessibility mechanics, service worker, and main workflows in one headless engine | Other browsers, real assistive technology, or a human-visible layout | Phase 1 implementation |
+| Desktop foundation, current | `npm run tauri:test` | Retained path, filename, and decoding helpers pass in Rust | Full Prose confinement, native dialogs, command registration, or a packaged window | Rust and Cargo |
+| Desktop shell, planned | Expanded `npm run tauri:test` | Path confinement, size limits, atomic-write rules, permission state, and command registration | Native dialogs and a real packaged window | Phase 1 implementation |
+| EPUB oracle, current when configured | Part of `npm test` | Retained handoff fixtures satisfy the observed EPUBCheck version | Future Prose output, Scribe interpretation, or reading-system rendering | Java and EPUBCheck |
+| Accessibility oracle, current when configured | Part of `npm test` | Ace can produce a report for the retained EPUB export | Future Prose accessibility or reading-system behaviour | Ace and Chrome or Chromium |
 | Scribe compatibility, planned | Dedicated fixture runner from `P3-05` | The recorded Scribe commit imports and re-exports expected structure | Future Scribe versions or visual quality | Sibling repository at recorded commit |
-| DOCX oracle, planned | Part of `npm test` when configured | LibreOffice can open or normalize generated DOCX fixtures | Microsoft Word compatibility | LibreOffice |
+| DOCX oracle, current when configured | Part of `npm test` | LibreOffice conversion output imports with the expected retained structure | Microsoft Word compatibility | LibreOffice |
 | Manual release matrix, planned | Procedure in this document | Named workflows worked on named real environments | Untested platforms or repeatability | Maintainer access |
 
-The current foundation set is `npm test`, `cargo test --manifest-path src-tauri/Cargo.toml`, and
-`python3 tools/check_docs.py`. Native-page CSP changes also require a disposable headless-browser run under the exact
-configured policy. P0-06 defines the Prose fast and full sets, including a maintained browser runner.
+The fast set is `npm test` plus `python3 tools/check_docs.py`. The full foundation set adds
+`npm run test:browser`, `npm run tauri:test`, and configured optional oracles. Native-page CSP changes always require
+the maintained browser run under the exact configured policy.
 
 ## Evidence rules
 
@@ -44,14 +47,15 @@ configured policy. P0-06 defines the Prose fast and full sets, including a maint
 - Cap archive entry count, individual file size, total inflated size, and parser input before hostile fixtures run.
 - Preserve manually downloaded oracles and corpora. A reset script must name exactly what it deletes.
 - For folder-sync tests, create a dedicated temporary root and assert its canonical path before any deletion.
-- Treat the retained commands as foundation evidence until P0-06 completes their Prose adaptation.
+- Treat the retained commands as foundation evidence until the relevant Phase 1 item adds a Prose domain contract.
 
 ## Current checks
 
 ```bash
 python3 tools/check_docs.py
 npm test
-cargo test --manifest-path src-tauri/Cargo.toml
+npm run test:browser
+npm run tauri:test
 ```
 
 A documentation pass ends with zero errors. Warnings require review and may indicate that HANDOFF needs
@@ -64,8 +68,9 @@ and a reason. None of these checks validates Prose behaviour yet.
 npm test
 ```
 
-The current runner derives from Scribe and P0-05 trimmed its discarded feature suites. P0-06 completes the Prose
-adaptation without losing the retained baseline, then the Prose suites must cover:
+The current runner derives from Scribe. P0-05 trimmed discarded feature suites; P0-06 removed stale source-roadmap
+citations and optional-oracle references to discarded modules without losing the retained baseline. Phase 1 suites
+must add coverage for:
 
 - grammar precedence, malformed recovery, escaping, half-open source ranges, CRLF, Unicode, and large input;
 - byte-preserving range splices and index-order edits;
@@ -78,29 +83,33 @@ adaptation without losing the retained baseline, then the Prose suites must cove
 Critical generators use property or fuzz cases with bounded input. Parsers and archive readers include hostile inputs
 that must return a diagnostic or refusal without throwing an unclassified exception.
 
-## Planned browser checks
+## Browser checks
 
 ```bash
 npm run test:browser
 ```
 
-The runner uses a new profile and a temporary HTTP origin. It covers create, type, undo, save, reload, emergency
-recovery, binder and corkboard keyboard movement, preview escaping, find and replace, versions, theme contrast, zoom,
-focus order, accessible names, service-worker update, and offline reload. It injects quota failures and interrupted
-writes. A green banner alone is insufficient; the runner checks a final summary and process exit code.
+The current dependency-free runner uses an installed Chrome or Chromium, a new profile, a temporary HTTP origin, and
+the exact CSP from `src-tauri/tauri.conf.json`. It proves that the app starts and its generic Stage bridge loads without
+a runtime or policy error. P0-06 validated the runner by changing the page title and observing the expected failure.
+
+Phase 1 expands the same command to cover create, type, undo, save, reload, emergency recovery, binder and corkboard
+keyboard movement, preview escaping, find and replace, versions, theme contrast, zoom, focus order, accessible names,
+service-worker update, offline reload, quota failures, and interrupted writes.
 
 Browser tests run against Chromium for the v0.1 support claim. Results from another engine remain additional evidence
 and do not extend the supported matrix without a later decision (D-013).
 
-## Planned desktop checks
+## Desktop checks
 
 ```bash
 npm run tauri:test
 ```
 
-Rust tests create a temporary selected root and cover traversal, absolute paths, symlinks leaving the root, Unicode and
-case aliases where the platform exposes them, permission revocation, file-count and byte limits, stale fingerprints,
-atomic replacement, watcher coalescing, and command registration. A real-window check remains manual.
+The current Rust suite covers retained relative-path rejection, canonical directory handling, safe filenames, and
+base64 decoding. Phase 1 adds temporary selected-root cases for symlink escape, Unicode and case aliases, permission
+revocation, file-count and byte limits, stale fingerprints, atomic replacement, watcher coalescing, and command
+registration. A real-window check remains manual.
 
 ## Handoff oracles
 

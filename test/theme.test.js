@@ -38,14 +38,14 @@ const light = vars(blockAfter(stylesCss, ':root[data-theme="light"]'));
 const dark = vars(blockAfter(stylesCss, ':root[data-theme="dark"]'));
 const systemDark = vars(blockAfter(blockAfter(stylesCss, '@media (prefers-color-scheme: dark)'), ':root:not([data-theme])'));
 
-test('theme (D-008): light, dark, and the system-dark fallback define the same variables, and the system fallback equals the dark theme', () => {
+test('theme: light, dark, and the system-dark fallback define the same variables, and the system fallback equals the dark theme', () => {
     assert.deepEqual(Object.keys(light).sort(), Object.keys(dark).sort(), 'light and dark define the same variables');
     Object.keys(dark).forEach((k) => assert.equal(systemDark[k], dark[k], k + ' differs between the dark theme and the system-dark fallback'));
     assert.deepEqual(Object.keys(systemDark).sort(), Object.keys(dark).sort());
     assert.ok(!/retro/.test(stylesCss), 'the inherited retro theme is gone: there is one look in two modes');
 });
 
-test('theme (D-008): text, buttons, and syntax colours are readable (WCAG AA, 4.5:1) in both modes', () => {
+test('theme: text, buttons, and syntax colours are readable (WCAG AA, 4.5:1) in both modes', () => {
     [['light', light], ['dark', dark]].forEach(([name, t]) => {
         ['--text-void', '--text-strong', '--text-soft', '--text-void-muted'].forEach((fg) => {
             ['--bg-void', '--bg-raised', '--bg-sunken'].forEach((bg) => assert.ok(contrast(t[fg], t[bg]) >= 4.5, name + ': ' + fg + ' on ' + bg + ' is ' + contrast(t[fg], t[bg]).toFixed(2)));
@@ -59,7 +59,7 @@ test('theme (D-008): text, buttons, and syntax colours are readable (WCAG AA, 4.
     });
 });
 
-test('theme (D-008): no colour is hard-coded outside the theme blocks, and the home page palette matches the studio\'s', () => {
+test('theme: no colour is hard-coded outside the theme blocks, and the home page palette matches the app shell', () => {
     const outside = stylesCss
         .replace(/@font-face \{[^}]*\}/g, '')
         .replace(/:root[^{]*\{[^}]*\}/g, '')
@@ -72,7 +72,7 @@ test('theme (D-008): no colour is hard-coded outside the theme blocks, and the h
     Object.keys(homeDark).filter((k) => /^#/.test(homeDark[k])).forEach((k) => assert.equal(homeDark[k], dark[k], 'home.css dark ' + k + ' differs from styles.css'));
 });
 
-test('theme (D-008): the Settings choices are system, light, and dark, defaulting to the system, and EB Garamond ships with its licence', () => {
+test('theme: Settings offers system, light, and dark, defaults to system, and EB Garamond ships with its licence', () => {
     const settings = fs.readFileSync(path.join(root, 'src', 'app', 'settings.js'), 'utf8');
     assert.includes(settings, "theme: 'system',");
     assert.includes(settings, "theme: ['system', 'light', 'dark'],");

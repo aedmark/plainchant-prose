@@ -68,7 +68,7 @@ test('editing & code-shade: expands HTML abbreviations on Tab, indents between t
     assert.ok(shadedHtml[0].runs.some((r) => r.mark === 'string'), 'shaded string');
 });
 
-test('project: previews never run project scripts, however they are linked (D-004)', () => {
+test('project: previews never run project scripts, however they are linked', () => {
     const files = {
         entries: {
             'index.html': '<html>\n<head></head>\n<body>\n  <script src="app.js"></script>\n  <script nonce="plainchant-prose-stage">var inline = 1;</script>\n</body></html>',
@@ -79,7 +79,7 @@ test('project: previews never run project scripts, however they are linked (D-00
     assert.excludes(doc, 'var a = 1;');
     assert.excludes(doc, 'var inline = 1;');
     assert.excludes(doc, 'pc-console-bridge');
-    assert.includes(doc, 'window.__BRIDGE = 1;', 'only the Studio bridge script is present');
+    assert.includes(doc, 'window.__BRIDGE = 1;', 'only the app bridge script is present');
     assert.equal((doc.match(/nonce="plainchant-prose-stage"/g) || []).length, 1, 'imported markup cannot authorize a script with the bridge nonce');
     assert.equal(Project.consoleBridge, undefined, 'the console bridge is gone');
 });

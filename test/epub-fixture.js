@@ -1,12 +1,12 @@
 /*
- * ExampleBook: the book behind "Load Example Book" (P2-01, D-018), a short guide to Prose in three chapters.
+ * EpubFixture: a test-only three-chapter EPUB package used to exercise retained handoff foundations.
  *
  * It is made the way a user's book is: the new-book template, then OpfEdit and Nav edits, so it also exercises
  * them. The text is written for Prose. A test keeps it passing Prose's own checks and EPUBCheck.
  */
 (function (root, factory) {
     if (typeof module === 'object' && module.exports) module.exports = factory(require('../src/xml-ast.js'), require('../src/book-template.js'), require('../src/book.js'), require('../src/opf-edit.js'), require('../src/nav.js'));
-    else root.ExampleBook = factory(root.XmlAst, root.BookTemplate, root.Book, root.OpfEdit, root.Nav);
+    else root.EpubFixture = factory(root.XmlAst, root.BookTemplate, root.Book, root.OpfEdit, root.Nav);
 })(typeof self !== 'undefined' ? self : this, function (XmlAst, BookTemplate, Book, OpfEdit, Nav) {
     'use strict';
 
@@ -34,7 +34,7 @@
                 '<blockquote>',
                 '  <p>A reading system lays the text out for its own screen. Leave the page size to the reader and style the words.</p>',
                 '</blockquote>',
-                '<p>Open a chapter in the editor and the Reading Stage shows it, parsed the way a reader parses it: a missing end tag stops the chapter, as it would on a device.</p>'
+                '<p>Each chapter remains a separate XHTML file in this packaging fixture.</p>'
             ]
         },
         {

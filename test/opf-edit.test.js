@@ -46,7 +46,7 @@ const oeThrows = (fn, code) => {
     assert.ok(false, 'expected an error with code ' + code);
 };
 
-test('opf-edit: metadata values, new DC elements beside their kind, and the named shortcuts (P1-04)', () => {
+test('opf-edit: metadata values, new DC elements beside their kind, and the named shortcuts', () => {
     const files = oeFixtureBook();
     oeExpect(files, (m) => OpfEdit.setTitle(m, 'Ink & <Ash>'), [['The Quiet Ledger &amp; Other Stories', 'Ink &amp; &lt;Ash&gt;']]);
     oeExpect(files, (m) => OpfEdit.setLanguage(m, 'fr'), [['<dc:language>en</dc:language>', '<dc:language>fr</dc:language>']]);
@@ -250,7 +250,7 @@ test('opf-edit: CRLF files keep their line ends, and a sequence of edits leaves 
     assert.equal(m.metadata.modified, '2026-12-01T00:00:00Z');
 });
 
-test('opf-edit: EPUB 2 name/content metas are set and removed, and metadata entries move as written (P3-06)', () => {
+test('opf-edit: EPUB 2 name/content metas are set and removed, and metadata entries move as written', () => {
     const files = oeFixtureBook();
     let r = oeRun(files, (m) => OpfEdit.setLegacyMeta(m, 'calibre:series', 'Ledger & Co'));
     assert.ok(r.opf.indexOf('<meta name="calibre:series" content="Ledger &amp; Co"/>') !== -1);

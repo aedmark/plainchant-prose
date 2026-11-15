@@ -159,7 +159,7 @@ test('book: EPUB 2 leftovers are read and noted, never errors (EPUB 3.3 §5.9)',
     assert.equal(r.model.metadata.metas.length, 1, 'an OPF 2 meta is not an EPUB 3 meta');
 });
 
-test('book: model entries carry their XmlAst nodes, so an edit can splice exactly them (D-002)', () => {
+test('book: model entries carry their XmlAst nodes, so an edit can splice exactly them', () => {
     const files = freshBook();
     const m = Book.read(files).model;
     const title = m.metadata.titles[0];

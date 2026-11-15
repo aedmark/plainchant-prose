@@ -1,11 +1,11 @@
-const bnBook = () => ExampleBook.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
+const bnBook = () => EpubFixture.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
 const bnCh = (n) => 'OEBPS/text/chapter-' + n + '.xhtml';
 // The start offset of the k-th <p> (0-based) in a document.
 const bnP = (text, k) => XmlAst.parse(text).elements.filter((e) => e.local === 'p')[k].start;
 const bnProblems = (e) => Book.read(e).problems.map((p) => p.severity + ' ' + p.code).concat(Nav.read(e, Book.read(e).model).problems.map((p) => p.severity + ' ' + p.code));
 const bnRefs = (text) => Array.from(text.matchAll(/<a epub:type="noteref" role="doc-noteref" class="noteref" href="([^"]*)" id="([^"]*)">(\d+)<\/a>/g)).map((m) => m[2] + ' ' + m[1] + ' ' + m[3]);
 
-test('book-notes: footnotes are numbered in reading order with links both ways (P4-04)', () => {
+test('book-notes: footnotes are numbered in reading order with links both ways', () => {
     let f = BookNotes.add(bnBook(), bnCh(1), bnP(bnBook()[bnCh(1)], 1), 'Second paragraph note.', 'footnotes').entries;
     // A note added earlier in the chapter takes number 1, and the other moves to 2.
     f = BookNotes.add(f, bnCh(1), bnP(f[bnCh(1)], 0), 'First <paragraph> note & more.', 'footnotes').entries;
@@ -91,7 +91,7 @@ test('book-notes: hand-made notes are renumbered without losing their markup', (
     assert.ok(t.indexOf('<aside epub:type="footnote" id="note-1"><p><a href="#ref-1">*</a> <em>Hand-made</em>.</p></aside>') !== -1, t);
 });
 
-test('book-notes: insertAt puts a reference at an exact place in the text, and only there (P5-03)', () => {
+test('book-notes: insertAt puts a reference at an exact place in the text, and only there', () => {
     const f = bnBook(), t = f[bnCh(1)];
     const at = t.indexOf('Prose keeps them') + 'Prose keeps them'.length;
     const r = BookNotes.insertAt(f, bnCh(1), at, 'Mid-sentence.', 'footnotes').entries[bnCh(1)];

@@ -35,8 +35,9 @@ The first release is designed around five constraints:
 The Scribe foundation is recorded under `P0-03`; `P0-04` renames it to Prose and hardens its Tauri page boundary;
 `P0-05` removes Scribe-only publication, reader, layout, cover, font, checking, preview-server, and file-association
 surfaces. The retained shell preserves the multi-file, persistence, versions, library, find, offline, native-folder,
-Markdown, and EPUB-package seams for later adaptation. `P0-06` owns the final test-harness adaptation and maintained
-browser runner. See [the lineage record](docs/archive/plainchant-lineage.md) and [the roadmap](ROADMAP.md).
+Markdown, and EPUB-package seams for later adaptation. `P0-06` adapts the retained harness and adds maintained browser
+and Rust commands. Phase 0 is complete; `P1-01` is the next roadmap item. See
+[the lineage record](docs/archive/plainchant-lineage.md) and [the roadmap](ROADMAP.md).
 
 ## Documentation check
 

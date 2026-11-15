@@ -1,4 +1,4 @@
-test('Shortcuts: every listed key still has a handler in the file it names (P7-15)', () => {
+test('Shortcuts: every listed key still has a handler in the file it names', () => {
     const fs = require('fs');
     const path = require('path');
     const items = Shortcuts.all();

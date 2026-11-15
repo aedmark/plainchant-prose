@@ -1,5 +1,5 @@
 /*
- * LibreOffice as the .docx oracle (P7-03, D-048): test/fixtures/docx/manuscript.fodt is converted to .docx by a real
+ * LibreOffice as the .docx oracle: test/fixtures/docx/manuscript.fodt is converted to .docx by a real
  * word processor, imported as a new book, and the book is checked, with EPUBCheck when it is there. Runs only when
  * soffice is on the PATH (or SOFFICE names it); PROSE_SKIP_SOFFICE=1 skips it. A private profile folder keeps it
  * apart from a LibreOffice the maintainer has open.
@@ -21,7 +21,7 @@ const loOracle = findSoffice();
 if (!loOracle.bin) {
     console.log('  skip libreoffice: oracle not run (' + loOracle.reason + ')');
 } else {
-    test('libreoffice: a manuscript saved as .docx by LibreOffice imports as a book with its structure, and passes EPUBCheck (oracle)', async () => {
+    test('libreoffice: a manuscript saved as .docx imports as a book with its structure (oracle)', async () => {
         const dir = loFs.mkdtempSync(loPath.join(loOs.tmpdir(), 'prose-lo-'));
         try {
             loChild.execFileSync(loOracle.bin, ['-env:UserInstallation=' + require('url').pathToFileURL(loPath.join(dir, 'profile')).href, '--headless', '--convert-to', 'docx', '--outdir', dir,

@@ -1,9 +1,9 @@
 const bxZlib = require('zlib');
-const bxBook = () => ExampleBook.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
+const bxBook = () => EpubFixture.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
 const bxPng = () => Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64'));
 const bxText = (e) => e.method === 8 ? bxZlib.inflateRawSync(e.data).toString('utf8') : Buffer.from(e.data).toString('utf8');
 
-test('book-export: mimetype comes first, stored, exact, and with no extra field (P5-01)', async () => {
+test('book-export: mimetype comes first, stored, exact, and with no extra field', async () => {
     const files = bxBook();
     files.mimetype = 'application/epub+zip\n';
     const r = await BookExport.pack(files, {}, { when: new Date(2026, 10, 4) });
@@ -58,7 +58,7 @@ test('book-export: only the manifest’s files go in; the rest and missing files
     assert.throws(() => BookExport.plan(broken), /cannot be exported/);
 });
 
-test('book-export: a linked record inside the book goes in, though the manifest does not list it (P5-06)', async () => {
+test('book-export: a linked record inside the book goes in, though the manifest does not list it', async () => {
     const files = bxBook();
     files['OEBPS/content.opf'] = files['OEBPS/content.opf'].replace('</metadata>', '<link href="onix.xml" media-type="application/xml" properties="onix" rel="record"/><link href="https://example.com/record" rel="record" media-type="text/html"/><link href="gone.xml" rel="record" media-type="application/xml"/><link href="content.opf" rel="alternate" media-type="application/oebps-package+xml"/></metadata>');
     files['OEBPS/onix.xml'] = '<ONIXMessage/>';

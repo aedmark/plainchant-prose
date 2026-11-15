@@ -53,7 +53,7 @@ const nvThrows = (fn, code) => {
     assert.ok(false, 'expected an error with code ' + code);
 };
 
-test('nav: reads the template and the hand-edited fixture with no problems (P1-05)', () => {
+test('nav: reads the template and the hand-edited fixture with no problems', () => {
     const t = nvRead(nvTemplate());
     assert.deepEqual(t.problems, []);
     assert.equal(t.nav.path, NV);

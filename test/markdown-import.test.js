@@ -1,4 +1,4 @@
-const mdBook = () => ExampleBook.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
+const mdBook = () => EpubFixture.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
 const mdX = (md, smart) => MarkdownImport.toXhtml(md, { smart: !!smart });
 const mdClean = (f, assets) => {
     assert.deepEqual(Book.read(f, { assets: assets || [] }).problems.map((p) => p.severity + ' ' + p.code), []);
@@ -6,7 +6,7 @@ const mdClean = (f, assets) => {
     Object.keys(f).filter((p) => /\.xhtml$/.test(p)).forEach((p) => assert.deepEqual(Xhtml.check(f[p], { path: p }).problems, [], p));
 };
 
-test('markdown-import: block structure follows the CommonMark core (P5-03)', () => {
+test('markdown-import: block structure follows the CommonMark core', () => {
     assert.equal(mdX('## Two\n\nText *em* **strong** ***both*** `a <b>`\nnext  \nbreak'), '<h2>Two</h2>\n<p>Text <em>em</em> <strong>strong</strong> <strong><em>both</em></strong> <code>a &lt;b&gt;</code> next<br/>break</p>');
     assert.equal(mdX('Title\n=====\n\nSub\n---\n\n***'), '<h1>Title</h1>\n<h2>Sub</h2>\n<hr/>');
     assert.equal(mdX('> One\nlazy\n>\n> > Inner'), '<blockquote>\n  <p>One lazy</p>\n  <blockquote>\n    <p>Inner</p>\n  </blockquote>\n</blockquote>');

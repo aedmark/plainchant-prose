@@ -1,4 +1,4 @@
-const bcBook = () => ExampleBook.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
+const bcBook = () => EpubFixture.create({ uuid: '0f3c2a1e-6b7d-4e2a-9c1b-8a5d4f3e2b10', now: Date.UTC(2026, 10, 4) }).files;
 const bcCh = (n) => 'OEBPS/text/chapter-' + n + '.xhtml';
 const bcTitles = (e) => BookChapters.list(e).map((c) => c.title);
 const bcToc = (e) => Nav.read(e, Book.read(e).model).nav.toc.entries.map((x) => [x.label, x.target.path]);
@@ -6,7 +6,7 @@ const bcToc = (e) => Nav.read(e, Book.read(e).model).nav.toc.entries.map((x) => 
 const bcProblems = (e) => { const r = Book.read(e); return r.problems.concat(Nav.read(e, r.model).problems).map((p) => p.severity + ' ' + p.code); };
 const bcThrows = (fn, code) => { try { fn(); } catch (e) { assert.equal(e.code, code, e.message); return; } assert.ok(false, 'expected ' + code); };
 
-test('book-chapters: the list is the spine\'s XHTML chapters with their titles (P3-02)', () => {
+test('book-chapters: the list is the spine\'s XHTML chapters with their titles', () => {
     assert.deepEqual(BookChapters.list(bcBook()).map((c) => [c.path, c.id, c.title, c.linear]), [
         [bcCh(1), 'chapter-1', 'A Book Is a Folder of Files', true], [bcCh(2), 'chapter-2', 'Chapters and Contents', true], [bcCh(3), 'chapter-3', 'A Page of Typical Elements', true]
     ]);
@@ -84,7 +84,7 @@ test('book-chapters: incoming links count other chapters\' links, not the conten
 
 const bcStart = (text, test) => XmlAst.parse(text).elements.find(test).start;
 
-test('book-chapters: split moves a heading and what follows into a new chapter, with wrappers and links following (P3-03)', () => {
+test('book-chapters: split moves a heading and what follows into a new chapter, with wrappers and links following', () => {
     const files = bcBook();
     const r = BookChapters.split(files, bcCh(3), bcStart(files[bcCh(3)], (e) => XmlAst.getAttr(e, 'id') === 'notes'));
     const fresh = r.entries[r.path], kept = r.entries[bcCh(3)];

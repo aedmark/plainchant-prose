@@ -11,7 +11,7 @@ test('ProjectLink: one folder maps to one live project, whatever the path spelli
     assert.equal(ProjectLink.findByPath({}, {}, '/x'), null);
 });
 
-test('ProjectLink: disk changes are measured against the last sync, not against unexported Studio edits', () => {
+test('ProjectLink: disk changes are measured against the last sync, not against unexported app edits', () => {
     assert.equal(ProjectLink.hashText('a\r\nb'), ProjectLink.hashText('a\nb\n'), 'line endings and a final newline do not count');
     assert.ok(ProjectLink.hashText('a') !== ProjectLink.hashText('b'));
     const synced = ProjectLink.hashEntries({ 'index.html': '<p>1</p>', 'a.css': 'a{}', 'old.js': '1' });

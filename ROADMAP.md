@@ -30,8 +30,11 @@ Goal: establish a truthful project repository and a testable static application 
   foundations. Every removal has a structure guard and the retained baseline stays green. Evidence: `npm test`
   (197/197), `cargo test --manifest-path src-tauri/Cargo.toml` (5/5), and an exact-CSP headless Chrome smoke test that
   loaded the retained Stage bridge with no errors or policy violations (2026-11-14).
-- [ ] P0-06 Adapt the inherited Node, structure, and Rust tests to the trimmed Prose shell; add a headless Chromium
-  runner with a disposable profile and make optional tools print "not run" with a reason when absent.
+- [x] P0-06 Adapt the inherited Node, structure, and Rust tests to the trimmed Prose shell; add a headless Chromium
+  runner with a disposable profile and make optional tools print "not run" with a reason when absent. Evidence:
+  `npm test` (198/198 with LibreOffice; EPUBCheck and Ace reported `not run`), an explicit all-oracle skip run
+  (197/197 with three named reasons), `npm run test:browser` (1/1 under the exact CSP, plus an expected failure after a
+  deliberate title mutation), and `npm run tauri:test` (5/5) (2026-11-14).
 
 **Gate 0:** the trimmed static shell opens with no network request, the retained pure modules run under Node, inherited
 names and removed features are absent, the service-worker file list agrees with the page, the page has a strict CSP,

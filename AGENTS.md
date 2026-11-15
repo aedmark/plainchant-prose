@@ -175,7 +175,6 @@ Planned code paths appear in `docs/ARCHITECTURE.md`; do not create empty directo
 
 ## Run and verify
 
-- Current documentation check: `python3 tools/check_docs.py`.
-- Planned fast checks after `P0-05`: `npm test` and `python3 tools/check_docs.py`.
-- Planned full checks: `npm run test:browser`, `npm run tauri:test`, and the relevant optional oracle checks.
+- Current fast checks: `npm test` and `python3 tools/check_docs.py`.
+- Current full checks add `npm run test:browser`, `npm run tauri:test`, and the relevant optional oracle checks.
 - Detailed proof boundaries: `docs/TESTING.md`.
