@@ -1,0 +1,150 @@
+/* Plainchant Prose home page: a manuscript. Warm paper and ink in light, lamplight in dark, following the system.
+   The palette matches src/styles.css (D-008). No JavaScript. */
+
+@font-face { font-family: 'EB Garamond'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url('../fonts/eb-garamond-latin-ext-400-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'EB Garamond'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url('../fonts/eb-garamond-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'EB Garamond'; font-style: italic; font-weight: 400; font-display: swap;
+    src: url('../fonts/eb-garamond-latin-ext-400-italic.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'EB Garamond'; font-style: italic; font-weight: 400; font-display: swap;
+    src: url('../fonts/eb-garamond-latin-400-italic.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'EB Garamond'; font-style: normal; font-weight: 600; font-display: swap;
+    src: url('../fonts/eb-garamond-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'EB Garamond'; font-style: normal; font-weight: 600; font-display: swap;
+    src: url('../fonts/eb-garamond-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Courier Prime'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url('../fonts/courier-prime-latin-ext-400-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Courier Prime'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url('../fonts/courier-prime-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url('../fonts/inter-latin-ext-400-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url('../fonts/inter-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap;
+    src: url('../fonts/inter-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap;
+    src: url('../fonts/inter-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+
+:root {
+    color-scheme: light;
+    --bg-void: #f4efe4;
+    --bg-raised: #fbf8f0;
+    --bg-sunken: #ebe4d3;
+    --text-void: #2b2620;
+    --text-strong: #14110d;
+    --text-void-muted: #625847;
+    --border-void: #ddd4bf;
+    --border-mid: #c9bfa6;
+    --focus: #2f5d8a;
+    --btn-primary-bg: #8c2f2b;
+    --btn-primary-text: #fbf8f0;
+    --btn-primary-hover: #732420;
+    --selection: rgba(140, 47, 43, 0.22);
+    --shadow-sm: 0 6px 20px rgba(43, 38, 32, 0.18);
+    --font-display: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    --font-code: 'Courier Prime', Courier, monospace;
+    --font-ui: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+        --bg-void: #16130f;
+        --bg-raised: #1f1b15;
+        --bg-sunken: #110e0b;
+        --text-void: #d9cfb8;
+        --text-strong: #f3ead6;
+        --text-void-muted: #a09580;
+        --border-void: #322b21;
+        --border-mid: #463d2f;
+        --focus: #8fbbe0;
+        --btn-primary-bg: #d9a441;
+        --btn-primary-text: #16130f;
+        --btn-primary-hover: #e8b558;
+        --selection: rgba(217, 164, 65, 0.3);
+        --shadow-sm: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    background: var(--bg-void);
+    color: var(--text-void);
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    line-height: 1.65;
+}
+
+::selection { background: var(--selection); }
+a { color: var(--btn-primary-bg); text-underline-offset: 0.18em; }
+a:hover { color: var(--btn-primary-hover); }
+a:focus-visible, .btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+.skip { position: absolute; left: -999px; top: 0; padding: 0.5rem 1rem; background: var(--bg-raised); color: var(--text-strong); font-family: var(--font-ui); font-size: 0.82rem; font-weight: 600; z-index: 10; }
+.skip:focus { left: 1rem; }
+
+.site-head { border-bottom: 1px solid var(--border-mid); background: var(--bg-raised); }
+.site-head .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1.5rem; padding-block: 0.7rem; }
+.wrap { width: 100%; max-width: 48rem; margin: 0 auto; padding-inline: 1.25rem; }
+.brand { color: var(--text-strong); font-size: 1.25rem; font-weight: 600; letter-spacing: 0.02em; text-decoration: none; }
+.brand:hover { color: var(--text-strong); }
+.brand small { font-style: italic; font-weight: 400; color: var(--text-void-muted); }
+.nav { display: flex; flex-wrap: wrap; gap: 1.1rem; font-family: var(--font-ui); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.nav a { color: var(--text-void); text-decoration: none; }
+.nav a:hover { color: var(--btn-primary-bg); text-decoration: underline; }
+
+.folio { max-width: 48rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+
+.title-block { text-align: center; padding: 2.5rem 0 3rem; border-bottom: 1px solid var(--border-mid); }
+.kicker { margin: 0; font-family: var(--font-ui); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-void-muted); }
+.title-block h1 { margin: 0.4rem 0 0.2rem; font-size: clamp(2.6rem, 9vw, 4.2rem); font-weight: 600; line-height: 1.05; letter-spacing: 0.01em; color: var(--text-strong); }
+.tagline { margin: 0 0 0.5rem; font-style: italic; font-size: 1.5rem; color: var(--text-void); }
+.byline { margin: 0.2rem 0 0.8rem; font-size: 1.1rem; font-style: italic; color: var(--text-void-muted); }
+.byline strong { font-style: normal; font-weight: 600; color: var(--text-strong); }
+.meta-strip { margin: 0 0 1.2rem; font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-void-muted); }
+.meta-strip span { color: var(--btn-primary-bg); font-weight: 600; }
+.lede { max-width: 34rem; margin: 0 auto 1.8rem; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; margin: 0; }
+
+.btn { display: inline-block; padding: 0.55rem 1.3rem; border: 1px solid var(--btn-primary-bg); border-radius: 0.2rem; color: var(--btn-primary-bg); font-family: var(--font-ui); font-size: 0.92rem; font-weight: 600; letter-spacing: 0.04em; text-decoration: none; background: transparent; }
+.btn:hover { background: var(--bg-sunken); color: var(--btn-primary-hover); }
+.btn.primary { background: var(--btn-primary-bg); color: var(--btn-primary-text); }
+.btn.primary:hover { background: var(--btn-primary-hover); color: var(--btn-primary-text); }
+
+.chapter { padding-top: 2.4rem; }
+.chapter h2 { margin: 0 0 0.6rem; font-size: 1.7rem; font-weight: 600; color: var(--text-strong); }
+.chapter h2 .numeral { font-style: italic; font-weight: 400; color: var(--btn-primary-bg); margin-right: 0.5rem; }
+.chapter p { margin: 0 0 1rem; }
+.chapter ol, .chapter ul { margin: 0 0 1rem; padding-left: 1.4rem; }
+.chapter li { margin-bottom: 0.45rem; }
+.chapter code { padding: 0 0.25rem; background: var(--bg-sunken); border-radius: 0.15rem; font-family: var(--font-code); font-size: 0.82em; }
+
+.ornament { margin: 2.4rem 0 0; text-align: center; color: var(--text-void-muted); font-size: 1.4rem; }
+
+.note { margin: 1.6rem 0 0; padding: 0.9rem 1.2rem; border-left: 3px solid var(--btn-primary-bg); background: var(--bg-raised); font-size: 1.05rem; box-shadow: var(--shadow-sm); }
+.note strong { font-family: var(--font-ui); font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.site-foot { border-top: 1px solid var(--border-mid); background: var(--bg-raised); font-family: var(--font-ui); font-size: 0.85rem; color: var(--text-void-muted); }
+.site-foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 1.5rem 2rem; padding-block: 2rem; }
+.foot-col { max-width: 18rem; }
+.foot-brand { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; color: var(--text-strong); margin: 0; }
+.foot-brand span { display: block; margin-top: 0.2rem; font-family: var(--font-ui); font-size: 0.82rem; font-weight: 400; color: var(--text-void-muted); }
+.foot-credit { margin: 0.6rem 0 0 !important; font-size: 0.82rem; }
+.foot-links-group { display: flex; flex-direction: column; gap: 0.35rem; }
+.foot-group-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--btn-primary-bg); margin-bottom: 0.2rem; }
+.foot-links-group a { color: var(--text-void); text-decoration: none; font-size: 0.85rem; }
+.foot-links-group a:hover { color: var(--btn-primary-bg); text-decoration: underline; }
+
+@media (max-width: 560px) {
+    body { font-size: 1.1rem; }
+    .nav { display: none; }
+    .site-foot .wrap { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+}

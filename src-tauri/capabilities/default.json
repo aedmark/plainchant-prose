@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The Prose window uses only allow-listed application commands.",
+  "windows": ["main"],
+  "permissions": []
+}

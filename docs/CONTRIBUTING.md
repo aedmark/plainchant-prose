@@ -1,7 +1,7 @@
 # Contributing
 
-Plainchant Prose is currently a blueprint. Changes should make one roadmap item or one design question easier to review
-and verify.
+Plainchant Prose currently has a blueprint and a trimmed Scribe-derived application foundation. Changes should make
+one roadmap item or one design question easier to review and verify.
 
 ## Before changing anything
 
@@ -20,7 +20,7 @@ and verify.
 - Preserve book-file bytes outside explicit edit ranges. Tests compare untouched bytes, not only parsed equality.
 - Put pure logic in UMD modules and environment integration in ordered classic app scripts (D-001).
 - Keep external input untrusted at HTML, URL, archive, filesystem, IndexedDB, and native boundaries.
-- Copy sibling code only under `P0-03` or another approved item that records exact lineage (D-004).
+- Copy sibling code only under an approved item that records the exact commit and file lineage (D-016).
 - Add tests with implementation. Make each important new test fail by changing only the intended rule.
 - Update the owning documents according to [the documentation map](README.md#update-triggers).
 - Keep credentials, private manuscripts, personal paths, production data, generated caches, and local configuration out
@@ -28,13 +28,15 @@ and verify.
 
 ## Verify
 
-The only current executable check is:
+The current foundation checks are:
 
 ```bash
 python3 tools/check_docs.py
+npm test
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-After `P0-05`, the normal fast set becomes:
+After P0-06 adapts the inherited suites, TESTING defines the normal Prose fast set.
 
 ```bash
 npm test

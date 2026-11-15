@@ -53,7 +53,7 @@ performance and newline preservation need fixtures.
 **Review trigger:** Real books demonstrate that scene-range movement is unreliable or cannot meet measured performance
 budgets; see `P6-03`.
 
-## D-004 Copy suite code with recorded lineage  (2026-11-12, status: accepted)
+## D-004 Copy suite code with recorded lineage  (2026-11-12, status: superseded by D-016)
 
 **Context:** Plainchant already contains relevant editing, storage, outline, statistics, versions, compare, file-sync,
 narration, focus, finding, and Tauri patterns. The maintainer chose a recorded copy and wants a shared API considered
@@ -240,6 +240,61 @@ assessment.
 
 **Consequences:** The reporting form is unavailable until the maintainer enables the setting on the existing GitHub
 repository. Before then, reporters use an established private channel with the maintainer.
+
+## D-016 Scribe is the foundation; Plainchant supplies writing modules later  (2026-11-13, status: accepted)
+
+**Context:** P0-03 initially named Plainchant as the copy source. Its editor is a working single-document screenplay
+application, but its shell, persistence, and tests assume one Fountain string. The maintainer directed the foundational
+scan to Plainchant Scribe. Scribe already has a multi-file IndexedDB project, cross-file versions and undo, Markdown
+and EPUB modules, Tauri folder commands, an offline shell, and a 313-test Node harness.
+
+**Decision:** P0-03 copies the released Scribe application, tests, fonts, icons, and Tauri shell from commit
+`e2b22186a481afb6b0180d0883ce21d393ae7352`, without its Git history or project documentation. The full known-green
+copy is the measurable baseline; Phase 0 then renames, hardens, and removes Scribe-only layout features. Plainchant
+commit `173a2ff0660b1304be89d439efd217f24c749c4b` remains the recorded secondary source for prose-editor, outline,
+statistics, compare, narration, focus, and writing-specific interaction work when those roadmap items begin.
+
+**Alternatives:** Copying Plainchant first would require replacing its single-string store before the app matches the
+book-folder boundary. Selecting isolated Scribe modules would lose the working dependency closure and make removals
+impossible to measure against a green baseline.
+
+**Consequences:** The first copy contains substantial EPUB-layout UI that Prose will remove. It also inherited Scribe's
+global Tauri object and absent page CSP; P0-04 corrected those page-boundary gaps under D-017. Prism and bundled fonts
+bring their licence notices. Copied Scribe tests describe the baseline only; a passing result does not prove Prose
+behaviour.
+
+**Review trigger:** Phase 0 evidence shows a smaller foundation can retain the multi-file, recovery, export, and native
+boundaries with materially less removal risk.
+
+## D-017 Strict CSP permits only the generated Stage bridge  (2026-11-13, status: accepted)
+
+**Context:** P0-04 disables Tauri's public global namespace and adds a strict page CSP. The inherited Stage uses
+sandboxed blob and `srcdoc` frames, author CSS, local blob images, and one application-generated interaction script.
+A policy copied unchanged from Plainchant blocked those generated elements and silently disabled Stage editing.
+
+**Decision:** The Tauri page allows only same-origin application scripts plus the fixed
+`plainchant-prose-stage` nonce. `Project.assemblePreview` strips every imported script and event handler before
+inserting the one nonce-bearing bridge script. A test supplies hostile imported markup with the known nonce and proves
+that it is removed. The policy allows inline CSS inside the sandboxed Stage because rendering
+the writer's styles is the feature, while all network-bearing directives stay confined to self, data images, or local
+blob URLs. Frames are limited to self and blob. Objects, forms, foreign ancestors, and unmarked inline scripts are
+refused.
+
+The browser calls only `window.__TAURI_INTERNALS__`; `withGlobalTauri` remains false.
+
+**Alternatives:** Allowing `unsafe-inline` for scripts would authorize imported inline code if a sanitizer regressed.
+Removing the Stage bridge in P0-04 would mix feature removal into the rename and lose the measurable P0-03 baseline.
+Externalizing the generated bridge would require redesigning its per-render state immediately before P0-05 reviews
+whether the inherited Stage remains at all.
+
+**Consequences:** The nonce is an authorization marker, not a secret. Safety depends on inserting it only after the
+retained Stage pipeline removes imported scripts, which the Node suite enforces. Headless Chrome must exercise a
+generated Stage under the exact policy after CSP, preview, or bridge changes. P0-05 removed the EPUB Stage, network
+preview, and native event bridge. The generic local Stage still needs inline author CSS, blob images, and its generated
+interaction bridge, so the page policy remains unchanged after review.
+
+**Review trigger:** Prose removes or replaces the retained generic Stage, adds another executable frame, or Tauri
+changes its internal bridge.
 
 ## Held tensions
 

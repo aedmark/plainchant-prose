@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plainchant Prose: make the book, keep the files</title>
+    <meta name="description" content="Plainchant Prose is an offline-first, plain-text long-form writer for novelists and non-fiction authors. In development.">
+    <meta name="author" content="Andrew Edmark">
+    <meta name="theme-color" content="#f4efe4">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="src/home.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the page</a>
+<header class="site-head">
+    <div class="wrap">
+        <a class="brand" href="index.html">Plainchant Prose <small>a long-form writer</small></a>
+        <nav class="nav" aria-label="Main navigation">
+            <a href="#idea">The idea</a>
+            <a href="#plan">The plan</a>
+            <a href="#today">Today</a>
+            <a href="#suite">The suite</a>
+        </nav>
+    </div>
+</header>
+<main id="main" class="folio">
+    <header class="title-block" aria-labelledby="title">
+        <h1 id="title">Plainchant Prose</h1>
+        <p class="tagline">Make the book. Keep the files.</p>
+        <p class="byline">designed by <strong>Andrew Edmark</strong></p>
+        <p class="meta-strip"><span>Free &amp; Open Source</span></p>
+        <p class="lede">An offline-first long-form writer that keeps each book in plain Markdown files and prepares a one-way EPUB handoff to Plainchant Scribe.</p>
+        <p class="actions">
+            <a class="btn primary" href="app.html">Open the foundation shell</a>
+            <a class="btn" href="README.md">Read the project overview</a>
+        </p>
+    </header>
+    <section id="idea" class="chapter" aria-labelledby="idea-title">
+        <h2 id="idea-title"><span class="numeral">I.</span>The idea</h2>
+        <p>A book folder contains <code>book.txt</code>, ordered Markdown chapters, and allowed supporting files. Those plain-text files remain authoritative and readable outside Prose.</p>
+        <p>Prose keeps a recoverable working copy in IndexedDB. The desktop shell links a real book folder through narrow commands. Finished manuscripts leave Prose as a one-way EPUB 3.3 handoff to Plainchant Scribe.</p>
+        <p class="ornament" aria-hidden="true">&#10086;</p>
+    </section>
+    <section id="plan" class="chapter" aria-labelledby="plan-title">
+        <h2 id="plan-title"><span class="numeral">II.</span>The plan</h2>
+        <ol>
+            <li><strong>Plain-text model.</strong> Parse <code>book.txt</code> and Markdown chapters without rewriting untouched source.</li>
+            <li><strong>Durable editing.</strong> Recover work locally and synchronize linked folders without silent overwrite.</li>
+            <li><strong>Writing tools.</strong> Add the binder, corkboard, focused editor, notes, versions, and whole-book find.</li>
+            <li><strong>Scribe handoff.</strong> Build deterministic EPUB 3.3 output and verify it with EPUBCheck and a recorded Scribe version.</li>
+            <li><strong>Release proof.</strong> Exercise offline, browser, desktop, accessibility, security, and recovery paths.</li>
+        </ol>
+        <p class="ornament" aria-hidden="true">&#10086;</p>
+    </section>
+    <section id="today" class="chapter" aria-labelledby="today-title">
+        <h2 id="today-title"><span class="numeral">III.</span>Where it stands today</h2>
+        <p>The repository contains a trimmed static foundation shell. Multi-file projects, IndexedDB persistence, versions, library, find and replace, offline caching, native folders, Markdown ingestion, and EPUB packaging remain available for adaptation.</p>
+        <p>The Prose grammar, authoritative book-folder model, recovery contract, and writing interface are not implemented yet. The shell is development evidence, not a finished writing application.</p>
+        <p class="note"><strong>No account, no tracking.</strong> Local-only operation is a project invariant.</p>
+        <p class="ornament" aria-hidden="true">&#10086;</p>
+    </section>
+    <section id="suite" class="chapter" aria-labelledby="suite-title">
+        <h2 id="suite-title"><span class="numeral">IV.</span>The Plainchant Suite</h2>
+        <ul>
+            <li><strong><a href="https://github.com/aedmark/plainchant">Plainchant</a>.</strong> The Fountain screenwriting application.</li>
+            <li><strong>Plainchant Prose.</strong> Plain-text drafting for novels and non-fiction.</li>
+            <li><strong>Plainchant Scribe.</strong> EPUB layout and publication after Prose hands off a manuscript.</li>
+        </ul>
+    </section>
+</main>
+<footer class="site-foot">
+    <div class="wrap">
+        <div class="foot-col">
+            <p class="foot-brand">Plainchant Prose <span>Make the book. Keep the files.</span></p>
+            <p class="foot-credit">Designed &amp; coded by <a href="https://github.com/aedmark/">Andrew Edmark</a></p>
+        </div>
+        <div class="foot-links-group">
+            <span class="foot-group-label">Project</span>
+            <a href="app.html">Open the shell</a>
+            <a href="README.md">Overview</a>
+            <a href="https://github.com/aedmark/plainchant-prose">Source (GitHub)</a>
+            <a href="LICENSE">Licence</a>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

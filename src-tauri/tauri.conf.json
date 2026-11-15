@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Plainchant Prose",
+  "version": "0.1.0",
+  "identifier": "io.plainchant.prose",
+  "build": {
+    "frontendDist": "dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "title": "Plainchant Prose — Long-Form Writer",
+        "url": "app.html",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 800,
+        "minHeight": 560,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'nonce-plainchant-prose-stage'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'self' blob:; frame-ancestors 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.png"
+    ],
+    "linux": {
+      "deb": {
+        "desktopTemplate": "linux/plainchant-prose.desktop"
+      },
+      "rpm": {
+        "desktopTemplate": "linux/plainchant-prose.desktop"
+      }
+    }
+  }
+}

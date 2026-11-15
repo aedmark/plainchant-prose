@@ -1,16 +1,17 @@
 # Testing
 
-This document defines the evidence required as Plainchant Prose is implemented. The repository currently has only the
-Manifold documentation check. Planned commands do not exist until their roadmap items create them, and must never be
-reported as run before then.
+This document defines the evidence required as Plainchant Prose is implemented. The repository currently carries
+trimmed Scribe-derived Node and Rust suites as foundation checks. Their results prove the retained foundation seams
+and P0-05 removal guards; Prose-specific claims wait for adapted tests.
 
 ## Suites
 
 | Suite | Planned file or command | Proves | Does not prove | Needs |
 | --- | --- | --- | --- | --- |
 | Documentation, current | `python3 tools/check_docs.py` | Active documents agree on IDs, links, paths, placeholders, and handoff shape | Product design is correct or code exists | Python 3 |
-| Unit, planned | `npm test` through `test/run.js` | Pure parser, splice, book, sync, store-rule, statistics, compare, and export contracts | DOM, real IndexedDB, native files, or reader behaviour | Node version selected in `P0-05` |
-| Structure, planned | Part of `npm test` | Script order, global names, file size, offline list, local assets, lineage rename guards | That the app runs | Node |
+| Retained Node foundation, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, and P0-05 removals remain green | Prose behaviour, DOM, real IndexedDB, native files, or writing UI | Node and optional external tools |
+| Retained Rust foundation, current | `cargo test --manifest-path src-tauri/Cargo.toml` | Retained native unit tests remain green | Prose path policy, native dialogs, or a packaged window | Rust and Cargo |
+| Prose unit and structure, planned | Adapted `npm test` | Parser, splice, book, sync, store-rule, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | P0-06 adaptation |
 | Browser, planned | `npm run test:browser` | Editor, undo, IndexedDB, recovery, accessibility mechanics, service worker, and main workflows in one headless engine | Other browsers, real assistive technology, or a human-visible layout | Headless browser, disposable profile |
 | Desktop shell, planned | `npm run tauri:test` | Path confinement, size limits, atomic-write rules, permission state, command registration | Native dialogs and a real packaged window | Rust and Cargo |
 | EPUB oracle, planned | Part of `npm test` when configured | Generated fixtures satisfy the observed EPUBCheck version | Scribe interpretation or reading-system rendering | Java and EPUBCheck |
@@ -18,8 +19,9 @@ reported as run before then.
 | DOCX oracle, planned | Part of `npm test` when configured | LibreOffice can open or normalize generated DOCX fixtures | Microsoft Word compatibility | LibreOffice |
 | Manual release matrix, planned | Procedure in this document | Named workflows worked on named real environments | Untested platforms or repeatability | Maintainer access |
 
-The planned fast set is `npm test` plus `python3 tools/check_docs.py`. The planned full set adds
-`npm run test:browser`, `npm run tauri:test`, configured oracles, and the manual checks relevant to the change.
+The current foundation set is `npm test`, `cargo test --manifest-path src-tauri/Cargo.toml`, and
+`python3 tools/check_docs.py`. Native-page CSP changes also require a disposable headless-browser run under the exact
+configured policy. P0-06 defines the Prose fast and full sets, including a maintained browser runner.
 
 ## Evidence rules
 
@@ -42,24 +44,28 @@ The planned fast set is `npm test` plus `python3 tools/check_docs.py`. The plann
 - Cap archive entry count, individual file size, total inflated size, and parser input before hostile fixtures run.
 - Preserve manually downloaded oracles and corpora. A reset script must name exactly what it deletes.
 - For folder-sync tests, create a dedicated temporary root and assert its canonical path before any deletion.
-- Run no planned `npm` or Tauri command until `P0-05` adds and documents it.
+- Treat the retained commands as foundation evidence until P0-06 completes their Prose adaptation.
 
-## Current check
+## Current checks
 
 ```bash
 python3 tools/check_docs.py
+npm test
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-A pass ends with zero errors. Warnings require review and may indicate that HANDOFF needs consolidation. This check
-reads active Manifold documents and `docs/archive/`; it does not inspect application code or validate design claims.
+A documentation pass ends with zero errors. Warnings require review and may indicate that HANDOFF needs
+consolidation. The retained code suites must end with their own passing summaries. Optional oracles report `not run`
+and a reason. None of these checks validates Prose behaviour yet.
 
-## Planned unit and structure checks
+## Retained and planned unit checks
 
 ```bash
 npm test
 ```
 
-`P0-05` defines the runner and final summary. The initial suites must cover:
+The current runner derives from Scribe and P0-05 trimmed its discarded feature suites. P0-06 completes the Prose
+adaptation without losing the retained baseline, then the Prose suites must cover:
 
 - grammar precedence, malformed recovery, escaping, half-open source ranges, CRLF, Unicode, and large input;
 - byte-preserving range splices and index-order edits;

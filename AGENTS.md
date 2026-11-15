@@ -3,7 +3,8 @@
 Plainchant Prose is a planned offline-first, plain-text long-form writer for novelists and non-fiction authors. Its
 frontend uses static HTML, CSS, and vanilla JavaScript; IndexedDB provides recovery and a working copy; a Tauri v2
 desktop shell provides controlled access to real book folders; EPUB 3.3 provides the one-way handoff to Plainchant
-Scribe. The repository currently contains a blueprint and no application code.
+Scribe. The repository currently contains the blueprint and a trimmed Scribe-derived application foundation; Prose
+domain behaviour is not implemented yet.
 
 This is the canonical instruction file for coding agents. `CLAUDE.md` imports it; do not duplicate these rules in
 tool-specific files. Project facts belong in the documents linked below, not in an agent's private memory.
@@ -19,7 +20,7 @@ tool-specific files. Project facts belong in the documents linked below, not in 
    multiple valid interpretations, ask targeted clarifying questions before editing, then work on one independently
    reviewable change at a time.
 
-For this blueprint-stage repository, read `README.md`, `BRIEF.md`, and `docs/README.md` before changing design claims.
+For this foundation-stage repository, read `README.md`, `BRIEF.md`, and `docs/README.md` before changing design claims.
 If a request conflicts with these instructions or the working tree contains overlapping edits, stop and ask the
 maintainer.
 

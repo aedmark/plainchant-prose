@@ -5,8 +5,8 @@ folder that a person can read without the application: `book.txt` records metada
 chapter is a Markdown (`.md`) file. The application supplies structure, preview, recovery, versions, and a one-way
 EPUB 3.3 handoff to Plainchant Scribe.
 
-This repository currently contains the product and engineering blueprint. Application code has not been copied or
-implemented.
+This repository contains the product blueprint and a trimmed Plainchant Scribe-derived application foundation. The
+shell is a measured starting point, not a working Plainchant Prose implementation.
 
 ## Product boundary
 
@@ -32,8 +32,11 @@ The first release is designed around five constraints:
 
 ## Current status
 
-Blueprint only. Git and the GitHub remote are established. The next implementation step is the recorded Plainchant code
-copy in `P0-03`. See [the roadmap](ROADMAP.md) for acceptance evidence.
+The Scribe foundation is recorded under `P0-03`; `P0-04` renames it to Prose and hardens its Tauri page boundary;
+`P0-05` removes Scribe-only publication, reader, layout, cover, font, checking, preview-server, and file-association
+surfaces. The retained shell preserves the multi-file, persistence, versions, library, find, offline, native-folder,
+Markdown, and EPUB-package seams for later adaptation. `P0-06` owns the final test-harness adaptation and maintained
+browser runner. See [the lineage record](docs/archive/plainchant-lineage.md) and [the roadmap](ROADMAP.md).
 
 ## Documentation check
 

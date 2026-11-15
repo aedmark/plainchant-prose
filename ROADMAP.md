@@ -15,16 +15,27 @@ Goal: establish a truthful project repository and a testable static application 
   rules for local tools and generated output, verify the D-014 licence, and record the repository state in HANDOFF.
   Evidence: existing baseline commit `5f04650`, `git remote -v`, clean documentation check, and maintainer-authorized
   commit and push (2026-11-13).
-- [ ] P0-03 Copy the minimum reusable modules and application shell from Plainchant at a recorded commit; write
-  `docs/archive/plainchant-lineage.md` with each copied file, relevant source decisions, removed features, and known
-  traps. Begin from the observed reference `173a2ff` (2026-11-12) or record the newer chosen commit before copying.
-- [ ] P0-04 Rename product, storage, cache, manifest, package, and Tauri identifiers to Plainchant Prose; add a
-  structure check that fails if inherited product identifiers return outside the lineage record.
-- [ ] P0-05 Establish Node unit and structure tests, a headless browser runner with a disposable profile, the Manifold
-  check, and Rust tests for the shell. Optional tools must print "not run" with a reason when absent.
+- [x] P0-03 Copy the known-green Plainchant Scribe application, tests, fonts, icons, and Tauri shell from
+  `e2b22186a481afb6b0180d0883ce21d393ae7352`; write `docs/archive/plainchant-lineage.md` with the Scribe foundation,
+  the later Plainchant writing source, relevant decisions, removal targets, and inherited traps (D-016). Evidence:
+  copied-file blob comparison, `npm test` (313/313), and `cargo test --manifest-path src-tauri/Cargo.toml` (15/15),
+  with loopback and installed external-oracle access allowed (2026-11-13).
+- [x] P0-04 Rename product, storage, cache, manifest, package, and Tauri identifiers to Plainchant Prose; replace the
+  global Tauri object with imported internals, add a strict page CSP, and add a structure check that fails if inherited
+  product identifiers return outside the lineage record (proposed D-008, D-016, D-017). Evidence: `npm test`
+  (314/314), `cargo test --manifest-path src-tauri/Cargo.toml` (15/15), and a headless Chrome CSP smoke test that loaded
+  the example Stage bridge with no violations (2026-11-13).
+- [x] P0-05 Remove Scribe-only layout, cover, font, reader, fixed-layout, store-checking, and publication UI while
+  keeping the multi-file project, Markdown, EPUB export, versions, library, find, offline, and native-folder
+  foundations. Every removal has a structure guard and the retained baseline stays green. Evidence: `npm test`
+  (197/197), `cargo test --manifest-path src-tauri/Cargo.toml` (5/5), and an exact-CSP headless Chrome smoke test that
+  loaded the retained Stage bridge with no errors or policy violations (2026-11-14).
+- [ ] P0-06 Adapt the inherited Node, structure, and Rust tests to the trimmed Prose shell; add a headless Chromium
+  runner with a disposable profile and make optional tools print "not run" with a reason when absent.
 
-**Gate 0:** the static shell opens with no network request, the copied pure modules run under Node, inherited names are
-absent, the service-worker file list agrees with the page, and all configured baseline checks report a final status.
+**Gate 0:** the trimmed static shell opens with no network request, the retained pure modules run under Node, inherited
+names and removed features are absent, the service-worker file list agrees with the page, the page has a strict CSP,
+and all configured baseline checks report a final status.
 
 ## Phase 1: Format, book model, and durable working copy
 

@@ -1,7 +1,8 @@
 # Architecture
 
-This document maps the planned Plainchant Prose system. Paths and interfaces marked "planned" do not exist yet. Why
-the system takes this shape lives in [DECISIONS.md](DECISIONS.md); implementation order lives in
+This document maps the planned Plainchant Prose system. Paths and interfaces marked "planned" do not yet constitute
+the target implementation, even where an inherited Scribe path has the same name. Why the system takes this shape
+lives in [DECISIONS.md](DECISIONS.md); implementation order lives in
 [ROADMAP.md](../ROADMAP.md).
 
 ## The shape, in one paragraph
@@ -13,7 +14,7 @@ preview, search, statistics, and EPUB handoff. User edits splice source ranges a
 only files whose last-synced fingerprint still matches disk. Send to Scribe derives a new EPUB 3.3 and records the sent
 revision. Nothing leaves the device, and no network resource is required.
 
-## Planned code map
+## Target code map
 
 | Area | Planned location | Entry point | Talks to |
 | --- | --- | --- | --- |
@@ -29,8 +30,9 @@ revision. Nothing leaves the device, and no network resource is required.
 | Desktop shell | `src-tauri/` | narrow Rust commands | Native dialogs and selected folders |
 | Tests | `test/` | `test/run.js`, browser and Rust runners | Fixtures and optional oracles |
 
-Names are provisional until the corresponding roadmap item creates the file. New files update this map in the same
-change.
+Names are provisional until the corresponding roadmap item creates or adapts the file. The current `src/`, `test/`,
+and `src-tauri/` trees are the trimmed Scribe-derived foundation recorded in the lineage archive; they do not implement
+this target map yet. New files update this map in the same change.
 
 ## Source contracts
 
@@ -138,8 +140,9 @@ folder or IndexedDB files
 
 ## Dependencies
 
-The planned frontend has no runtime dependency (D-001). Copied Plainchant and Scribe modules become maintained project
-code with recorded lineage, not package dependencies (D-004).
+The target frontend has no runtime package dependency (D-001). Copied Plainchant and Scribe modules become maintained
+project code with recorded lineage, not package dependencies (D-016). The current foundation vendors Prism 1.30.0
+and local font files with their licence notices.
 
 | Dependency | Version policy | For | Boundary |
 | --- | --- | --- | --- |
@@ -185,9 +188,17 @@ manuscript text, research notes, absolute personal paths, or recovered version c
 
 ## Claims vs. code
 
-- The repository contains no application code as of 2026-11-12. Every component above is a blueprint.
-- The Plainchant source reference `173a2ff` is an observed short commit on 2026-11-12; no files have been copied.
+- The repository began from a byte-for-byte Scribe foundation at commit
+  `e2b22186a481afb6b0180d0883ce21d393ae7352`; its complete copied-file manifest is in
+  `docs/archive/plainchant-lineage.md`. P0-04 renamed its application and persistent identifiers to Prose. P0-05
+  removed its publication, reader, device, cover, font, fixed-layout, store-checking, preview-server, EPUB association,
+  and Scribe-help surfaces while retaining named foundation seams.
+- Plainchant commit `173a2ff0660b1304be89d439efd217f24c749c4b` is the secondary writing-source reference;
+  no Plainchant file has been copied.
 - EPUBCheck and Scribe compatibility are planned evidence. No Prose EPUB has been generated or tested.
 - The supported v0.1 environments are Linux Tauri and Chromium browser or PWA (D-013). No release evidence exists yet.
 - The IndexedDB transaction design in D-007 is accepted but remains unimplemented. The native boundary in D-008 stays
   proposed until its roadmap item supplies executable evidence and maintainer acceptance.
+- The Tauri page disables the public global object and enforces the D-017 CSP. P0-05 removed the inherited preview,
+  EPUBCheck, cover-save, desktop-open, and EPUB-association boundaries. D-008 stays proposed until folder-confinement
+  work supplies its full evidence.

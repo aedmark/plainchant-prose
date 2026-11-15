@@ -1,7 +1,8 @@
 # Security
 
-Plainchant Prose protects unpublished manuscripts and local filesystem access. The repository currently contains a
-blueprint, so this document states required boundaries rather than claiming an implemented security posture.
+Plainchant Prose protects unpublished manuscripts and local filesystem access. The repository contains a trimmed
+Scribe-derived application foundation, but this document states Prose's required boundaries rather than claiming that
+the foundation shell has an accepted security posture.
 
 ## Supported versions
 
@@ -57,7 +58,7 @@ through the private report; public details wait for maintainer approval and an a
 ## Dependency and lineage policy
 
 The static frontend has no runtime package dependency (D-001). Tauri crates are locked. Optional oracles run only in
-development. Copied suite code records its source commit and security-relevant source decisions (D-004). A dependency
+development. Copied suite code records its source commit and security-relevant source decisions (D-016). A dependency
 addition requires maintainer approval, an accepted decision, licence review, a pinned version, and an update path.
 
 The repository is distributed under the AI-assisted MIT terms in `LICENSE` (D-014).
@@ -67,7 +68,13 @@ authorize writes to sibling Zones.
 
 ## Verification
 
-Planned security evidence includes:
+The retained Node suite exercises archive limits, XML hostile input, path validation, local assets, and structure
+guards. P0-04 disabled the public Tauri global and added the D-017 CSP, including negative tests that strip an imported
+script even when it copies the Stage bridge nonce. P0-05 removed unused network preview, Java EPUBCheck, cover-save,
+desktop-open, event-listener, and EPUB-association authority. This does not establish Prose's complete native boundary;
+dialog-scoped folder confinement and command limits remain under proposed D-008 and P1-07.
+
+Planned Prose security evidence includes:
 
 - hostile Markdown and metadata escaping in preview, EPUB XHTML, error messages, and filenames;
 - path traversal, absolute path, control character, Unicode collision, case collision, symlink escape, and permission
