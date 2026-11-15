@@ -1,15 +1,16 @@
 # Testing
 
 This document defines the evidence required as Plainchant Prose is implemented. The repository currently carries
-trimmed Scribe-derived Node and Rust suites as foundation checks. Their results prove the retained foundation seams
-and P0-05 removal guards; Prose domain claims wait for Phase 1 tests.
+trimmed Scribe-derived Node and Rust suites as foundation checks plus the normative `P1-01` source fixtures. Their
+results prove the retained foundation seams, P0-05 removal guards, and fixture consistency; parser behaviour still
+waits for `P1-02`.
 
 ## Suites
 
 | Suite | Planned file or command | Proves | Does not prove | Needs |
 | --- | --- | --- | --- | --- |
 | Documentation, current | `python3 tools/check_docs.py` | Active documents agree on IDs, links, paths, placeholders, and handoff shape | Product design is correct or code exists | Python 3 |
-| Retained Node foundation, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, and P0-05 removals remain green | Prose behaviour, DOM, real IndexedDB, native files, or writing UI | Node and optional external tools |
+| Node foundation and source fixtures, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, P0-05 removals, and P1-01 fixture consistency remain green | Prose parsing behaviour, DOM, real IndexedDB, native files, or writing UI | Node and optional external tools |
 | Retained Rust foundation, current | `cargo test --manifest-path src-tauri/Cargo.toml` | Retained native unit tests remain green | Prose path policy, native dialogs, or a packaged window | Rust and Cargo |
 | Prose unit and structure, planned | Expanded `npm test` | Parser, splice, book, sync, store-rule, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | Phase 1 implementation |
 | Browser foundation, current | `npm run test:browser` | The starter Stage and interaction bridge load under the exact Tauri CSP in Chromium with a disposable profile | Editing workflows, IndexedDB recovery, service-worker upgrades, other browsers, assistive technology, or visible layout | Installed Chrome or Chromium |
@@ -60,7 +61,19 @@ npm run tauri:test
 
 A documentation pass ends with zero errors. Warnings require review and may indicate that HANDOFF needs
 consolidation. The retained code suites must end with their own passing summaries. Optional oracles report `not run`
-and a reason. None of these checks validates Prose behaviour yet.
+and a reason. The source-fixture checks validate the written contract and exact ranges, not a parser implementation.
+
+## Source grammar fixtures
+
+`test/fixtures/prose-source/` contains seven normative cases for minimal and full books, metadata conflicts, index
+conflicts, malformed chapters, delimiter precedence, escaping, CRLF, a byte-order mark, Unicode normalization, and
+astral UTF-16 ranges. Each `expected.json` records features, exact source slices, derived expectations, diagnostics,
+and its export gate. `test/source-fixtures.test.js` verifies those records without duplicating the parser planned by
+`P1-02`.
+
+Every physical source file in a case must appear in its manifest. Encoding-only examples may embed source in JSON so
+CRLF and byte-order-mark evidence remains visible in review. Adding or changing grammar updates the normative format,
+fixtures, their coverage list, and parser tests in the same change.
 
 ## Retained and planned unit checks
 

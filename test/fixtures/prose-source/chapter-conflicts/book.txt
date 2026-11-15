@@ -1,0 +1,9 @@
+Title: Broken Source
+Author: Mira Vale
+Language: en
+
+bad-title.md
+bad-note.md
+bad-boneyard.md
+bad-footnotes.md
+unsupported.md

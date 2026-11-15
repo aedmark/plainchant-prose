@@ -135,6 +135,7 @@ permission.
 | `docs/README.md` | Documentation ownership and update triggers |
 | `docs/HANDOFF.md` | Current state, next steps, gotchas, and bounded session history |
 | `docs/ARCHITECTURE.md` | Planned components, boundaries, invariants, state, and failure modes |
+| `docs/SOURCE_FORMAT.md` | Normative book-index and chapter grammar, recovery, diagnostics, and source ranges |
 | `docs/DECISIONS.md` | Accepted and proposed choices, held tensions, and open questions |
 | `docs/TESTING.md` | Planned test strategy, commands, proof boundaries, and limitations |
 | `docs/SECURITY.md` | Assets, trust boundaries, secret handling, and reporting |

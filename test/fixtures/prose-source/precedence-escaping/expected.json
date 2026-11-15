@@ -1,0 +1,23 @@
+{
+  "id": "precedence-escaping",
+  "features": ["escaping", "precedence", "nested-delimiters-literal", "bold-before-italic", "footnotes"],
+  "documents": [
+    {"path": "book.txt", "ranges": [{"id": "chapter.path", "start": 47, "end": 52, "text": "01.md"}]},
+    {
+      "path": "01.md",
+      "ranges": [
+        {"id": "escaped.noteOpen", "start": 11, "end": 14, "text": "\\[["},
+        {"id": "note.withNestedDelimiters", "start": 63, "end": 97, "text": "[[note /* nested */ and [[ inner]]"},
+        {"id": "boneyard.withNestedDelimiters", "start": 106, "end": 140, "text": "/* bone [[nested]] and /* inner */"},
+        {"id": "emphasis.bold", "start": 147, "end": 155, "text": "**bold**"},
+        {"id": "emphasis.italic", "start": 160, "end": 168, "text": "*italic*"},
+        {"id": "escaped.emphasis", "start": 173, "end": 184, "text": "\\*literal\\*"},
+        {"id": "footnote.reference", "start": 185, "end": 191, "text": "[^one]"},
+        {"id": "footnote.definition", "start": 193, "end": 247, "text": "[^one]: **Strong** and *quiet*.\n\tContinued with a tab."}
+      ]
+    }
+  ],
+  "expected": {"noteCount": 1, "boneyardCount": 1, "footnotes": ["one"]},
+  "diagnostics": [],
+  "exportBlocking": false
+}

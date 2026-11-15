@@ -1,0 +1,29 @@
+{
+  "id": "valid-minimal",
+  "features": ["required-metadata", "chapter-path", "chapter-title", "paragraph"],
+  "documents": [
+    {
+      "path": "book.txt",
+      "ranges": [
+        {"id": "metadata.title", "start": 0, "end": 18, "text": "Title: Small Hours"},
+        {"id": "metadata.author", "start": 19, "end": 36, "text": "Author: Mira Vale"},
+        {"id": "metadata.language", "start": 37, "end": 49, "text": "Language: en"},
+        {"id": "chapter.path", "start": 51, "end": 64, "text": "01-opening.md"}
+      ]
+    },
+    {
+      "path": "01-opening.md",
+      "ranges": [
+        {"id": "chapter.title", "start": 0, "end": 13, "text": "# First Light"},
+        {"id": "paragraph", "start": 15, "end": 33, "text": "A quiet beginning."}
+      ]
+    }
+  ],
+  "expected": {
+    "metadata": {"Title": "Small Hours", "Author": "Mira Vale", "Language": "en"},
+    "order": ["01-opening.md"],
+    "chapterTitle": "First Light"
+  },
+  "diagnostics": [],
+  "exportBlocking": false
+}

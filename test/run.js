@@ -72,6 +72,7 @@ require('./ace.test.js');
 require('./format.test.js');
 require('./shortcuts.test.js');
 require('./projectlink.test.js');
+require('./source-fixtures.test.js');
 require('./codeshade.test.js');
 require('./theme.test.js');
 require('./project.test.js');

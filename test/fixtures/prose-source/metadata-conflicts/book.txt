@@ -1,0 +1,11 @@
+Title: First
+title: Second
+Author:
+Language: en
+Publisher: One
+Publisher: Two
+Imprint: North Star
+Custom: Edition = First
+Custom: Edition = Revised
+
+01.md

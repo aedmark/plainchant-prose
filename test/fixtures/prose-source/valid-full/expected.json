@@ -1,0 +1,51 @@
+{
+  "id": "valid-full",
+  "features": ["optional-metadata", "custom-metadata", "parts", "nested-paths", "section-headings", "scenes", "synopses", "multiline-notes", "multiline-boneyards", "emphasis", "quotes", "footnotes", "footnote-continuation"],
+  "documents": [
+    {
+      "path": "book.txt",
+      "ranges": [
+        {"id": "metadata.publishDate", "start": 55, "end": 79, "text": "Publish Date: 2026-11-14"},
+        {"id": "metadata.publisher", "start": 80, "end": 107, "text": "Publisher: North Star Press"},
+        {"id": "metadata.series", "start": 108, "end": 127, "text": "Series: Tidal Books"},
+        {"id": "metadata.custom.imprint", "start": 128, "end": 159, "text": "Custom: Imprint = Lantern House"},
+        {"id": "metadata.custom.edition", "start": 160, "end": 185, "text": "Custom: Edition = Revised"},
+        {"id": "part.one", "start": 187, "end": 201, "text": "Part: Part One"},
+        {"id": "chapter.harbour", "start": 202, "end": 224, "text": "chapters/01-harbour.md"},
+        {"id": "part.two", "start": 225, "end": 239, "text": "Part: Part Two"},
+        {"id": "chapter.crossing", "start": 240, "end": 263, "text": "chapters/02-crossing.md"}
+      ]
+    },
+    {
+      "path": "chapters/01-harbour.md",
+      "ranges": [
+        {"id": "chapter.title", "start": 0, "end": 9, "text": "# Harbour"},
+        {"id": "scene.first.synopsis", "start": 10, "end": 31, "text": "= Arrival at low tide"},
+        {"id": "heading.level2", "start": 33, "end": 51, "text": "## Before **Dawn**"},
+        {"id": "emphasis.italic", "start": 56, "end": 65, "text": "*harbour*"},
+        {"id": "note.multiline", "start": 90, "end": 113, "text": "[[private\nauthor note]]"},
+        {"id": "boneyard.multiline", "start": 121, "end": 140, "text": "/* cut\nparagraph */"},
+        {"id": "quote", "start": 142, "end": 181, "text": "> A **bell** sounded.\n> Then *silence*."},
+        {"id": "scene.second.break", "start": 183, "end": 188, "text": "* * *"},
+        {"id": "scene.second.synopsis", "start": 189, "end": 209, "text": "= The letter arrives"},
+        {"id": "footnote.reference", "start": 82, "end": 89, "text": "[^tide]"},
+        {"id": "footnote.definition", "start": 225, "end": 276, "text": "[^tide]: A measured rise.\n    Recorded before dawn."}
+      ]
+    },
+    {
+      "path": "chapters/02-crossing.md",
+      "ranges": [
+        {"id": "chapter.title", "start": 0, "end": 10, "text": "# Crossing"},
+        {"id": "heading.level3", "start": 12, "end": 27, "text": "### The Channel"}
+      ]
+    }
+  ],
+  "expected": {
+    "customMetadata": {"Imprint": "Lantern House", "Edition": "Revised"},
+    "parts": ["Part One", "Part Two"],
+    "sceneCount": 2,
+    "footnotes": ["tide"]
+  },
+  "diagnostics": [],
+  "exportBlocking": false
+}

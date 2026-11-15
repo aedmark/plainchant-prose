@@ -296,6 +296,30 @@ interaction bridge, so the page policy remains unchanged after review.
 **Review trigger:** Prose removes or replaces the retained generic Stage, adds another executable frame, or Tauri
 changes its internal bridge.
 
+## D-018 Source conflicts remain explicit until the writer resolves them  (2026-11-14, status: accepted)
+
+**Context:** `P1-01` needed deterministic metadata and malformed-source behaviour without letting a parser choose a
+writer's intent. Duplicate metadata, unknown keys, and private unclosed marks can each produce a plausible model while
+hiding a different source interpretation.
+
+**Decision:** [The source-format contract](SOURCE_FORMAT.md) defines the complete v0.1 grammar. `Title`, `Author`, and
+`Language` are required metadata; `Publish Date`, `Publisher`, and `Series` are optional. A generalized
+`Custom: Name = value` form preserves accepted project-specific metadata without assigning an EPUB meaning.
+Duplicates have no automatic winner. Unknown keys, duplicates, path conflicts, title conflicts, and broken footnotes
+remain visible until the writer explicitly resolves them. Unclosed notes and boneyards remain literal and block export
+to protect private material. Every export reruns the complete conflict check.
+
+**Alternatives:** First- or last-occurrence precedence silently selects source that may be stale. Discarding unknown
+metadata weakens the plain-files promise. Treating private unclosed marks as printable risks disclosure. Blocking all
+unsupported Markdown would make ordinary hand-edited files unnecessarily fragile.
+
+**Consequences:** Editing can continue with warnings and conflicts, while preview uses only unambiguous data. Source
+resolutions are explicit, undoable range edits. `P1-02` returns half-open UTF-16 ranges so JavaScript slicing, editor
+selection, and later splices share one coordinate system. Safely literal unsupported Markdown does not block export.
+
+**Review trigger:** Real books require repeatable duplicate precedence, custom metadata needs an accepted handoff
+mapping, or UTF-16 ranges cannot support a target editor without lossy conversion.
+
 ## Held tensions
 
 ### T-001 Portable writing history and clean book folders  (2026-11-12, status: resolved by D-007)

@@ -1,0 +1,30 @@
+{
+  "id": "metadata-conflicts",
+  "features": ["metadata-case-warning", "empty-required-metadata", "duplicate-standard-metadata", "unknown-metadata", "duplicate-custom-metadata"],
+  "documents": [
+    {
+      "path": "book.txt",
+      "ranges": [
+        {"id": "title.first", "start": 0, "end": 12, "text": "Title: First"},
+        {"id": "title.second", "start": 13, "end": 26, "text": "title: Second"},
+        {"id": "author.empty", "start": 27, "end": 34, "text": "Author:"},
+        {"id": "publisher.first", "start": 48, "end": 62, "text": "Publisher: One"},
+        {"id": "publisher.second", "start": 63, "end": 77, "text": "Publisher: Two"},
+        {"id": "unknown.imprint", "start": 78, "end": 97, "text": "Imprint: North Star"},
+        {"id": "custom.edition.first", "start": 98, "end": 121, "text": "Custom: Edition = First"},
+        {"id": "custom.edition.second", "start": 122, "end": 147, "text": "Custom: Edition = Revised"}
+      ]
+    },
+    {"path": "01.md", "ranges": [{"id": "chapter.title", "start": 0, "end": 10, "text": "# Metadata"}]}
+  ],
+  "expected": {"selectedMetadata": null, "resolution": "user-selects-or-rejects"},
+  "diagnostics": [
+    {"code": "metadata-key-case", "severity": "warning", "document": "book.txt", "start": 13, "end": 26, "text": "title: Second", "exportBlocking": false},
+    {"code": "metadata-duplicate-title", "severity": "warning", "document": "book.txt", "start": 13, "end": 26, "text": "title: Second", "exportBlocking": true},
+    {"code": "metadata-required-empty", "severity": "conflict", "document": "book.txt", "start": 27, "end": 34, "text": "Author:", "exportBlocking": true},
+    {"code": "metadata-duplicate-publisher", "severity": "warning", "document": "book.txt", "start": 63, "end": 77, "text": "Publisher: Two", "exportBlocking": true},
+    {"code": "metadata-unknown-key", "severity": "conflict", "document": "book.txt", "start": 78, "end": 97, "text": "Imprint: North Star", "exportBlocking": true},
+    {"code": "metadata-duplicate-custom", "severity": "warning", "document": "book.txt", "start": 122, "end": 147, "text": "Custom: Edition = Revised", "exportBlocking": true}
+  ],
+  "exportBlocking": true
+}

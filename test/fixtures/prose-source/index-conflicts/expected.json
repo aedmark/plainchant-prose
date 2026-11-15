@@ -1,0 +1,38 @@
+{
+  "id": "index-conflicts",
+  "features": ["empty-parts", "missing-paths", "duplicate-paths", "case-colliding-paths", "unicode-colliding-paths", "unsafe-paths", "research-exclusion", "unknown-index-lines", "unlisted-files"],
+  "documents": [
+    {
+      "path": "book.txt",
+      "ranges": [
+        {"id": "part.empty", "start": 45, "end": 50, "text": "Part:"},
+        {"id": "path.missing", "start": 63, "end": 73, "text": "missing.md"},
+        {"id": "path.caseCollision", "start": 90, "end": 105, "text": "chapters/ONE.md"},
+        {"id": "path.duplicate", "start": 106, "end": 121, "text": "chapters/one.md"},
+        {"id": "path.nfc", "start": 122, "end": 138, "text": "chapters/café.md"},
+        {"id": "path.nfd", "start": 139, "end": 156, "text": "chapters/café.md"},
+        {"id": "path.traversal", "start": 157, "end": 169, "text": "../escape.md"},
+        {"id": "path.research", "start": 170, "end": 187, "text": "research/notes.md"},
+        {"id": "path.backslash", "start": 188, "end": 201, "text": "C:\\chapter.md"},
+        {"id": "line.unknown", "start": 202, "end": 215, "text": "not a chapter"}
+      ]
+    },
+    {"path": "chapters/one.md", "ranges": [{"id": "chapter.title", "start": 0, "end": 5, "text": "# One"}]},
+    {"path": "chapters/café.md", "ranges": [{"id": "chapter.title", "start": 0, "end": 6, "text": "# Café"}]},
+    {"path": "unlisted.md", "ranges": [{"id": "chapter.title", "start": 0, "end": 10, "text": "# Unlisted"}]}
+  ],
+  "expected": {"order": null},
+  "diagnostics": [
+    {"code": "part-empty", "severity": "warning", "document": "book.txt", "start": 45, "end": 50, "text": "Part:", "exportBlocking": false},
+    {"code": "chapter-missing", "severity": "conflict", "document": "book.txt", "start": 63, "end": 73, "text": "missing.md", "exportBlocking": true},
+    {"code": "chapter-path-case-collision", "severity": "conflict", "document": "book.txt", "start": 90, "end": 105, "text": "chapters/ONE.md", "exportBlocking": true},
+    {"code": "chapter-path-duplicate", "severity": "conflict", "document": "book.txt", "start": 106, "end": 121, "text": "chapters/one.md", "exportBlocking": true},
+    {"code": "chapter-path-unicode-collision", "severity": "conflict", "document": "book.txt", "start": 139, "end": 156, "text": "chapters/café.md", "exportBlocking": true},
+    {"code": "chapter-path-traversal", "severity": "conflict", "document": "book.txt", "start": 157, "end": 169, "text": "../escape.md", "exportBlocking": true},
+    {"code": "chapter-path-research", "severity": "conflict", "document": "book.txt", "start": 170, "end": 187, "text": "research/notes.md", "exportBlocking": true},
+    {"code": "chapter-path-backslash", "severity": "conflict", "document": "book.txt", "start": 188, "end": 201, "text": "C:\\chapter.md", "exportBlocking": true},
+    {"code": "index-unknown-line", "severity": "conflict", "document": "book.txt", "start": 202, "end": 215, "text": "not a chapter", "exportBlocking": true},
+    {"code": "chapter-unlisted", "severity": "conflict", "document": "unlisted.md", "exportBlocking": true}
+  ],
+  "exportBlocking": true
+}

@@ -36,6 +36,10 @@ this target map yet. New files update this map in the same change.
 
 ## Source contracts
 
+The complete normative grammar, malformed-input recovery, diagnostic policy, and UTF-16 range convention live in
+[SOURCE_FORMAT.md](SOURCE_FORMAT.md). The summary below defines the component boundary; it does not replace that
+grammar.
+
 ### Book folder
 
 `book.txt` is the only ordered index. Its initial contract is:
@@ -52,8 +56,9 @@ Part: Two
 03-crossing.md
 ```
 
-- Metadata consists of `Key: value` lines before the ordered section. Required keys, duplicates, comments, and custom
-  keys are settled by `P1-01` fixtures.
+- Metadata consists of `Key: value` lines before the ordered section. `Title`, `Author`, and `Language` are required;
+  `Publish Date`, `Publisher`, and `Series` are optional. Duplicate or unknown keys stay unresolved until the user
+  selects, rejects, or converts them to generalized `Custom: Name = value` metadata.
 - A `Part: value` line labels the ordered chapters that follow until another part.
 - A chapter entry is a relative `.md` path confined to the book folder. Absolute paths, traversal, control characters,
   and case or Unicode normalization collisions are refused.
@@ -65,8 +70,8 @@ Part: Two
 - The first `# Title` is the chapter title. `##` through `######` are printable section headings at their standard
   Markdown levels (D-010).
 - `* * *` alone is a printable scene break. An immediately associated `= Synopsis` is non-printing scene metadata.
-- `[[note]]`, including its accepted multiline form once specified, is a non-printing author note.
-- `/* ... */` is a non-printing boneyard. The grammar defines closure and malformed recovery before implementation.
+- `[[note]]`, including multiline content, is a non-printing author note.
+- `/* ... */`, including multiline content, is a non-printing boneyard.
 - `*italic*`, `**bold**`, and `> quote` are printable Markdown-core constructs.
 - `[^label]` and `[^label]: definition` form printable notes after validation.
 - Unknown syntax remains visible source. Rendered writer text is escaped; raw HTML is never executed.
@@ -199,6 +204,8 @@ manuscript text, research notes, absolute personal paths, or recovered version c
 - The supported v0.1 environments are Linux Tauri and Chromium browser or PWA (D-013). No release evidence exists yet.
 - The IndexedDB transaction design in D-007 is accepted but remains unimplemented. The native boundary in D-008 stays
   proposed until its roadmap item supplies executable evidence and maintainer acceptance.
+- The complete source grammar and normative fixture expectations exist under `P1-01`; the parser and book-index
+  reader remain unimplemented until `P1-02` and `P1-03`.
 - The Tauri page disables the public global object and enforces the D-017 CSP. P0-05 removed the inherited preview,
   EPUBCheck, cover-save, desktop-open, and EPUB-association boundaries. D-008 stays proposed until folder-confinement
   work supplies its full evidence.

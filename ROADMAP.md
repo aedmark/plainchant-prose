@@ -44,8 +44,10 @@ and all configured baseline checks report a final status.
 
 Goal: open, edit, recover, and safely synchronize a multi-file book without reformatting untouched source.
 
-- [ ] P1-01 Specify the complete Prose source grammar with fixtures: `book.txt`, `#` chapter titles, `##` through
-  `######` section headings, scene breaks, synopses, notes, boneyards, emphasis, quotes, and footnotes (D-010, D-011).
+- [x] P1-01 Specify the complete Prose source grammar with fixtures: `book.txt`, `#` chapter titles, `##` through
+  `######` section headings, scene breaks, synopses, notes, boneyards, emphasis, quotes, and footnotes (D-010, D-011,
+  D-018). Evidence: normative `docs/SOURCE_FORMAT.md`, seven fixture cases, `npm test` (202/202, including four
+  fixture-consistency checks), and `python3 tools/check_docs.py` (2026-11-14).
 - [ ] P1-02 Build a pure parser that returns source ranges, diagnostics, book metadata, parts, chapters, scenes,
   printable blocks, notes, and footnotes. Rendering always escapes writer text; malformed marks remain editable.
 - [ ] P1-03 Build the pure book-index reader and range-splice writer. It preserves comments, spacing, unknown metadata,

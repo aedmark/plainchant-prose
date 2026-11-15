@@ -1,0 +1,13 @@
+Title: The Salt Road
+Author: A. Writer
+Language: en-GB
+Publish Date: 2026-11-14
+Publisher: North Star Press
+Series: Tidal Books
+Custom: Imprint = Lantern House
+Custom: Edition = Revised
+
+Part: Part One
+chapters/01-harbour.md
+Part: Part Two
+chapters/02-crossing.md

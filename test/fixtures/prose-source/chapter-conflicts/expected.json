@@ -1,0 +1,76 @@
+{
+  "id": "chapter-conflicts",
+  "features": ["missing-chapter-title", "duplicate-chapter-title", "unclosed-notes", "stray-note-closers", "unclosed-boneyards", "stray-boneyard-closers", "footnote-conflicts", "unsupported-markdown", "raw-html", "scene-synopsis-edge-cases", "malformed-editable"],
+  "documents": [
+    {"path": "book.txt", "ranges": [{"id": "chapter.first", "start": 53, "end": 65, "text": "bad-title.md"}]},
+    {
+      "path": "bad-title.md",
+      "ranges": [
+        {"id": "invalid.firstLine", "start": 0, "end": 7, "text": "Preface"},
+        {"id": "extra.levelOne", "start": 8, "end": 21, "text": "# Later Title"}
+      ]
+    },
+    {
+      "path": "bad-note.md",
+      "ranges": [
+        {"id": "note.strayCloser", "start": 15, "end": 17, "text": "]]"},
+        {"id": "note.unclosed", "start": 32, "end": 59, "text": "[[private text never closes"}
+      ]
+    },
+    {
+      "path": "bad-boneyard.md",
+      "ranges": [
+        {"id": "boneyard.strayCloser", "start": 14, "end": 16, "text": "*/"},
+        {"id": "boneyard.unclosed", "start": 31, "end": 61, "text": "/* discarded text never closes"}
+      ]
+    },
+    {
+      "path": "bad-footnotes.md",
+      "ranges": [
+        {"id": "footnote.reference.first", "start": 16, "end": 20, "text": "[^a]"},
+        {"id": "footnote.reference.duplicate", "start": 30, "end": 34, "text": "[^a]"},
+        {"id": "footnote.reference.missing", "start": 43, "end": 53, "text": "[^missing]"},
+        {"id": "footnote.definition.first", "start": 56, "end": 67, "text": "[^a]: First"},
+        {"id": "footnote.definition.duplicate", "start": 68, "end": 80, "text": "[^a]: Second"},
+        {"id": "footnote.definition.unused", "start": 81, "end": 97, "text": "[^unused]: Alone"}
+      ]
+    },
+    {
+      "path": "unsupported.md",
+      "ranges": [
+        {"id": "unsupported.combinedEmphasis", "start": 17, "end": 31, "text": "***combined***"},
+        {"id": "unsupported.list", "start": 32, "end": 38, "text": "- list"},
+        {"id": "unsupported.rawHtml", "start": 39, "end": 65, "text": "<a onclick=\"bad()\">raw</a>"},
+        {"id": "quote.empty", "start": 66, "end": 67, "text": ">"},
+        {"id": "quote.nested", "start": 68, "end": 77, "text": ">> nested"},
+        {"id": "unsupported.rule", "start": 78, "end": 81, "text": "---"},
+        {"id": "synopsis.misplaced", "start": 82, "end": 93, "text": "= misplaced"},
+        {"id": "synopsis.empty", "start": 101, "end": 102, "text": "="},
+        {"id": "scene.trailingBreak", "start": 103, "end": 108, "text": "* * *"}
+      ]
+    }
+  ],
+  "expected": {"malformedSourcePreserved": true, "unknownSyntaxPrintableLiteral": true},
+  "diagnostics": [
+    {"code": "chapter-title-missing", "severity": "conflict", "document": "bad-title.md", "start": 0, "end": 7, "text": "Preface", "exportBlocking": true},
+    {"code": "chapter-title-additional", "severity": "conflict", "document": "bad-title.md", "start": 8, "end": 21, "text": "# Later Title", "exportBlocking": true},
+    {"code": "note-stray-close", "severity": "warning", "document": "bad-note.md", "start": 15, "end": 17, "text": "]]", "exportBlocking": false},
+    {"code": "note-unclosed", "severity": "warning", "document": "bad-note.md", "start": 32, "end": 59, "text": "[[private text never closes", "exportBlocking": true},
+    {"code": "boneyard-stray-close", "severity": "warning", "document": "bad-boneyard.md", "start": 14, "end": 16, "text": "*/", "exportBlocking": false},
+    {"code": "boneyard-unclosed", "severity": "warning", "document": "bad-boneyard.md", "start": 31, "end": 61, "text": "/* discarded text never closes", "exportBlocking": true},
+    {"code": "footnote-reference-duplicate", "severity": "conflict", "document": "bad-footnotes.md", "start": 30, "end": 34, "text": "[^a]", "exportBlocking": true},
+    {"code": "footnote-definition-missing", "severity": "conflict", "document": "bad-footnotes.md", "start": 43, "end": 53, "text": "[^missing]", "exportBlocking": true},
+    {"code": "footnote-definition-duplicate", "severity": "conflict", "document": "bad-footnotes.md", "start": 68, "end": 80, "text": "[^a]: Second", "exportBlocking": true},
+    {"code": "footnote-definition-unused", "severity": "warning", "document": "bad-footnotes.md", "start": 81, "end": 97, "text": "[^unused]: Alone", "exportBlocking": false},
+    {"code": "inline-unsupported", "severity": "warning", "document": "unsupported.md", "start": 17, "end": 31, "text": "***combined***", "exportBlocking": false},
+    {"code": "block-unsupported-list", "severity": "warning", "document": "unsupported.md", "start": 32, "end": 38, "text": "- list", "exportBlocking": false},
+    {"code": "block-unsupported-html", "severity": "warning", "document": "unsupported.md", "start": 39, "end": 65, "text": "<a onclick=\"bad()\">raw</a>", "exportBlocking": false},
+    {"code": "quote-empty", "severity": "warning", "document": "unsupported.md", "start": 66, "end": 67, "text": ">", "exportBlocking": false},
+    {"code": "quote-nested", "severity": "warning", "document": "unsupported.md", "start": 68, "end": 77, "text": ">> nested", "exportBlocking": false},
+    {"code": "block-unsupported-rule", "severity": "warning", "document": "unsupported.md", "start": 78, "end": 81, "text": "---", "exportBlocking": false},
+    {"code": "synopsis-misplaced", "severity": "warning", "document": "unsupported.md", "start": 82, "end": 93, "text": "= misplaced", "exportBlocking": false},
+    {"code": "synopsis-empty", "severity": "warning", "document": "unsupported.md", "start": 101, "end": 102, "text": "=", "exportBlocking": false},
+    {"code": "scene-empty", "severity": "warning", "document": "unsupported.md", "start": 103, "end": 108, "text": "* * *", "exportBlocking": false}
+  ],
+  "exportBlocking": true
+}

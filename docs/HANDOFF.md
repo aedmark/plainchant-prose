@@ -9,10 +9,10 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-14, session 6, on `master` tracking `origin/master`: Phase 0 is complete; the Scribe-derived
-foundation is renamed, hardened, trimmed, and covered by maintained Node, Chromium, Rust, and documentation commands._
+_Last updated: 2026-11-14, session 7, on `master` tracking `origin/master`: P1-01 defines the complete Prose source
+grammar and normative fixtures; parser implementation begins at P1-02._
 
-**Session owner:** None. The next session may claim P1-01.
+**Session owner:** None.
 
 **Where things stand:** `BRIEF.md` remains the maintainer-owned source. Plainchant Prose uses `.md` chapters, standard
 `##` through `######` headings, an ignored optional `research/` directory, IndexedDB-only writing history in v0.1,
@@ -23,14 +23,16 @@ repository. Git uses `master` and the GitHub `origin`. The application foundatio
 `e2b22186a481afb6b0180d0883ce21d393ae7352`; P0-04 renames its identifiers and hardens its page boundary. P0-05
 removes Scribe-only publication, reader, layout, cover, font, checking, preview-server, file-association, and help
 surfaces. P0-06 adapts the retained tests, removes dormant oracle references to discarded modules, and adds maintained
-browser and Rust commands. The retained shell still has generic studio concepts; no Prose source grammar or book model
-exists yet. The complete provenance and removal map are in `docs/archive/plainchant-lineage.md`.
+browser and Rust commands. P1-01 adds the normative `docs/SOURCE_FORMAT.md`, D-018, and seven fixture cases with exact
+UTF-16 source ranges and diagnostics. The retained shell still has generic studio concepts; no Prose parser or book
+model exists yet. The complete provenance and removal map are in `docs/archive/plainchant-lineage.md`.
 
 **Verified** (2026-11-14; Node 22.23.5, Rust and Cargo 1.99.1, Google Chrome 157.0.8103.78, Python 3.14.10)
 
 | Suite | Result |
 | --- | --- |
-| `npm test` | **198/198 passed**; LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| `npm test` | **202/202 passed**; four P1-01 fixture checks passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| Fixture-range mutation | **Expected failure, 201/202 passed** after shortening one recorded range; fixture restored |
 | Explicit all-oracle skip run | **197/197 passed**; EPUBCheck, Ace, and LibreOffice each reported `not run` with its configured reason |
 | `npm run test:browser` | **1/1 passed twice** after the final timing adjustment, in disposable Chrome profiles under the exact CSP |
 | Browser-runner mutation | **Expected failure** for the deliberately changed page title; production title restored |
@@ -50,6 +52,10 @@ exists yet. The complete provenance and removal map are in `docs/archive/plainch
   capabilities, EPUB association, and inherited manual.
 - `npm test`, `npm run test:browser`, and `npm run tauri:test` are maintained entry points for the retained foundation;
   optional oracles distinguish a named skip from a pass.
+- The source-format contract settles required and optional metadata, generalized custom keys, user-resolved
+  duplicates, index safety, chapter syntax, malformed recovery, precedence, exact ranges, and export blockers.
+- Seven normative fixture cases cover valid books, conflicts, malformed source, unsupported literal Markdown,
+  escaping, line endings, a byte-order mark, Unicode normalization, and astral UTF-16 offsets.
 - The blueprint separates observed sibling-repository evidence, accepted product choices, proposed implementation
   choices, and the resolved maintainer questions.
 - The roadmap puts safe multi-file storage before UI expansion and places the Scribe handoff before secondary writing
@@ -57,7 +63,8 @@ exists yet. The complete provenance and removal map are in `docs/archive/plainch
 
 **Not verified**
 
-- No retained behaviour has been adapted to the Prose source grammar, book-folder model, recovery contract, or UI.
+- No parser, book-index reader, retained UI behaviour, recovery path, or folder workflow implements the Prose source
+  grammar yet.
 - EPUBCheck and Ace were not run because their optional tools are absent. No Prose output has run through Scribe.
 - The headless CSP path was tested, but a real packaged Tauri window, manual accessibility, and reading-system
   behaviour were not tested.
@@ -66,7 +73,8 @@ exists yet. The complete provenance and removal map are in `docs/archive/plainch
 
 - `BRIEF.md` contains an unavailable embedded-plan marker. The maintainer called it noise and instructed the blueprint
   to ignore it on 2026-11-12.
-- The retained shell is still a generic web studio. Prose domain work starts at P1-01.
+- The retained shell is still a generic web studio. P1-02 must implement the fixtures without weakening their
+  conflicts into automatic choices.
 - The D-017 Stage nonce is an authorization marker, not a secret. The generic Stage strips imported scripts before
   inserting its marked interaction bridge.
 - `test/epub-fixture.js` is test-only. It preserves direct coverage for retained EPUB packaging without restoring an
@@ -78,13 +86,51 @@ exists yet. The complete provenance and removal map are in `docs/archive/plainch
 ## Next steps
 
 1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
-2. Complete P1-01 by specifying the Prose source grammar and its fixtures before implementing the parser.
+2. Start P1-02 with a pure parser that satisfies the normative source fixtures and returns exact UTF-16 ranges.
 
 ## Open questions for maintainers
 
 - None. Q-001 through Q-006 are answered in DECISIONS.
 
 ## Session log
+
+### Session 7: 2026-11-14: specify the Prose source grammar
+
+**Contributor:** Maintainer and Codex
+
+**Goal:** Complete P1-01 by turning the approved source choices into a normative, executable contract without
+implementing the parser early.
+
+**Done:** P1-01.
+
+**Changed:** Added `docs/SOURCE_FORMAT.md` for `book.txt`, chapter blocks, inline marks, malformed recovery,
+diagnostics, and the export gate; recorded D-018; added seven fixture cases with valid, conflicting, malformed,
+encoding, Unicode, and precedence examples; and added four dependency-free consistency checks to `npm test`.
+
+**Decisions:** Required metadata is Title, Author, and Language. Publish Date, Publisher, and Series are optional.
+Unknown metadata remains a conflict until rejected or rewritten as generalized custom metadata. Duplicate metadata has
+no automatic winner, stays visible while editing, and blocks export until the writer chooses. Every export reruns the
+complete conflict check. Source ranges use half-open UTF-16 code-unit offsets.
+
+**Verified:** `npm test` passed 202/202, including manifest completeness, exact source slices, diagnostic/export-gate
+agreement, and approved-feature coverage. Shortening one recorded range produced the expected 201/202 failure before
+the fixture was restored. The documentation result is recorded in Current state after the final run.
+
+**Not verified:** Parser output, rendering, editor integration, book-index splices, browser workflows, native folder
+behaviour, EPUB handoff, or reading-system behaviour.
+
+**Problems / surprises:** Encoding fixtures need CRLF and byte-order-mark evidence that remains visible in code
+review. Those isolated sources live as escaped JSON strings; every ordinary fixture remains a physical book file.
+
+**Corrections:** The fixture harness distinguishes contract consistency from parser correctness and requires every
+physical source file to appear in its case manifest. Unicode normalization and astral offset cases prevent accidental
+byte or code-point range semantics.
+
+**Left undone:** The P1-02 parser, P1-03 index splice writer, durable working copy, folder synchronization, writing UI,
+and handoff implementation.
+
+**Next session should start with:** Claim P1-02, define the parser module boundary from `docs/SOURCE_FORMAT.md`, then
+make the minimal and full fixtures pass before implementing malformed recovery.
 
 ### Session 6: 2026-11-14: adapt the foundation harness
 

@@ -26,6 +26,7 @@ The first release is designed around five constraints:
 - [BRIEF.md](BRIEF.md) is the maintainer's original product brief.
 - [ROADMAP.md](ROADMAP.md) breaks the work into independently verifiable phases and release gates.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) defines the planned components, data flow, and invariants.
+- [docs/SOURCE_FORMAT.md](docs/SOURCE_FORMAT.md) defines the normative `book.txt` and chapter grammar.
 - [docs/DECISIONS.md](docs/DECISIONS.md) records accepted choices, proposals, and questions requiring maintainer input.
 - [docs/TESTING.md](docs/TESTING.md) defines the proof expected at each boundary.
 - [docs/HANDOFF.md](docs/HANDOFF.md) records the repository's current state.
@@ -36,7 +37,8 @@ The Scribe foundation is recorded under `P0-03`; `P0-04` renames it to Prose and
 `P0-05` removes Scribe-only publication, reader, layout, cover, font, checking, preview-server, and file-association
 surfaces. The retained shell preserves the multi-file, persistence, versions, library, find, offline, native-folder,
 Markdown, and EPUB-package seams for later adaptation. `P0-06` adapts the retained harness and adds maintained browser
-and Rust commands. Phase 0 is complete; `P1-01` is the next roadmap item. See
+and Rust commands. Phase 0 is complete; `P1-01` specifies the Prose source grammar and fixtures, and `P1-02` is the
+next implementation item. See
 [the lineage record](docs/archive/plainchant-lineage.md) and [the roadmap](ROADMAP.md).
 
 ## Documentation check

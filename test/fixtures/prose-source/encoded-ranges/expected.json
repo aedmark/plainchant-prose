@@ -1,0 +1,36 @@
+{
+  "id": "encoded-ranges",
+  "features": ["crlf", "bom", "unicode", "astral-utf16-ranges"],
+  "documents": [
+    {
+      "id": "crlf.md",
+      "source": "# Windows\r\n\r\nA line.\r\n",
+      "ranges": [
+        {"id": "chapter.title", "start": 0, "end": 9, "text": "# Windows"},
+        {"id": "paragraph", "start": 13, "end": 20, "text": "A line."}
+      ]
+    },
+    {
+      "id": "bom.md",
+      "source": "﻿# Marked\n\nText.\n",
+      "ranges": [
+        {"id": "bom", "start": 0, "end": 1, "text": "﻿"},
+        {"id": "chapter.title", "start": 1, "end": 9, "text": "# Marked"}
+      ]
+    },
+    {
+      "id": "astral.md",
+      "source": "# Orbit 🌕\n\nA 🚀 moves.\n",
+      "ranges": [
+        {"id": "chapter.title", "start": 0, "end": 10, "text": "# Orbit 🌕"},
+        {"id": "paragraph", "start": 12, "end": 23, "text": "A 🚀 moves."},
+        {"id": "astral.character", "start": 14, "end": 16, "text": "🚀"}
+      ]
+    }
+  ],
+  "expected": {"rangeUnit": "utf16-code-unit", "lineEndings": ["crlf", "lf"]},
+  "diagnostics": [
+    {"code": "source-bom", "severity": "warning", "document": "bom.md", "start": 0, "end": 1, "text": "﻿", "exportBlocking": false}
+  ],
+  "exportBlocking": false
+}
