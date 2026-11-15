@@ -77,7 +77,9 @@ P1-03 adds strict range validation, overlap and same-start refusal, bounded inde
 and an exact stale-source refusal before an order edit. P1-04 adds non-destructive IndexedDB schema inspection,
 read-only recovery, bounded separate file records, fingerprinted binary research, serialized revision checks, exact
 intent resolution, real quota exhaustion, v2 rollback, unknown-store preservation, and a persistent-folder-record
-guard that rejects path or grant authority. This does not establish Prose's complete native boundary;
+guard that rejects path or grant authority. P1-05 adds bounded per-book emergency text, exact revision
+reconciliation, last-chapter preservation, explicit deletion confirmation, and forced-close browser evidence. This
+does not establish Prose's complete native boundary;
 dialog-scoped folder confinement and command limits remain under proposed D-008 and P1-07.
 
 Planned Prose security evidence includes:
@@ -97,14 +99,15 @@ limits.
 
 ## Data retention and deletion
 
-The v3 book record has a separate soft-deletion timestamp. `P1-05` still owns the brief's 30-day expiry and recovery
-workflow. The implementation must distinguish active books, deleted working copies, versions, emergency buffers,
-generated exports, and the disk source. The UI names which copy an action affects. Emptying an
-editor, unlinking a folder, clearing a cache, or removing a library entry never deletes the source folder.
+The v3 book record has a separate soft-deletion timestamp. The working copy remains recoverable for at least 30 days.
+Crossing that boundary produces a warning and does not delete data automatically. The implementation distinguishes
+active books, deleted working copies, versions, emergency buffers, generated exports, and the disk source. The UI
+names which copy an action affects. Emptying an editor, unlinking a folder, clearing a cache, or removing a library
+entry never deletes the source folder.
 
-Permanent delete requires explicit user action, identifies all affected local stores, and preserves disk files unless
-the user separately selects them through an operating-system flow. Retention details remain part of `P1-04` under
-D-007.
+Permanent delete requires explicit user action and the exact book identifier, identifies all affected local stores,
+and preserves disk files unless the user separately selects them through an operating-system flow. D-021 owns the
+retention and emergency-buffer rules.
 
 ## Incident response
 

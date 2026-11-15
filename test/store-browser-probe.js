@@ -264,6 +264,218 @@
         return code;
     }
 
+    function clock(start) {
+        let value = start;
+        return function () { value += 1; return value; };
+    }
+
+    async function persistence(prefix) {
+        const results = [];
+        const name = prefix + '-persistence';
+        await deleteDatabase(name);
+        localStorage.clear();
+        const opened = await Store.openBooks(indexedDB, { name: name });
+        const id = 'persistence-book';
+        await Store.createBook(opened.db, { book: book(id, 0, 1), files: initialFiles(id) });
+        const timerId = 'timer-book';
+        await Store.createBook(opened.db, { book: book(timerId, 0, 1), files: initialFiles(timerId) });
+        const delays = [];
+        const timerSession = ProsePersistence.create({ db: opened.db, bookId: timerId, now: clock(5),
+            setTimeout: function (fn, delay) { delays.push(delay); return delays.length; },
+            clearTimeout: function () {}, BroadcastChannel: null });
+        await timerSession.open();
+        timerSession.putText('one.md', 'chapter', '# Timed\n');
+        check(delays.indexOf(250) !== -1 && delays.indexOf(1500) !== -1,
+            'emergency and durable debounce delays were not scheduled');
+        timerSession.dispose();
+        localStorage.removeItem(BookRecovery.key(timerId));
+        results.push('text edits schedule the 250 ms emergency and 1,500 ms durable debounces');
+        const visibility = new EventTarget();
+        visibility.visibilityState = 'hidden';
+        const session = ProsePersistence.create({ db: opened.db, bookId: id, now: clock(10),
+            visibilityEvents: visibility, BroadcastChannel: null });
+        await session.open();
+        session.putText('one.md', 'chapter', '# One\n\nSaved together.\n');
+        session.putText('two.md', 'chapter', '# Two\n\nSaved together.\n');
+        visibility.dispatchEvent(new Event('visibilitychange'));
+        const buffered = JSON.parse(localStorage.getItem(BookRecovery.key(id)));
+        check(buffered.files.length === 2 && buffered.baseRevision === 0, 'all dirty text was not buffered');
+        await session.save();
+        let loaded = await Store.loadBook(opened.db, id);
+        check(loaded.book.revision === 1 && loaded.files.find(function (file) { return file.path === 'two.md'; }),
+            'multi-file autosave did not commit one revision');
+        check(localStorage.getItem(BookRecovery.key(id)) === null, 'durable save did not clear emergency text');
+        results.push('all dirty text commits atomically and clears only after durability');
+
+        session.putText('one.md', 'chapter', '# One\n\nFirst in flight.\n');
+        const first = session.save();
+        session.putText('one.md', 'chapter', '# One\n\nTyped during save.\n');
+        await first;
+        check(session.state().dirtyPaths[0] === 'one.md', 'old completion cleared a newer edit');
+        await session.save();
+        loaded = await Store.loadBook(opened.db, id);
+        check(loaded.files.find(function (file) { return file.path === 'one.md'; }).text.indexOf('Typed during') !== -1,
+            'newer edit did not survive the in-flight save');
+        results.push('generation token preserves edits made during an in-flight save');
+
+        await session.putBinary({ path: 'research/map.bin', role: 'research', kind: 'binary',
+            blob: new Blob(['map']), fingerprint: 'sha256:map' });
+        loaded = await Store.loadBook(opened.db, id);
+        check(loaded.files.some(function (file) { return file.path === 'research/map.bin'; }),
+            'binary research did not commit immediately');
+        results.push('binary research bypasses localStorage and commits immediately');
+
+        session.putText('one.md', 'chapter', '');
+        await session.save();
+        loaded = await Store.loadBook(opened.db, id);
+        check(loaded.files.find(function (file) { return file.path === 'one.md'; }).text === '',
+            'an empty text file was treated as absence');
+        await expectCode(function () { return Store.applyBookChange(opened.db, { bookId: id,
+            expectedRevision: loaded.book.revision, now: loaded.book.updatedAt + 1, putFiles: [],
+            removePaths: ['one.md', 'two.md'] }); }, 'book-last-chapter');
+        results.push('empty chapter content persists and the last durable chapter cannot be removed');
+
+        const pending = { id: 'persistence-intent', bookId: id, state: 'prepared',
+            baseRevision: loaded.book.revision, createdAt: loaded.book.updatedAt + 2,
+            changes: [{ path: 'book.txt', before: loaded.files.find(function (file) { return file.path === 'book.txt'; }),
+                after: text(id, 'book.txt', 'index', 'Title: Test Book\nAuthor: Writer\nLanguage: en\n\ntwo.md\n',
+                    loaded.book.revision + 1, loaded.book.updatedAt + 2) }] };
+        await Store.prepareIntent(opened.db, pending);
+        const paused = ProsePersistence.create({ db: opened.db, bookId: id, now: clock(100), BroadcastChannel: null });
+        await paused.open();
+        paused.putText('two.md', 'chapter', '# Two\n\nWhile intent waits.\n');
+        await paused.save();
+        check(paused.state().status === 'pending-intent' &&
+            localStorage.getItem(BookRecovery.key(id)) !== null, 'pending intent did not pause autosave and retain text');
+        paused.dispose();
+        await Store.resolveIntent(opened.db, pending.id, 'cancel', loaded.book.updatedAt + 3);
+        localStorage.removeItem(BookRecovery.key(id));
+        results.push('pending intent pauses ordinary autosave while emergency text remains available');
+
+        const storageFailure = {
+            old: 'preserved',
+            getItem: function () { return this.old; },
+            setItem: function () { throw new DOMException('full', 'QuotaExceededError'); },
+            removeItem: function () {}
+        };
+        const fallback = ProsePersistence.create({ db: opened.db, bookId: id, storage: storageFailure,
+            now: clock(200), BroadcastChannel: null });
+        await fallback.open();
+        fallback.putText('two.md', 'chapter', '# Two\n\nFallback durable.\n');
+        fallback.flushEmergency();
+        await fallback.save();
+        check(storageFailure.old === 'preserved', 'failed emergency write replaced the older recovery value');
+        loaded = await Store.loadBook(opened.db, id);
+        check(loaded.files.find(function (file) { return file.path === 'two.md'; }).text.indexOf('Fallback') !== -1,
+            'emergency failure did not fall through to durable storage');
+        fallback.dispose();
+        results.push('localStorage refusal preserves its old value and triggers durable persistence');
+
+        const conflictId = 'buffer-conflict-book';
+        await Store.createBook(opened.db, { book: book(conflictId, 0, 1), files: initialFiles(conflictId) });
+        const conflictSession = ProsePersistence.create({ db: opened.db, bookId: conflictId,
+            now: clock(250), BroadcastChannel: null });
+        await conflictSession.open();
+        conflictSession.putText('one.md', 'chapter', '# One\n\nMust remain buffered.\n');
+        conflictSession.flushEmergency();
+        await Store.applyBookChange(opened.db, { bookId: conflictId, expectedRevision: 0, now: 2,
+            putFiles: [text(conflictId, 'book.txt', 'index',
+                'Title: Changed elsewhere\nAuthor: Writer\nLanguage: en\n\none.md\n', 0, 1)], removePaths: [] });
+        await expectCode(function () { return conflictSession.save(); }, 'book-revision-conflict');
+        check(localStorage.getItem(BookRecovery.key(conflictId)) !== null,
+            'failed durable transaction cleared the emergency record');
+        conflictSession.dispose();
+        results.push('failed durable save retains the emergency buffer');
+
+        const deletion = ProsePersistence.create({ db: opened.db, bookId: id, now: clock(300), BroadcastChannel: null });
+        await deletion.open();
+        await Store.putTarget(opened.db, { bookId: id, words: 1000 });
+        loaded = await Store.loadBook(opened.db, id);
+        await Store.createBookVersion(opened.db, { id: 'delete-version', bookId: id, takenAt: 301,
+            revision: loaded.book.revision });
+        await Store.addHandoff(opened.db, { id: 'delete-handoff', bookId: id, createdAt: 302,
+            sourceRevision: loaded.book.revision, fileName: 'delete.epub', fingerprint: 'sha256:delete' });
+        await deletion.softDelete();
+        check(deletion.retention().status === 'recoverable', 'soft-deleted book is not recoverable');
+        let deletedCode = null;
+        try { deletion.putText('one.md', 'chapter', '# Changed while deleted\n'); }
+        catch (problem) { deletedCode = problem && problem.code; }
+        check(deletedCode === 'book-deleted', 'soft-deleted book remained editable before restore');
+        await deletion.restoreDeleted();
+        await deletion.softDelete();
+        await expectCode(function () { return deletion.deleteForever('wrong-book'); }, 'delete-confirmation-invalid');
+        await deletion.deleteForever(id);
+        check((await Store.loadBook(opened.db, id)) === null, 'explicit permanent deletion retained the book');
+        check(!(await Store.loadTargets(opened.db)).some(function (record) { return record.bookId === id; }) &&
+            !(await Store.loadHandoffs(opened.db)).some(function (record) { return record.bookId === id; }) &&
+            (await Store.loadBookVersions(opened.db, id)).length === 0,
+        'explicit permanent deletion retained owned local records');
+        results.push('soft delete restores, never expires automatically, and permanent delete requires exact confirmation');
+
+        const guardedId = 'guarded-delete-book';
+        await Store.createBook(opened.db, { book: book(guardedId, 0, 1), files: initialFiles(guardedId) });
+        const removalFailure = { getItem: function () { return null; }, setItem: function () {},
+            removeItem: function () { throw new DOMException('denied', 'SecurityError'); } };
+        const guardedDelete = ProsePersistence.create({ db: opened.db, bookId: guardedId, storage: removalFailure,
+            now: clock(350), BroadcastChannel: null });
+        await guardedDelete.open();
+        await guardedDelete.softDelete();
+        await expectCode(function () { return guardedDelete.deleteForever(guardedId); }, 'emergency-unavailable');
+        check((await Store.loadBook(opened.db, guardedId)) !== null,
+            'permanent deletion proceeded without clearing emergency storage');
+        guardedDelete.dispose();
+        results.push('permanent deletion stops when emergency storage cannot be cleared');
+
+        const blockedId = 'blocked-recovery-book';
+        await Store.createBook(opened.db, { book: book(blockedId, 0, 1), files: initialFiles(blockedId) });
+        const unavailableStorage = { getItem: function () { return null; },
+            setItem: function () { throw new DOMException('full', 'QuotaExceededError'); }, removeItem: function () {} };
+        const blockedSession = ProsePersistence.create({ db: opened.db, bookId: blockedId,
+            storage: unavailableStorage, now: clock(400), BroadcastChannel: null });
+        await blockedSession.open();
+        session.dispose();
+        deletion.dispose();
+        opened.db.close();
+        blockedSession.putText('one.md', 'chapter', '# One\n\nCopy this text.\n');
+        blockedSession.flushEmergency();
+        await expectCode(function () { return blockedSession.save(); }, 'storage-closed');
+        check(blockedSession.state().status === 'recovery-blocked',
+            'failure of both emergency and durable storage did not become blocking');
+        blockedSession.dispose();
+        results.push('combined emergency and durable failure becomes a blocking recovery state');
+        return results;
+    }
+
+    async function seedCrash(name) {
+        await deleteDatabase(name);
+        localStorage.clear();
+        const opened = await Store.openBooks(indexedDB, { name: name });
+        const id = 'crash-book';
+        await Store.createBook(opened.db, { book: book(id, 0, 1), files: initialFiles(id) });
+        const session = ProsePersistence.create({ db: opened.db, bookId: id, now: clock(10), BroadcastChannel: null });
+        await session.open();
+        session.putText('one.md', 'chapter', '# One\n\nRecovered one.\n');
+        session.putText('two.md', 'chapter', '# Two\n\nRecovered two.\n');
+        dispatchEvent(new Event('pagehide'));
+        check(localStorage.getItem(BookRecovery.key(id)) !== null, 'pagehide did not synchronously buffer dirty text');
+        return true;
+    }
+
+    async function recoverCrash(name) {
+        const opened = await Store.openBooks(indexedDB, { name: name });
+        const id = 'crash-book';
+        const session = ProsePersistence.create({ db: opened.db, bookId: id, now: clock(100), BroadcastChannel: null });
+        const state = await session.open();
+        const loaded = await Store.loadBook(opened.db, id);
+        const answer = { status: state.status, revision: loaded.book.revision,
+            one: loaded.files.find(function (file) { return file.path === 'one.md'; }).text,
+            two: loaded.files.find(function (file) { return file.path === 'two.md'; }).text,
+            bufferPresent: localStorage.getItem(BookRecovery.key(id)) !== null };
+        session.dispose();
+        opened.db.close();
+        return answer;
+    }
+
     root.StoreBrowserTests = {
         freshAndRecovery: freshAndRecovery,
         race: race,
@@ -274,6 +486,9 @@
         holdStoreConnection: holdStoreConnection,
         upgradeRaw: upgradeRaw,
         versionChangeState: versionChangeState,
-        quota: quota
+        quota: quota,
+        persistence: persistence,
+        seedCrash: seedCrash,
+        recoverCrash: recoverCrash
     };
 })(window);

@@ -377,6 +377,42 @@ expiry, emergency text, and folder authorization remain later roadmap work.
 **Review trigger:** Real book sizes exceed a limit, a browser cannot preserve atomic transactions under the supported
 matrix, or P1-05 recovery needs another durable intent state.
 
+## D-021 Emergency recovery is revision-exact and deletion remains explicit  (2026-11-15, status: accepted)
+
+**Context:** `P1-05` must preserve edits across a forced close without turning localStorage into another complete book
+database. It must also define what happens when a save races later typing, another tab changes the revision, an intent
+is pending, storage fails, or a deleted book crosses the brief's 30-day boundary.
+
+**Decision:** Editor-pending state and folder-sync dirty state remain separate. Text autosave uses a 1,500-millisecond
+IndexedDB debounce. A synchronous localStorage write runs after 250 milliseconds of idle time and on manual save,
+visibility loss, or page hide. Its versioned per-book record contains the base revision, exact after-images for every
+dirty text file, and explicit removal paths. Binary research commits immediately without entering localStorage. One
+save writes all observed dirty files in one revision; generation tokens preserve edits made during that transaction.
+
+Startup applies the buffer only at its exact base revision, clears it when the durable files already equal the after
+images, and retains it for every conflict, pending intent, deleted or missing book, invalid record, or read-only
+database. The app never chooses a recovery winner. Empty text is content, omission is not deletion, and an explicit
+change cannot remove the last durable chapter. Cross-tab notices carry only a book identifier and revision.
+
+Soft deletion creates a new book revision. Thirty days is a guaranteed restore period. Expiry produces a warning and
+never triggers physical deletion. Restore and delete forever are explicit actions. Permanent deletion requires the
+exact book identifier, removes every local record owned by that book and its emergency buffer, and leaves disk files
+alone. A localStorage failure preserves its older value, starts an IndexedDB save, and becomes a blocking recovery
+state if durable storage also fails.
+
+**Alternatives:** Writing the whole book into localStorage duplicates sensitive content and exceeds common quotas.
+Clearing the buffer when a transaction starts loses the only recovery copy on abort. Last-writer-wins reconciliation
+hides concurrent changes. Automatic cleanup after 30 days can destroy the only remaining working copy.
+
+**Consequences:** `src/book-recovery.js` owns pure validation, reconciliation, and retention status.
+`src/app/book-persistence.js` owns browser timers, lifecycle flushes, storage calls, and revision-only broadcasts. The
+retained studio UI does not call this Prose session; `P2-01` adopts it with the editor. Recovery buffers may remain
+past 30 days until the writer explicitly deletes them.
+
+**Review trigger:** Real manuscripts exceed localStorage before the 250-millisecond write can complete, supported
+browsers cannot finish the synchronous lifecycle write, or editor integration needs a recovery choice absent from the
+state machine.
+
 ## Held tensions
 
 ### T-001 Portable writing history and clean book folders  (2026-11-12, status: resolved by D-007)

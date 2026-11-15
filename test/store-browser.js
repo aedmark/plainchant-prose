@@ -20,7 +20,8 @@ function findChrome() {
 
 function startServer() {
     const html = '<!doctype html><meta charset="utf-8"><title>Store test</title>' +
-        '<script src="/src/store-schema.js"></script><script src="/src/store.js"></script>' +
+        '<script src="/src/store-schema.js"></script><script src="/src/book-recovery.js"></script>' +
+        '<script src="/src/store.js"></script><script src="/src/app/book-persistence.js"></script>' +
         '<script src="/test/store-browser-probe.js"></script>';
     const server = http.createServer(function (req, res) {
         const pathname = decodeURIComponent(new URL(req.url, 'http://127.0.0.1').pathname);
@@ -139,18 +140,30 @@ async function main() {
         }
         console.log('  ok   indexeddb: two-tab revision race');
 
-        await evaluate(cdp, a.session, call('holdV2', ['p104-blocked']));
+        const persistence = await evaluate(cdp, a.session, call('persistence', ['p105']));
+        persistence.forEach(function (name) { console.log('  ok   persistence: ' + name); });
+
+        await evaluate(cdp, a.session, call('seedCrash', ['p105-crash']));
+        await cdp.send('Target.closeTarget', { targetId: a.targetId });
+        const recoveredPage = await page(cdp, origin + '/__store_test.html');
+        const recovered = await evaluate(cdp, recoveredPage.session, call('recoverCrash', ['p105-crash']));
+        if (recovered.status !== 'recovered' || recovered.revision !== 1 ||
+            recovered.one !== '# One\n\nRecovered one.\n' || recovered.two !== '# Two\n\nRecovered two.\n' ||
+            recovered.bufferPresent) throw new Error('forced-close recovery failed: ' + JSON.stringify(recovered));
+        console.log('  ok   persistence: forced target close and multi-file restart recovery');
+
+        await evaluate(cdp, recoveredPage.session, call('holdV2', ['p104-blocked']));
         const blockedPromise = evaluate(cdp, b.session, call('openResult', ['p104-blocked']));
         const blocked = await blockedPromise;
         if (blocked.status !== 'blocked') throw new Error('blocked upgrade returned ' + JSON.stringify(blocked));
-        await evaluate(cdp, a.session, 'StoreBrowserTests.closeHeld()');
+        await evaluate(cdp, recoveredPage.session, 'StoreBrowserTests.closeHeld()');
         console.log('  ok   indexeddb: blocked upgrade is explicit');
 
         const v3 = await evaluate(cdp, b.session, call('openResult', ['p104-versionchange']));
         if (v3.status !== 'ready') throw new Error('versionchange seed did not open');
-        await evaluate(cdp, a.session, call('holdStoreConnection', ['p104-versionchange']));
+        await evaluate(cdp, recoveredPage.session, call('holdStoreConnection', ['p104-versionchange']));
         await evaluate(cdp, b.session, call('upgradeRaw', ['p104-versionchange']));
-        const state = await evaluate(cdp, a.session, 'StoreBrowserTests.versionChangeState()');
+        const state = await evaluate(cdp, recoveredPage.session, 'StoreBrowserTests.versionChangeState()');
         if (!state.notified || !state.closed) throw new Error('versionchange did not close the old connection');
         console.log('  ok   indexeddb: versionchange closes stale connection');
 
@@ -166,7 +179,8 @@ async function main() {
         } finally {
             await new Promise((resolve) => quotaServer.close(resolve));
         }
-        console.log('\n' + (checks.length + 4) + '/' + (checks.length + 4) + ' passed');
+        const total = checks.length + persistence.length + 5;
+        console.log('\n' + total + '/' + total + ' passed');
     } finally {
         clearTimeout(timer);
         if (proc.exitCode === null) {

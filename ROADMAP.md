@@ -64,8 +64,11 @@ Goal: open, edit, recover, and safely synchronize a multi-file book without refo
   `npm run test:browser` runs (starter 1/1 and IndexedDB 13/13 in Chrome 157), including v2 preservation, forced
   upgrade rollback, atomic abort, intent recovery, corrupt and unknown data preservation, actual quota exhaustion,
   two-tab revision serialization, blocked upgrade, and version-change closure (2026-11-15).
-- [ ] P1-05 Implement debounced autosave, a synchronous emergency buffer, 30-day soft-delete recovery, and crash
-  reconciliation for all dirty book files. Empty editor state never destroys the last durable chapter.
+- [x] P1-05 Implement debounced autosave, a synchronous emergency buffer, 30-day soft-delete recovery, and crash
+  reconciliation for all dirty book files. Empty editor state never destroys the last durable chapter. Evidence:
+  D-021, `src/book-recovery.js`, `src/app/book-persistence.js`, `npm test` (243/243), `npm run test:browser` (starter
+  1/1 and persistence 25/25 in Chrome 157), and an expected mutation failure when the emergency record cleared before
+  a failed IndexedDB transaction (2026-11-15).
 - [ ] P1-06 Implement Tauri folder linking and conflict decisions with canonical newlines and content fingerprints.
   The app never overwrites a file changed outside Prose; missing, added, renamed, and simultaneous edits produce
   explicit choices. Browser books use explicit import and export instead of persistent directory handles (D-012).

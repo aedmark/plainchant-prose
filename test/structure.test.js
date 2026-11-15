@@ -19,7 +19,7 @@ test('structure: the app scripts are loaded after the src/ modules they use, and
     [
         'src/html-ast.js', 'src/css-ast.js', 'src/code-shade.js', 'src/dom-outline.js',
         'src/project.js', 'src/editing.js', 'src/suggest.js', 'src/library.js',
-        'src/store-schema.js', 'src/store.js', 'src/versions.js', 'src/filesync.js', 'src/importing.js',
+        'src/store-schema.js', 'src/book-recovery.js', 'src/store.js', 'src/versions.js', 'src/filesync.js', 'src/importing.js',
         'src/xml-ast.js', 'src/book-template.js', 'src/book.js', 'src/opf-edit.js', 'src/nav.js',
         'src/book-chapters.js', 'src/book-notes.js', 'src/book-blocks.js', 'src/book-export.js',
         'src/epub.js', 'src/markdown-import.js', 'src/xhtml.js', 'src/book-lang.js',

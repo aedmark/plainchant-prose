@@ -403,6 +403,11 @@
         }).catch(function (problem) { throw storageFailure(problem); });
     }
 
+    function loadBooks(db) {
+        const tx = db.transaction([BOOKS], 'readonly');
+        return promised(tx.objectStore(BOOKS).getAll()).catch(function (problem) { throw storageFailure(problem); });
+    }
+
     function applyBookChange(db, change) {
         writable(db);
         const plan = change || {};
@@ -444,6 +449,10 @@
                     next.set(file.path, normalizedFile(file, plan.bookId, revision, plan.now));
                 });
                 const nextFiles = Array.from(next.values());
+                const hadChapter = currentFiles.some(function (file) { return file.role === 'chapter'; });
+                if (hadChapter && !nextFiles.some(function (file) { return file.role === 'chapter'; })) {
+                    throw storageProblem('book-last-chapter', 'The last durable chapter cannot be removed.');
+                }
                 requireValid(Schema.validateSnapshot(written, nextFiles));
                 const store = tx.objectStore(BOOK_FILES);
                 plan.removePaths.forEach(function (path) { store.delete([plan.bookId, path]); });
@@ -452,6 +461,39 @@
             } catch (problem) { rejectIn(tx, problem); }
         });
         return completeWrite(tx).then(function () { return written; });
+    }
+
+    function deleteBookForever(db, bookId) {
+        writable(db);
+        if (!Schema.validId(bookId)) throw storageProblem('book-id-invalid', 'A book identifier is invalid.');
+        const names = [BOOKS, BOOK_FILES, BOOK_UI, BOOK_VERSIONS, BOOK_VERSION_FILES, BOOK_INTENTS,
+            TARGETS, FOLDER_LINKS, HANDOFFS];
+        const tx = db.transaction(names, 'readwrite');
+        const bookRequest = tx.objectStore(BOOKS).get(bookId);
+        bookRequest.onsuccess = function () {
+            if (!bookRequest.result) {
+                rejectIn(tx, storageProblem('book-missing', 'The book does not exist.'));
+                return;
+            }
+            function deleteIndexKeys(storeName, indexName, range) {
+                const store = tx.objectStore(storeName);
+                const request = store.index(indexName).getAllKeys(range);
+                request.onsuccess = function () { request.result.forEach(function (key) { store.delete(key); }); };
+            }
+            deleteIndexKeys(BOOK_FILES, BY_BOOK, IDBKeyRange.only(bookId));
+            deleteIndexKeys(BOOK_VERSIONS, BY_BOOK_TAKEN,
+                IDBKeyRange.bound([bookId, -Infinity], [bookId, Infinity]));
+            deleteIndexKeys(BOOK_VERSION_FILES, BY_BOOK_VERSION,
+                IDBKeyRange.bound([bookId, ''], [bookId, '\uffff']));
+            deleteIndexKeys(BOOK_INTENTS, BY_BOOK, IDBKeyRange.only(bookId));
+            deleteIndexKeys(HANDOFFS, BY_BOOK_CREATED,
+                IDBKeyRange.bound([bookId, -Infinity], [bookId, Infinity]));
+            tx.objectStore(BOOK_UI).delete(bookId);
+            tx.objectStore(TARGETS).delete(bookId);
+            tx.objectStore(FOLDER_LINKS).delete(bookId);
+            tx.objectStore(BOOKS).delete(bookId);
+        };
+        return completeWrite(tx);
     }
 
     function createBookVersion(db, record) {
@@ -788,7 +830,8 @@
         putAssets: putAssets, putAsset: putAsset, deleteAsset: deleteAsset, loadAssets: loadAssets, copyAssets: copyAssets,
         putLink: putLink, loadLinks: loadLinks, removeLink: removeLink,
         connect: connect, openBooks: openBooks, inspectBooks: inspectBooks,
-        createBook: createBook, loadBook: loadBook, applyBookChange: applyBookChange,
+        createBook: createBook, loadBook: loadBook, loadBooks: loadBooks, applyBookChange: applyBookChange,
+        deleteBookForever: deleteBookForever,
         createBookVersion: createBookVersion, loadBookVersions: loadBookVersions,
         loadBookVersion: loadBookVersion, removeBookVersion: removeBookVersion,
         prepareIntent: prepareIntent, applyIntent: applyIntent, resolveIntent: resolveIntent,

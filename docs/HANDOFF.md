@@ -9,10 +9,10 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-15, session 10, on `master` tracking `origin/master`: P1-04 adopts the multi-file IndexedDB v3
-schema, recoverable intents, serialized revision writes, and non-destructive recovery states._
+_Last updated: 2026-11-15, session 11, on `master` tracking `origin/master`: P1-05 implements the callable multi-file
+autosave, emergency recovery, soft-delete, and explicit permanent-deletion session._
 
-**Session owner:** None. P1-04 is complete and the working tree is ready for maintainer review.
+**Session owner:** None.
 
 **Where things stand:** `BRIEF.md` remains the maintainer-owned source. Prose uses `.md` chapters, an ignored optional
 `research/` directory, IndexedDB-only history, Tauri-only linked folders, and Linux desktop plus Chromium browser or
@@ -20,36 +20,28 @@ PWA support. The renamed and trimmed Scribe foundation comes from commit
 `e2b22186a481afb6b0180d0883ce21d393ae7352`; its provenance is in `docs/archive/plainchant-lineage.md`. P1-01 defines
 the source grammar and fixtures. P1-02 parses immutable ranged books and renders escaped preview HTML. P1-03 adds the
 sole lossless `book.txt` reader, strict splices, and stale-source-checked order planning. P1-04 adds pure storage rules
-and an IndexedDB v3 adapter for separate books, files, versions, intents, targets, folder metadata, and handoffs. The
-retained shell still has generic studio concepts and uses the preserved v2 stores; Prose domain modules and v3 book
-APIs are not connected to its UI.
+and an IndexedDB v3 adapter for separate books, files, versions, intents, targets, folder metadata, and handoffs. P1-05
+adds pure recovery and retention rules plus a callable browser persistence session for all dirty book files. The
+retained shell still has generic studio concepts and uses the preserved v2 stores; the Prose editor has not adopted
+the v3 session.
 
 **Verified** (2026-11-15; Node 22.23.5, Python 3.14.10, Google Chrome 157.0.8103.78; retained Rust result is from
 2026-11-14)
 
 | Suite | Result |
 | --- | --- |
-| `npm test` | **238/238 passed**; storage rules passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
-| Revision mutation | **Expected failure** after removing the in-transaction stale-revision refusal; implementation restored |
-| `npm run test:browser` | **1/1 starter and 13/13 IndexedDB passed twice** in disposable Chrome profiles and origins under the exact CSP |
+| `npm test` | **243/243 passed**; recovery rules passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| Buffer-clear mutation | **Expected failure** when a save removed emergency text before its IndexedDB transaction failed; implementation restored |
+| `npm run test:browser` | **1/1 starter and 25/25 persistence passed twice** in disposable Chrome profiles and origins under the exact CSP |
 | `npm run tauri:test` | **5 passed, 0 failed** |
 | `python3 tools/check_docs.py` | **0 errors, 0 warnings in 14 files** |
 
 **What works**
 
-- Application identity and persistent keys belong to Plainchant Prose; a structure guard rejects inherited machine
-  identifiers in runtime paths and files.
-- The native page has a strict local-only CSP, no public Tauri global, and a tested internal invoke bridge.
-- `npm test`, `npm run test:browser`, and `npm run tauri:test` are maintained entry points for the retained foundation;
-  optional oracles distinguish a named skip from a pass.
 - The source-format contract settles required and optional metadata, generalized custom keys, user-resolved
   duplicates, index safety, chapter syntax, malformed recovery, precedence, exact ranges, and export blockers.
-- Seven normative fixture cases cover valid books, conflicts, malformed source, unsupported literal Markdown,
-  escaping, line endings, a byte-order mark, Unicode normalization, and astral UTF-16 offsets.
 - `Prose.parse` returns immutable ranged metadata, parts, chapters, scenes, printable blocks, notes, boneyards,
   footnotes, diagnostics, and the complete export gate from an in-memory book map.
-- `Prose.parseChapter` supports isolated editor parsing; `Prose.toHTML` escapes writer text, omits recognized private
-  source, and leaves ambiguous footnotes literal.
 - `BookIndex.read` owns the `book.txt` grammar used by `Prose.parseBook`; it returns immutable metadata, order records,
   exact identities, unknown lines, diagnostics, and source spans.
 - `BookIndex.reorder` returns one explicit order-span edit or a structured refusal for stale, incomplete, repeated,
@@ -65,11 +57,18 @@ APIs are not connected to its UI.
 - Corrupt records, missing or unknown stores, and newer schemas are preserved and produce structured non-writable
   states. Quota, blocked upgrade, abort, stale revision, closed connection, and newer schema remain distinct failures.
 - Folder-link records retain display metadata and bounded fingerprints but reject persisted paths or permission grants.
+- Text changes write a versioned per-book emergency record after 250 milliseconds of idle time and synchronously on
+  manual save or lifecycle loss; all observed dirty files commit in one IndexedDB revision after 1,500 milliseconds.
+- Startup applies an exact base revision, clears an already-durable image, and retains conflicts, pending intents,
+  deleted or missing books, and invalid records without choosing a winner.
+- Generation tokens preserve typing during an in-flight save. Binary research commits immediately, empty text remains
+  content, explicit removal cannot erase the last durable chapter, and a failed transaction keeps emergency text.
+- Soft-deleted books remain recoverable for at least 30 days and are never erased on a timer. Delete forever requires
+  exact confirmation, removes every local record owned by the book, and does not touch disk.
 
 **Not verified**
 
-- No retained UI behaviour, emergency recovery path, or folder workflow uses the Prose parser, index writer, or v3
-  book adapter yet.
+- No retained UI behaviour or folder workflow uses the Prose parser, index writer, or v3 persistence session yet.
 - EPUBCheck and Ace were not run because their optional tools are absent. No Prose output has run through Scribe.
 - The headless CSP path was tested, but a real packaged Tauri window, manual accessibility, and reading-system
   behaviour were not tested.
@@ -79,8 +78,10 @@ APIs are not connected to its UI.
 - The retained shell is still a generic web studio. Its v2 stores remain only for compatibility and recovery; callers
   must use `Store.openBooks` and the v3 book APIs before claiming Prose persistence behaviour.
 - The physical version stores are `bookVersions` and `bookVersionFiles`; the inherited `versions` name remains occupied.
-- `P1-05` owns debounced autosave, the synchronous emergency buffer, 30-day expiry, dirty-file reconciliation, and UI
-  adoption. P1-04 only supplies the durable records and exact intent transitions.
+- `src/app/persistence.js` remains the generic inherited adapter. Prose callers use the separate
+  `src/app/book-persistence.js` session; `P2-01` owns editor adoption.
+- `P1-06` owns folder linking and conflict decisions. Editor-pending and sync-dirty states remain separate under
+  D-021.
 - Range identities belong to one `book.txt` revision. A caller rereads after applying an accepted P1-03 edit; it never
   reuses the old model.
 - Installed external binaries and loopback tests can be blocked by the workspace sandbox even when present. Record
@@ -89,14 +90,62 @@ APIs are not connected to its UI.
 ## Next steps
 
 1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
-2. Start P1-05 by specifying the emergency-buffer key, dirty-file state machine, autosave debounce, last-durable-file
-   guard, and 30-day expiry against the accepted v3 transaction APIs.
+2. Start P1-06 by specifying folder snapshots, canonical newline handling, fingerprints, conflict choices, and the
+   browser import or export boundary against the v3 book revision APIs.
 
 ## Open questions for maintainers
 
 - None. Q-001 through Q-006 are answered in DECISIONS.
 
 ## Session log
+
+Earlier completed sessions are in [the November 2026 archive](archive/SESSION_LOG_2026_11.md).
+
+### Session 11: 2026-11-15: implement autosave and crash reconciliation
+
+**Contributor:** Maintainer and Codex
+
+**Goal:** Complete P1-05 with an exact multi-file recovery state machine, debounced durable saves, an emergency text
+buffer, explicit deletion, and real forced-close evidence.
+
+**Done:** P1-05.
+
+**Changed:** Added `src/book-recovery.js` for versioned per-book emergency records, exact reconciliation, and 30-day
+retention status. Added `src/app/book-persistence.js` for the 250-millisecond emergency write, 1,500-millisecond
+IndexedDB autosave, lifecycle flushes, generation-safe writes, immediate binary persistence, pending-intent pause,
+revision-only tab notices, soft delete, restore, and confirmed permanent deletion. The store now refuses removal of
+the last durable chapter and can remove all local records owned by an explicitly confirmed book.
+
+**Decisions:** D-021 records exact base-revision recovery, omission versus deletion, localStorage failure behavior,
+generation ordering, revision-only broadcasts, the guaranteed 30-day restore period, and the rule that expiry never
+deletes automatically.
+
+**Verified:** `npm test` passed 243/243. Two consecutive `npm run test:browser` runs passed the 1/1 starter smoke and
+25/25 persistence cases in Google Chrome 157.0.8103.78. The browser suite covered two dirty chapters, a forced target
+close and restart,
+in-flight typing, empty text, last-chapter refusal, pending intents, immediate binary storage, localStorage refusal,
+failed-transaction retention, soft-delete restore, explicit permanent deletion, two-tab revision serialization,
+corruption, upgrade, and actual quota behavior. Clearing emergency text before a failed transaction produced the
+expected targeted failure before restoration. The documentation result is recorded in Current state after the final
+run.
+
+**Not verified:** Prose editor adoption, visible recovery choices, real folder sync, native permissions, a packaged
+Tauri window, other browsers, or assistive technology.
+
+**Problems / surprises:** A queued save initially captured edits in a later microtask, so typing immediately after a
+manual save joined the earlier snapshot. Starting the first save synchronously and serializing only later saves makes
+the generation boundary exact. The browser runner also needed a fresh target after deliberately closing its first
+page.
+
+**Corrections:** Permanent deletion removes auxiliary records and versions with the book. An explicit browser case
+proves a failed IndexedDB transaction retains emergency text. Binary research bypasses localStorage and begins a
+durable commit immediately.
+
+**Left undone:** P1-06 folder synchronization, P1-07 native folder commands, P2-01 editor adoption, visible recovery
+UI, EPUB handoff, and release evidence.
+
+**Next session should start with:** Claim P1-06 and draft the folder snapshot, fingerprint, newline, conflict, rename,
+missing-file, and browser import or export contract before changing the retained folder adapter.
 
 ### Session 10: 2026-11-15: adopt the multi-file IndexedDB schema
 
@@ -434,32 +483,3 @@ superseded by this session.
 **Left undone:** Enabling private vulnerability reporting, source copy, and all implementation.
 
 **Next session should start with:** Claim `P0-03` and record the exact Plainchant source commit before copying.
-
-### Session 1: 2026-11-12: adopt the Plainchant Prose blueprint
-
-**Contributor:** Codex
-
-**Goal:** Read the product brief and suite repositories, learn the Manifold template, and fully adopt it as an
-implementation blueprint.
-
-**Done:** `P0-01`.
-
-**Changed:** Replaced template placeholders across README, AGENTS, and active docs; added ROADMAP and the archive
-index; preserved BRIEF; recorded confirmed maintainer choices and unresolved questions.
-
-**Decisions:** D-001 through D-010 recorded; D-007, D-008, and D-010 remain proposed.
-
-**Verified:** `python3 tools/check_docs.py`: 0 errors, 0 warnings in 13 files.
-
-**Not verified:** Every application and cross-application behaviour; no code exists.
-
-**Problems / surprises:** The folder contained an empty `.git` directory and omitted ROADMAP and `docs/archive/` from
-the otherwise complete Manifold copy. The brief's embedded plan was unavailable and the maintainer directed that it be
-ignored.
-
-**Corrections:** Plainchant Prose replaces the brief's working name Plainchant Draft. The maintainer selected `.md` from
-the brief's chapter-extension alternatives.
-
-**Left undone:** Git initialization, licence, unanswered product questions, source copy, and all implementation.
-
-**Next session should start with:** Read Current state, get the relevant maintainer answer, then claim one roadmap item.
