@@ -24,7 +24,7 @@ revision. Nothing leaves the device, and no network resource is required.
 | Search, counts, outline, compare, narration | `src/finding.js`, `stats.js`, `outline.js`, `compare.js`, `narration.js` | One pure API per module | Parsed books or source maps |
 | Folder conflict rules | `src/filesync.js` | `FileSync.decide` | Canonical text and fingerprints |
 | EPUB handoff | `src/prose-xhtml.js`, `src/epub-handoff.js`, copied archive modules | `EpubHandoff.build` | Parsed book and source files |
-| IndexedDB rules and adapter | `src/store.js`, `src/app/persistence.js` | `Store`, `saveBookChange` | IndexedDB and emergency storage |
+| IndexedDB rules and adapter | `src/store-schema.js`, `src/store.js`, `src/app/persistence.js` | `StoreSchema`, `Store` | IndexedDB and emergency storage |
 | Browser application | `src/app/*.js` | `main.js` on `DOMContentLoaded` | All pure modules and browser APIs |
 | Offline install | `sw.js`, `manifest.webmanifest`, `src/app/offline.js` | service-worker event handlers | Cache API |
 | Desktop shell | `src-tauri/` | narrow Rust commands | Native dialogs and selected folders |
@@ -126,6 +126,39 @@ folder or IndexedDB files
 | EPUB bytes | `EpubHandoff.build` | Download, native save, Scribe | EPUB 3.3; exact compatibility commit and validator version recorded |
 | Native command | App scripts | Tauri Rust shell | Dialog-granted root, confined relative path, operation-specific size limits |
 
+### IndexedDB working-copy schema
+
+`P1-04` adopts version 3 of `plainchant_prose`. `src/store-schema.js` owns pure record validation, limits, exact
+file comparison, and error classification. `src/store.js` owns schema installation and IndexedDB transactions. The
+retained generic shell still calls the inherited adapter methods; no Prose UI uses the new records yet.
+
+| Store | Key | Purpose |
+| --- | --- | --- |
+| `books` | `id` | Title, monotonic revision, timestamps, and optional soft-deletion time |
+| `bookFiles` | `[bookId, path]` | Separate `book.txt`, chapter, and research payloads |
+| `bookUi` | `bookId` | Recoverable per-book UI state |
+| `bookVersions` | `id` | Version headers tied to one book revision |
+| `bookVersionFiles` | `[versionId, path]` | Immutable file images created or removed with their version header |
+| `bookIntents` | `id` | Prepared or applied multi-file before and after images |
+| `targets` | `bookId` | IndexedDB-only target data reserved for `P4-02` |
+| `folderLinks` | `bookId` | Display metadata and content fingerprints, never a path or permission grant |
+| `handoffs` | `id` | Handoff history reserved for `P3-06` |
+| `meta` | `key` | Namespaced schema and compatibility markers |
+
+The inherited version-2 `scripts`, `versions`, `files`, and `assets` stores remain byte-preserved so the retained shell
+can start and a recovery export can inspect old data. They are not interpreted as Prose books. New book writes require
+the expected revision and acquire the IndexedDB write lock before reading it; one of two racing tabs wins, and the
+other receives `book-revision-conflict`. Versions and their files share one transaction. An intent can move from
+`prepared` to `applied`, then be finalized or rolled back only while its recorded revision and file images still match.
+An unresolved intent remains a startup warning.
+
+Schema inspection never deletes or repairs data. Invalid records, missing or unknown stores, and orphan references
+return `recovery-required` and make the connection read-only. A database with a higher version returns
+`newer-schema`; blocked upgrades, quota exhaustion, transaction aborts, and closed connections remain separate
+failures. Text files are limited to 5,242,880 UTF-16 code units, binary research files to 67,108,864 bytes, each book
+to 10,000 files and 268,435,456 stored bytes. A binary research record carries a content fingerprint so recovery
+comparisons do not equate unrelated same-sized blobs.
+
 ## Invariants
 
 - **Book files are authoritative.** Enforced by parser range and splice-preservation tests (`P1-02`, `P1-03`; D-002,
@@ -183,7 +216,7 @@ Any new dependency requires maintainer approval and an accepted decision.
 | What | Planned location | Written by | Reset or recovery | Committed? |
 | --- | --- | --- | --- | --- |
 | Authoritative manuscript | Selected book folder | Writer and conflict-checked sync | Writer backup and explicit restore | No |
-| Working books and dirty files | IndexedDB `plainchant-prose` | Persistence adapter | Recovery UI; never silently reset | No |
+| Working books and dirty files | IndexedDB `plainchant_prose`, schema v3 | Persistence adapter | Read-only recovery state; never silently reset | No |
 | Versions and deleted books | IndexedDB | Store and versions modules | Retention rules and explicit action | No |
 | Multi-file intent and emergency text | IndexedDB plus minimal localStorage buffer | Persistence adapter | Reconciled at startup | No |
 | Targets, streaks, handoff log | IndexedDB `plainchant-prose` | Stats and handoff modules | Explicit reset; portable backup is later work (`P6-05`) | No |
@@ -196,6 +229,8 @@ Any new dependency requires maintainer approval and an accepted decision.
 | Failure | User-visible behaviour | Detection | Recovery |
 | --- | --- | --- | --- |
 | IndexedDB unavailable or full | Editing stops before an unsafe promise; export or copy text remains available | Rejected transaction and quota classification | Free space, export, or retry; disk source stays unchanged |
+| IndexedDB is corrupt, incomplete, or from newer code | Startup refuses writes and reports recovery or newer-schema state | Store topology and record validation | Preserve records for export; reopen with compatible code; never reset automatically |
+| Another tab commits the expected revision first | Later write is refused without changing files | Revision check inside the serialized readwrite transaction | Reload the current book revision and reapply an explicit edit |
 | Tab or process closes mid-edit | Recovery view identifies dirty files and pending intent | Emergency buffer and intent record | Reconcile into a new working revision before sync |
 | Disk file changed elsewhere | Conflict names every changed file and shows both revisions | Fingerprint differs from last sync | Load disk, keep working copy as a new file, or compare; no automatic overwrite |
 | Tauri folder permission disappears | Linked status pauses with relink action | Native permission failure | Select the folder again; IndexedDB copy remains available |
@@ -222,8 +257,9 @@ manuscript text, research notes, absolute personal paths, or recovered version c
   no Plainchant file has been copied.
 - EPUBCheck and Scribe compatibility are planned evidence. No Prose EPUB has been generated or tested.
 - The supported v0.1 environments are Linux Tauri and Chromium browser or PWA (D-013). No release evidence exists yet.
-- The IndexedDB transaction design in D-007 is accepted but remains unimplemented. The native boundary in D-008 stays
-  proposed until its roadmap item supplies executable evidence and maintainer acceptance.
+- The IndexedDB v3 schema and transaction adapter implement D-007 under P1-04. The retained UI has not adopted its
+  Prose book APIs; autosave and emergency reconciliation remain P1-05. The native boundary in D-008 stays proposed
+  until its roadmap item supplies executable evidence and maintainer acceptance.
 - The complete source grammar and normative fixture expectations exist under `P1-01`. The pure ranged parser and safe
   renderer exist under `P1-02`; the lossless book-index reader, strict splice primitive, and order planner exist under
   `P1-03`. No retained UI or persistence path uses them yet.

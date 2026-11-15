@@ -9,26 +9,29 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-15, session 9, on `master` tracking `origin/master`: P1-03 implements the lossless `book.txt`
-reader, strict range splices, and source-preserving order edits; IndexedDB schema work begins at P1-04._
+_Last updated: 2026-11-15, session 10, on `master` tracking `origin/master`: P1-04 adopts the multi-file IndexedDB v3
+schema, recoverable intents, serialized revision writes, and non-destructive recovery states._
 
-**Session owner:** None.
+**Session owner:** None. P1-04 is complete and the working tree is ready for maintainer review.
 
 **Where things stand:** `BRIEF.md` remains the maintainer-owned source. Prose uses `.md` chapters, an ignored optional
 `research/` directory, IndexedDB-only history, Tauri-only linked folders, and Linux desktop plus Chromium browser or
 PWA support. The renamed and trimmed Scribe foundation comes from commit
 `e2b22186a481afb6b0180d0883ce21d393ae7352`; its provenance is in `docs/archive/plainchant-lineage.md`. P1-01 defines
 the source grammar and fixtures. P1-02 parses immutable ranged books and renders escaped preview HTML. P1-03 adds the
-sole lossless `book.txt` reader, strict splices, and stale-source-checked order planning. The retained shell still has
-generic studio concepts; Prose domain modules are not connected to its UI or persistence.
+sole lossless `book.txt` reader, strict splices, and stale-source-checked order planning. P1-04 adds pure storage rules
+and an IndexedDB v3 adapter for separate books, files, versions, intents, targets, folder metadata, and handoffs. The
+retained shell still has generic studio concepts and uses the preserved v2 stores; Prose domain modules and v3 book
+APIs are not connected to its UI.
 
-**Verified** (2026-11-15; Node 22.23.5, Python 3.14.10; retained browser and Rust results below are from 2026-11-14)
+**Verified** (2026-11-15; Node 22.23.5, Python 3.14.10, Google Chrome 157.0.8103.78; retained Rust result is from
+2026-11-14)
 
 | Suite | Result |
 | --- | --- |
-| `npm test` | **229/229 passed**; P1-03 exact preservation and refusal checks passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
-| Stale-source mutation | **Expected failure** after weakening the exact ordered-source comparison; implementation restored |
-| `npm run test:browser` | **1/1 passed twice** after the final timing adjustment, in disposable Chrome profiles under the exact CSP |
+| `npm test` | **238/238 passed**; storage rules passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| Revision mutation | **Expected failure** after removing the in-transaction stale-revision refusal; implementation restored |
+| `npm run test:browser` | **1/1 starter and 13/13 IndexedDB passed twice** in disposable Chrome profiles and origins under the exact CSP |
 | `npm run tauri:test` | **5 passed, 0 failed** |
 | `python3 tools/check_docs.py` | **0 errors, 0 warnings in 14 files** |
 
@@ -53,41 +56,91 @@ generic studio concepts; Prose domain modules are not connected to its UI or per
   unknown, or ambiguous input. `Splice.apply` rejects invalid or overlapping ranges before applying any replacement.
 - No-op and inverse reorder tests preserve every original UTF-16 code unit, including metadata spacing, CRLF, a byte
   order mark, blank lines, comment-like unknown source outside the changed span, and trailing source.
+- IndexedDB v3 stores Prose books, files, UI state, versions, version files, prepared or applied intents, targets,
+  folder-link metadata, and handoffs separately while preserving inherited v2 records unchanged.
+- Every book change checks its expected monotonic revision after acquiring the IndexedDB write transaction; a real
+  two-tab test proves one concurrent writer wins and the other receives a revision conflict.
+- Versions and their file images are atomic. Prepared and applied intents remain warnings until exact completion,
+  cancellation, finalization, or rollback is possible.
+- Corrupt records, missing or unknown stores, and newer schemas are preserved and produce structured non-writable
+  states. Quota, blocked upgrade, abort, stale revision, closed connection, and newer schema remain distinct failures.
+- Folder-link records retain display metadata and bounded fingerprints but reject persisted paths or permission grants.
 
 **Not verified**
 
-- No retained UI behaviour, recovery path, or folder workflow uses the Prose parser and index writer yet.
+- No retained UI behaviour, emergency recovery path, or folder workflow uses the Prose parser, index writer, or v3
+  book adapter yet.
 - EPUBCheck and Ace were not run because their optional tools are absent. No Prose output has run through Scribe.
 - The headless CSP path was tested, but a real packaged Tauri window, manual accessibility, and reading-system
   behaviour were not tested.
 
 **Gotchas for the next session**
 
-- `BRIEF.md` contains an unavailable embedded-plan marker. The maintainer called it noise and instructed the blueprint
-  to ignore it on 2026-11-12.
-- The retained shell is still a generic web studio. P1-04 must define Prose records without treating the inherited
-  Scribe store schema as accepted product behaviour.
+- The retained shell is still a generic web studio. Its v2 stores remain only for compatibility and recovery; callers
+  must use `Store.openBooks` and the v3 book APIs before claiming Prose persistence behaviour.
+- The physical version stores are `bookVersions` and `bookVersionFiles`; the inherited `versions` name remains occupied.
+- `P1-05` owns debounced autosave, the synchronous emergency buffer, 30-day expiry, dirty-file reconciliation, and UI
+  adoption. P1-04 only supplies the durable records and exact intent transitions.
 - Range identities belong to one `book.txt` revision. A caller rereads after applying an accepted P1-03 edit; it never
   reuses the old model.
-- The D-017 Stage nonce is an authorization marker, not a secret. The generic Stage strips imported scripts before
-  inserting its marked interaction bridge.
-- `test/epub-fixture.js` is test-only. It preserves direct coverage for retained EPUB packaging without restoring an
-  EPUB-as-project runtime model.
 - Installed external binaries and loopback tests can be blocked by the workspace sandbox even when present. Record
   that refusal separately from an absent optional oracle.
-- Sibling repositories are separate Zones and remain read-only without a new explicit request.
 
 ## Next steps
 
 1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
-2. Start P1-04 by designing the multi-store IndexedDB schema, transaction boundary, upgrade refusal, and recovery
-   states before adapting the inherited store.
+2. Start P1-05 by specifying the emergency-buffer key, dirty-file state machine, autosave debounce, last-durable-file
+   guard, and 30-day expiry against the accepted v3 transaction APIs.
 
 ## Open questions for maintainers
 
 - None. Q-001 through Q-006 are answered in DECISIONS.
 
 ## Session log
+
+### Session 10: 2026-11-15: adopt the multi-file IndexedDB schema
+
+**Contributor:** Maintainer and Codex
+
+**Goal:** Complete P1-04 with a durable multi-file schema, exact concurrent-write rule, recoverable intents, and
+non-destructive failure states before connecting Prose editing to persistence.
+
+**Done:** P1-04.
+
+**Changed:** Added `src/store-schema.js` for pure record validation, file and book limits, exact file comparisons, and
+failure classification. Upgraded `plainchant_prose` to version 3 with separate book, file, UI, version, version-file,
+intent, target, folder-link, and handoff stores while preserving inherited v2 stores. Added monotonic-revision book
+transactions, atomic versions, prepared and applied intent resolution, auxiliary-record ownership, and read-only
+recovery inspection. Added Node rules and a dependency-free Chrome DevTools pipe runner for real IndexedDB checks.
+
+**Decisions:** D-020 records legacy preservation, physical store names, revision serialization, exact intent states,
+structured recovery, storage limits, fingerprinted binary research, non-authoritative folder metadata, and the P1-05
+boundary for autosave, emergency text, and 30-day expiry.
+
+**Verified:** `npm test` passed 238/238. Two consecutive `npm run test:browser` runs passed the 1/1 starter smoke and
+13/13 IndexedDB cases in Google Chrome 157.0.8103.78. The browser suite covered fresh v3 creation, v2 preservation,
+forced-upgrade rollback, atomic version abort, intent recovery, auxiliary stores, corrupt records, unknown store data,
+newer schema, a two-tab race, blocked upgrade, version-change closure, and actual quota exhaustion under a 1 KiB
+override. Removing the revision refusal produced the expected stale-write failure before restoration. The documentation
+result is recorded in Current state after the final run.
+
+**Not verified:** UI adoption, debounced autosave, emergency-buffer recovery, 30-day expiry, real folder sync, native
+permissions, or deletion UX.
+
+**Problems / surprises:** The inherited `versions` store required distinct Prose physical names. Chromium quota
+override must be sent on the page DevTools session. The starter `--dump-dom` probe could wait indefinitely for storage
+startup under virtual time, so its readiness wait is bounded while the dedicated IndexedDB suite verifies storage
+directly.
+
+**Corrections:** Binary research equality requires a content fingerprint, folder-link records reject persisted path or
+grant authority, auxiliary writes verify their book in the same transaction, and unknown or incomplete store topology
+enters read-only recovery without deletion.
+
+**Left undone:** P1-05 autosave, emergency reconciliation, expiry, and v3 UI adoption; P1-06 folder synchronization;
+P1-07 native folder commands.
+
+**Next session should start with:** Claim P1-05 and draft the emergency-buffer and dirty-file state machine against
+the v3 book revision and intent APIs before changing retained `src/app/persistence.js`.
 
 ### Session 9: 2026-11-15: implement lossless book-index splices
 

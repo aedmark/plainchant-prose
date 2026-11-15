@@ -58,8 +58,12 @@ Goal: open, edit, recover, and safely synchronize a multi-file book without refo
   Evidence: `src/book-index.js`, `src/splice.js`, `npm test` (229/229 including exact inverse and untouched-source
   checks), an expected mutation failure after weakening stale-source refusal, and `python3 tools/check_docs.py`
   (2026-11-15).
-- [ ] P1-04 Design and implement the multi-file IndexedDB schema for books, files, versions, targets, folder links, and
+- [x] P1-04 Design and implement the multi-file IndexedDB schema for books, files, versions, targets, folder links, and
   handoff records. Include upgrade, rollback or recovery, quota-failure, and two-tab tests before adopting the schema.
+  Evidence: D-020, `src/store-schema.js`, the v3 adapter in `src/store.js`, `npm test` (238/238), and two consecutive
+  `npm run test:browser` runs (starter 1/1 and IndexedDB 13/13 in Chrome 157), including v2 preservation, forced
+  upgrade rollback, atomic abort, intent recovery, corrupt and unknown data preservation, actual quota exhaustion,
+  two-tab revision serialization, blocked upgrade, and version-change closure (2026-11-15).
 - [ ] P1-05 Implement debounced autosave, a synchronous emergency buffer, 30-day soft-delete recovery, and crash
   reconciliation for all dirty book files. Empty editor state never destroys the last durable chapter.
 - [ ] P1-06 Implement Tauri folder linking and conflict decisions with canonical newlines and content fingerprints.

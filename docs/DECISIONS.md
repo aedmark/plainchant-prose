@@ -344,6 +344,39 @@ unit. A later UI must reread after each accepted edit because ranges and identit
 **Review trigger:** Real books need comments with defined attachment semantics, or retaining blank lines in fixed slots
 produces surprising part or chapter movement.
 
+## D-020 IndexedDB v3 preserves legacy data and serializes book revisions  (2026-11-15, status: accepted)
+
+**Context:** `P1-04` needs durable multi-file recovery without reinterpreting the retained Scribe-derived version-2
+database as Prose books. IndexedDB upgrades, quota failures, corrupt records, concurrent tabs, and interrupted
+multi-file operations can each lose work if they collapse into a reset or last-writer-wins path.
+
+**Decision:** `plainchant_prose` version 3 adds separate stores for books, files, UI state, version headers and files,
+intents, targets, folder-link metadata, and handoffs. The inherited version-2 stores remain unchanged for compatibility
+and recovery. Book and file records use a monotonic book revision. Every change checks its expected revision inside the
+same serialized readwrite transaction that writes all affected files. Version headers and file images are atomic.
+Multi-file intents retain exact before and after images in `prepared` or `applied` state; cancel, complete, finalize,
+and rollback proceed only when the recorded book revision and contents still match.
+
+Schema inspection is non-destructive. Invalid or orphan records and missing or unknown stores make the connection
+read-only and return structured recovery problems; a higher database version is a separate refusal. Quota, blocked
+upgrade, transaction abort, closed connection, and stale revision also keep distinct codes. Folder-link records carry
+only display metadata and bounded content fingerprints; paths and permission grants stay outside persistent authority.
+Book records include soft-deletion time, while expiry and emergency-buffer reconciliation remain `P1-05`.
+
+**Alternatives:** Migrating packed inherited projects into Prose books would guess source structure. One record per
+book makes multi-file recovery, research limits, and selective version inspection opaque. A broadcast-only lock cannot
+prevent two tabs from writing after the same revision; IndexedDB transaction serialization can. Resetting invalid data
+would trade an implementation problem for manuscript loss.
+
+**Consequences:** The physical version stores use `bookVersions` and `bookVersionFiles` because the inherited
+`versions` name remains occupied. Text is capped at 5,242,880 UTF-16 code units per file, binary research at 67,108,864
+bytes per file, and a book at 10,000 files and 268,435,456 stored bytes. Binary research requires a content fingerprint.
+Pending intents remain visible warnings until an exact resolution is possible. UI adoption, autosave timing, 30-day
+expiry, emergency text, and folder authorization remain later roadmap work.
+
+**Review trigger:** Real book sizes exceed a limit, a browser cannot preserve atomic transactions under the supported
+matrix, or P1-05 recovery needs another durable intent state.
+
 ## Held tensions
 
 ### T-001 Portable writing history and clean book folders  (2026-11-12, status: resolved by D-007)

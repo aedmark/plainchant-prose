@@ -64,7 +64,7 @@ const probe = [
     'window.addEventListener("DOMContentLoaded", function () {',
     '  setTimeout(async function () {',
     '    try {',
-    '      if (typeof whenReady === "function") await whenReady();',
+    '      if (typeof whenReady === "function") await Promise.race([whenReady(), new Promise(function (resolve) { setTimeout(resolve, 2000); })]);',
     '      if (typeof loadStarterProject === "function") loadStarterProject();',
     '      await new Promise(function (resolve) { setTimeout(resolve, 500); });',
     '      var frame = document.getElementById("stageFrame");',
@@ -131,11 +131,13 @@ async function main() {
     try {
         const result = await runChrome(chrome.bin, [
             '--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
-            '--user-data-dir=' + profile, '--virtual-time-budget=10000', '--dump-dom', url
+            '--user-data-dir=' + profile, '--virtual-time-budget=30000', '--dump-dom', url
         ]);
         if (result.status !== 0) throw new Error('Chrome exited ' + result.status + ': ' + result.stderr.trim());
         const match = result.stdout.match(/data-prose-browser-result="([^"]+)"/);
-        if (!match) throw new Error('the browser probe did not finish');
+        if (!match) throw new Error('the browser probe did not finish; Chrome: ' +
+            (result.stderr.trim().split('\n').slice(-3).join(' | ') || 'no diagnostic') +
+            '; DOM tail: ' + result.stdout.slice(-500).replace(/\s+/g, ' '));
         const state = JSON.parse(decodeURIComponent(match[1].replace(/&amp;/g, '&')));
         const problems = Array.isArray(state.problems) ? state.problems : ['probe returned no problem list'];
         if (state.title !== 'Plainchant Prose: long-form writer') problems.push('unexpected title: ' + state.title);

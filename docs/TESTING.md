@@ -1,19 +1,18 @@
 # Testing
 
 This document defines the evidence required as Plainchant Prose is implemented. The repository currently carries
-trimmed Scribe-derived Node and Rust suites as foundation checks, the normative `P1-01` source fixtures, and the pure
-`P1-02` parser and `P1-03` range-splice suites. Their results prove the retained foundation seams, P0-05 removal
-guards, fixture consistency, and the named pure parsing, rendering, and lossless order-edit contracts.
+trimmed Scribe-derived Node and Rust suites, the normative `P1-01` source fixtures, the pure `P1-02` parser and
+`P1-03` range-splice suites, and the `P1-04` IndexedDB rule and Chromium adapter suites.
 
 ## Suites
 
 | Suite | Planned file or command | Proves | Does not prove | Needs |
 | --- | --- | --- | --- | --- |
 | Documentation, current | `python3 tools/check_docs.py` | Active documents agree on IDs, links, paths, placeholders, and handoff shape | Product design is correct or code exists | Python 3 |
-| Node foundation and Prose domain, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, P0-05 removals, source fixtures, parsing, escaping, and lossless index splices remain green | DOM, real IndexedDB, native files, browser integration, or writing UI | Node and optional external tools |
+| Node foundation and Prose domain, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, source fixtures, parsing, escaping, lossless index splices, and IndexedDB record rules remain green | DOM, real IndexedDB, native files, or writing UI | Node and optional external tools |
 | Retained Rust foundation, current | `cargo test --manifest-path src-tauri/Cargo.toml` | Retained native unit tests remain green | Prose path policy, native dialogs, or a packaged window | Rust and Cargo |
-| Later Prose unit and structure, planned | Expanded `npm test` | Splice, book-change, sync, store-rule, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | Later Phase 1 implementation |
-| Browser foundation, current | `npm run test:browser` | The starter Stage and interaction bridge load under the exact Tauri CSP in Chromium with a disposable profile | Editing workflows, IndexedDB recovery, service-worker upgrades, other browsers, assistive technology, or visible layout | Installed Chrome or Chromium |
+| Later Prose unit and structure, planned | Expanded `npm test` | Book-change, sync, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | Later Phase 1 implementation |
+| Browser foundation and IndexedDB, current | `npm run test:browser` | The starter Stage loads under the exact CSP; real Chromium proves schema creation, v2 upgrade preservation and rollback, atomic abort, intents, corruption recovery, quota classification, two-tab revision serialization, blocked upgrade, and version-change closure | Writing UI, emergency buffer, service-worker upgrades, other browsers, assistive technology, or visible layout | Installed Chrome or Chromium |
 | Browser workflows, planned | Expanded `npm run test:browser` | Editor, undo, IndexedDB, recovery, accessibility mechanics, service worker, and main workflows in one headless engine | Other browsers, real assistive technology, or a human-visible layout | Phase 1 implementation |
 | Desktop foundation, current | `npm run tauri:test` | Retained path, filename, and decoding helpers pass in Rust | Full Prose confinement, native dialogs, command registration, or a packaged window | Rust and Cargo |
 | Desktop shell, planned | Expanded `npm run tauri:test` | Path confinement, size limits, atomic-write rules, permission state, and command registration | Native dialogs and a real packaged window | Phase 1 implementation |
@@ -87,11 +86,12 @@ citations and optional-oracle references to discarded modules without losing the
 fixture-diagnostic comparison, UTF-16 range checks, escaping and nonprinting tests, immutable and pure boundary checks,
 a configurable size refusal, and 200 deterministic bounded hostile strings. P1-03 adds strict edit validation,
 single-reader integration, exact metadata and suffix preservation, inverse-order equality, CRLF, BOM, astral,
-duplicate-identity, stale-source, and ambiguous-unknown-line checks. Later Phase 1 suites must add coverage for:
+duplicate-identity, stale-source, and ambiguous-unknown-line checks. P1-04 adds pure record, file-limit, fingerprint,
+intent, folder-authority, and failure-classification checks. Later
+Phase 1 suites must add coverage for:
 
 - multi-file transaction planning, interruption, rollback, and stale-before-image refusal;
 - folder conflict states for identical, local-only, disk-only, simultaneous, missing, added, and renamed files;
-- IndexedDB schema rules separately from its browser adapter;
 - XHTML and archive output at byte and structure levels;
 - inherited-name rejection, classic-script duplicate globals, local-only assets, and service-worker list agreement.
 
@@ -104,13 +104,17 @@ that must return a diagnostic or refusal without throwing an unclassified except
 npm run test:browser
 ```
 
-The current dependency-free runner uses an installed Chrome or Chromium, a new profile, a temporary HTTP origin, and
-the exact CSP from `src-tauri/tauri.conf.json`. It proves that the app starts and its generic Stage bridge loads without
-a runtime or policy error. P0-06 validated the runner by changing the page title and observing the expected failure.
+The dependency-free runner uses an installed Chrome or Chromium, new profiles, temporary HTTP origins, and the exact
+CSP from `src-tauri/tauri.conf.json`. The starter smoke proves that the app and generic Stage bridge load without a
+runtime or policy error. The IndexedDB half drives Chrome through its inherited DevTools pipe, uses only Node platform
+APIs, and overrides one disposable origin to a 1 KiB quota before attempting a valid maximum-size text record. It also
+opens two independent page targets for revision and blocked-upgrade checks. P0-06 validated the starter runner by
+changing the title; P1-04 validates concurrency by removing the in-transaction revision refusal and observing the
+expected stale-revision failure disappear.
 
-Phase 1 expands the same command to cover create, type, undo, save, reload, emergency recovery, binder and corkboard
-keyboard movement, preview escaping, find and replace, versions, theme contrast, zoom, focus order, accessible names,
-service-worker update, offline reload, quota failures, and interrupted writes.
+Later Phase 1 work expands the same command to cover type, undo, emergency-buffer recovery, binder and corkboard
+keyboard movement, preview escaping, find and replace, theme contrast, zoom, focus order, accessible names,
+service-worker update, and offline reload.
 
 Browser tests run against Chromium for the v0.1 support claim. Results from another engine remain additional evidence
 and do not extend the supported matrix without a later decision (D-013).

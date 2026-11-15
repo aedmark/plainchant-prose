@@ -20,6 +20,7 @@ const APP_FILES = [
     'src/editing.js',
     'src/suggest.js',
     'src/library.js',
+    'src/store-schema.js',
     'src/store.js',
     'src/versions.js',
     'src/filesync.js',

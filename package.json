@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "test": "node test/run.js",
-    "test:browser": "node test/browser.js",
+    "test:browser": "node test/browser.js && node test/store-browser.js",
     "tauri:test": "cargo test --manifest-path src-tauri/Cargo.toml",
     "roundtrip": "node tools/roundtrip.js",
     "serve": "python3 -m http.server 8081",

@@ -19,7 +19,7 @@ test('structure: the app scripts are loaded after the src/ modules they use, and
     [
         'src/html-ast.js', 'src/css-ast.js', 'src/code-shade.js', 'src/dom-outline.js',
         'src/project.js', 'src/editing.js', 'src/suggest.js', 'src/library.js',
-        'src/store.js', 'src/versions.js', 'src/filesync.js', 'src/importing.js',
+        'src/store-schema.js', 'src/store.js', 'src/versions.js', 'src/filesync.js', 'src/importing.js',
         'src/xml-ast.js', 'src/book-template.js', 'src/book.js', 'src/opf-edit.js', 'src/nav.js',
         'src/book-chapters.js', 'src/book-notes.js', 'src/book-blocks.js', 'src/book-export.js',
         'src/epub.js', 'src/markdown-import.js', 'src/xhtml.js', 'src/book-lang.js',
@@ -436,9 +436,10 @@ test('structure: Scribe-only publication surfaces and native boundaries stay rem
 
 test('structure: the P0-06 harness targets the trimmed shell and exposes maintained browser and Rust commands', () => {
     const pkg = JSON.parse(readRoot('package.json'));
-    assert.equal(pkg.scripts['test:browser'], 'node test/browser.js');
+    assert.equal(pkg.scripts['test:browser'], 'node test/browser.js && node test/store-browser.js');
     assert.equal(pkg.scripts['tauri:test'], 'cargo test --manifest-path src-tauri/Cargo.toml');
     assert.ok(fs.existsSync(path.join(root, 'test', 'browser.js')), 'the maintained browser runner is missing');
+    assert.ok(fs.existsSync(path.join(root, 'test', 'store-browser.js')), 'the IndexedDB browser runner is missing');
     const retainedTests = fs.readdirSync(path.join(root, 'test'))
         .filter((file) => file.endsWith('.js') && file !== 'structure.test.js')
         .map((file) => fs.readFileSync(path.join(root, 'test', file), 'utf8')).join('\n');
