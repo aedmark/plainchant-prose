@@ -22,7 +22,8 @@ revision. Nothing leaves the device, and no network resource is required.
 | Book index and range edits | `src/book-index.js`, `src/splice.js` | `BookIndex.read`, `Splice.apply` | Pure text only |
 | Book transactions | `src/book-change.js` | `BookChange.plan`, `BookChange.apply` | Parser and splice modules |
 | Search, counts, outline, compare, narration | `src/finding.js`, `stats.js`, `outline.js`, `compare.js`, `narration.js` | One pure API per module | Parsed books or source maps |
-| Folder conflict rules | `src/filesync.js` | `FileSync.decide` | Canonical text and fingerprints |
+| Folder conflict rules | `src/filesync.js`, `src/app/book-sync.js` | `FileSync.plan`, `ProseBookSync.create` | Canonical text, Web Crypto fingerprints, IndexedDB, abstract native adapter |
+| Browser book transfer | `src/book-archive.js` | `BookArchive.build`, `BookArchive.read` | Bounded explicit ZIP packages |
 | EPUB handoff | `src/prose-xhtml.js`, `src/epub-handoff.js`, copied archive modules | `EpubHandoff.build` | Parsed book and source files |
 | IndexedDB rules and adapter | `src/store-schema.js`, `src/book-recovery.js`, `src/store.js`, `src/app/book-persistence.js` | `StoreSchema`, `BookRecovery`, `Store`, `ProsePersistence` | IndexedDB and emergency storage |
 | Browser application | `src/app/*.js` | `main.js` on `DOMContentLoaded` | All pure modules and browser APIs |
@@ -122,7 +123,7 @@ folder or IndexedDB files
 | Parsed book | Pure parser | UI and domain modules | Immutable derived data with exact half-open source ranges and diagnostics |
 | `BookChange` | Binder, corkboard, editor, replace, restore | Persistence and folder sync | Ordered file patches with before fingerprints; all apply or recover as one intent |
 | IndexedDB book record | Persistence adapter | App startup, restore, versions | Versioned schema; schema contract is accepted only with migration and recovery tests |
-| Folder snapshot | Tauri bridge or approved browser adapter | `FileSync.decide` | Relative paths, canonical bytes, size, modified time, and content fingerprint |
+| Folder snapshot | Tauri bridge | `FileSync.plan` | Relative paths, kinds, exact SHA-256, and canonical SHA-256; times and watch events are hints only |
 | EPUB bytes | `EpubHandoff.build` | Download, native save, Scribe | EPUB 3.3; exact compatibility commit and validator version recorded |
 | Native command | App scripts | Tauri Rust shell | Dialog-granted root, confined relative path, operation-specific size limits |
 
@@ -181,6 +182,29 @@ the guaranteed restore period; reaching the boundary changes the retention statu
 records. Restore is explicit. Delete forever requires the exact book identifier and removes the book's IndexedDB
 records plus its emergency buffer. It never touches a linked disk folder.
 
+### Folder synchronization and browser transfer
+
+`P1-06` implements the environment-free three-way rules in `src/filesync.js` and the callable browser coordinator in
+`src/app/book-sync.js`. A plan compares the last-synced snapshot, IndexedDB files, and a complete folder scan. Text has
+an exact-byte SHA-256 and a canonical SHA-256; binary content uses its exact SHA-256 for both. Canonicalization changes
+only newline encoding. Local writes preserve the disk file's first observed newline style, and new text uses LF.
+
+A plan may write a local-only change, version and load a disk-only change, or advance fingerprints for canonical
+equality. Additions, deletions, simultaneous changes, case or Unicode aliases, and ambiguous rename evidence remain
+user choices. Any unresolved choice pauses every disk mutation. Every write has an expected exact fingerprint and
+rereads it immediately before replacement. The native command repeats that comparison under the selected-root
+authority in `P1-07`. A failed or interrupted group leaves the prior last-synced snapshot in place so a full rescan can
+derive remaining work without guessing.
+
+The folder adapter carries an opaque process-session authority identifier. One live authority maps to one book. Its
+path, dialog grant, and command capability never enter IndexedDB; `folderLinks` stores only display name, platform,
+and at most 10,000 bounded fingerprints. A restart therefore requires explicit relinking.
+
+The Chromium and PWA boundary is `src/book-archive.js`, an explicit ZIP import or export rather than linked directory
+access (D-012). Packages contain exactly the book contract (`book.txt`, chapter `.md`, and `research/` descendants),
+cap entries at 10,000, cap one entry at 64 MiB, cap expanded content at 256 MiB, and reject unsafe or colliding paths.
+The retained generic studio UI has not adopted this Prose session; `P2-01` replaces that inherited workflow.
+
 ## Invariants
 
 - **Book files are authoritative.** Enforced by parser range and splice-preservation tests (`P1-02`, `P1-03`; D-002,
@@ -193,8 +217,8 @@ records plus its emergency buffer. It never touches a linked disk folder.
   interruption tests (`P1-04`, `P1-05`; D-007, D-021).
 - **Empty editor state never removes the last durable chapter.** Enforced inside the IndexedDB transaction and by a
   real-browser refusal test (`P1-05`; D-021).
-- **No disk file is overwritten after an external change.** Enforced by fingerprint conflict rules, native integration
-  tests, and a real-folder gate (`P1-06`, `P1-07`).
+- **No disk file is overwritten after an external change.** Enforced by the pure three-way matrix, a Web Crypto
+  late-change browser test, native integration tests, and a real-folder gate (`P1-06`, `P1-07`; D-022).
 - **The parser and domain modules never touch the DOM, `window`, IndexedDB, Tauri, or Node-only APIs.** Enforced by Node
   tests and a planned import scan (`P0-05`).
 - **Writer text enters HTML only through contextual escaping.** Enforced by hostile-input parser and export fixtures

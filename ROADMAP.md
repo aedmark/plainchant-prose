@@ -69,9 +69,11 @@ Goal: open, edit, recover, and safely synchronize a multi-file book without refo
   D-021, `src/book-recovery.js`, `src/app/book-persistence.js`, `npm test` (243/243), `npm run test:browser` (starter
   1/1 and persistence 25/25 in Chrome 157), and an expected mutation failure when the emergency record cleared before
   a failed IndexedDB transaction (2026-11-15).
-- [ ] P1-06 Implement Tauri folder linking and conflict decisions with canonical newlines and content fingerprints.
+- [x] P1-06 Implement Tauri folder linking and conflict decisions with canonical newlines and content fingerprints.
   The app never overwrites a file changed outside Prose; missing, added, renamed, and simultaneous edits produce
   explicit choices. Browser books use explicit import and export instead of persistent directory handles (D-012).
+  Evidence: D-022, `src/filesync.js`, `src/app/book-sync.js`, `src/book-archive.js`, the Node sync and archive suites,
+  and real-Chromium SHA-256, late-change, version-before-load, one-owner, and explicit-transfer cases (2026-11-15).
 - [ ] P1-07 Implement narrow Tauri commands for native folder selection, reading, writing, and watching. Commands
   accept only canonical paths under a folder selected in a native dialog, enforce size limits, and expose no shell.
 

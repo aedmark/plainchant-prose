@@ -9,8 +9,8 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-15, session 11, on `master` tracking `origin/master`: P1-05 implements the callable multi-file
-autosave, emergency recovery, soft-delete, and explicit permanent-deletion session._
+_Last updated: 2026-11-15, session 12, on `master` tracking `origin/master`: P1-06 implements the pure folder-conflict
+contract, callable Web Crypto synchronization session, and bounded explicit browser book package._
 
 **Session owner:** None.
 
@@ -23,39 +23,27 @@ sole lossless `book.txt` reader, strict splices, and stale-source-checked order 
 and an IndexedDB v3 adapter for separate books, files, versions, intents, targets, folder metadata, and handoffs. P1-05
 adds pure recovery and retention rules plus a callable browser persistence session for all dirty book files. The
 retained shell still has generic studio concepts and uses the preserved v2 stores; the Prose editor has not adopted
-the v3 session.
+the v3 session. P1-06 adds pure three-way folder decisions, a callable path-free synchronization coordinator, and an
+explicit bounded ZIP for Chromium or PWA book transfer. P1-07 still owns real Tauri filesystem authority and commands.
 
-**Verified** (2026-11-15; Node 22.23.5, Python 3.14.10, Google Chrome 157.0.8103.78; retained Rust result is from
-2026-11-14)
+**Verified** (2026-11-15; Node 22.23.5, Python 3.14.10, Google Chrome 157.0.8103.78, current Rust toolchain)
 
 | Suite | Result |
 | --- | --- |
-| `npm test` | **243/243 passed**; recovery rules passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
-| Buffer-clear mutation | **Expected failure** when a save removed emergency text before its IndexedDB transaction failed; implementation restored |
-| `npm run test:browser` | **1/1 starter and 25/25 persistence passed twice** in disposable Chrome profiles and origins under the exact CSP |
+| `npm test` | **256/256 passed**; sync and transfer rules passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| Fingerprint-preflight mutation | **Expected failure** when the final exact disk fingerprint check was removed; implementation restored |
+| `npm run test:browser` | **1/1 starter and 32/32 storage, persistence, sync, and transfer passed** in a disposable Chrome profile and origins under the exact CSP |
 | `npm run tauri:test` | **5 passed, 0 failed** |
 | `python3 tools/check_docs.py` | **0 errors, 0 warnings in 14 files** |
 
 **What works**
 
-- The source-format contract settles required and optional metadata, generalized custom keys, user-resolved
-  duplicates, index safety, chapter syntax, malformed recovery, precedence, exact ranges, and export blockers.
-- `Prose.parse` returns immutable ranged metadata, parts, chapters, scenes, printable blocks, notes, boneyards,
-  footnotes, diagnostics, and the complete export gate from an in-memory book map.
-- `BookIndex.read` owns the `book.txt` grammar used by `Prose.parseBook`; it returns immutable metadata, order records,
-  exact identities, unknown lines, diagnostics, and source spans.
-- `BookIndex.reorder` returns one explicit order-span edit or a structured refusal for stale, incomplete, repeated,
-  unknown, or ambiguous input. `Splice.apply` rejects invalid or overlapping ranges before applying any replacement.
-- No-op and inverse reorder tests preserve every original UTF-16 code unit, including metadata spacing, CRLF, a byte
-  order mark, blank lines, comment-like unknown source outside the changed span, and trailing source.
+- The complete source grammar, ranged immutable parser, escaped renderer, export gate, and lossless `book.txt` splice
+  planner are implemented with exact CRLF, byte-order-mark, unknown-source, and inverse-edit coverage.
 - IndexedDB v3 stores Prose books, files, UI state, versions, version files, prepared or applied intents, targets,
   folder-link metadata, and handoffs separately while preserving inherited v2 records unchanged.
-- Every book change checks its expected monotonic revision after acquiring the IndexedDB write transaction; a real
-  two-tab test proves one concurrent writer wins and the other receives a revision conflict.
-- Versions and their file images are atomic. Prepared and applied intents remain warnings until exact completion,
-  cancellation, finalization, or rollback is possible.
-- Corrupt records, missing or unknown stores, and newer schemas are preserved and produce structured non-writable
-  states. Quota, blocked upgrade, abort, stale revision, closed connection, and newer schema remain distinct failures.
+- Book writes serialize expected revisions. Versions are atomic, intents remain recoverable, and corrupt, unknown,
+  quota, upgrade, abort, stale-revision, and closed states stay distinct without destructive repair.
 - Folder-link records retain display metadata and bounded fingerprints but reject persisted paths or permission grants.
 - Text changes write a versioned per-book emergency record after 250 milliseconds of idle time and synchronously on
   manual save or lifecycle loss; all observed dirty files commit in one IndexedDB revision after 1,500 milliseconds.
@@ -65,10 +53,19 @@ the v3 session.
   content, explicit removal cannot erase the last durable chapter, and a failed transaction keeps emergency text.
 - Soft-deleted books remain recoverable for at least 30 days and are never erased on a timer. Delete forever requires
   exact confirmation, removes every local record owned by the book, and does not touch disk.
+- Folder decisions compare last-synced, IndexedDB, and fresh-disk SHA-256 snapshots. Canonical comparison changes only
+  newline encoding; local writes preserve existing disk newlines and never normalize trailing blank lines or a BOM.
+- Additions, missing files, simultaneous edits, unconfirmed deletion, path collisions, and ambiguous renames pause the
+  whole folder. Unique exact rename evidence is advisory and every conflict retains explicit preserving choices.
+- The callable sync session uses Web Crypto, requires one in-memory authority per book, rereads the exact disk
+  fingerprint before every replacement, and versions the working copy before loading an external edit.
+- Chromium and PWA transfer uses an explicit ZIP limited to `book.txt`, `.md` chapters, and `research/`, with bounded
+  entry count and bytes plus unsafe-name and collision refusal. It retains no browser directory handle.
 
 **Not verified**
 
-- No retained UI behaviour or folder workflow uses the Prose parser, index writer, or v3 persistence session yet.
+- No retained UI behaviour or real folder workflow uses the Prose parser, index writer, v3 persistence session, or
+  P1-06 synchronization session yet.
 - EPUBCheck and Ace were not run because their optional tools are absent. No Prose output has run through Scribe.
 - The headless CSP path was tested, but a real packaged Tauri window, manual accessibility, and reading-system
   behaviour were not tested.
@@ -80,8 +77,10 @@ the v3 session.
 - The physical version stores are `bookVersions` and `bookVersionFiles`; the inherited `versions` name remains occupied.
 - `src/app/persistence.js` remains the generic inherited adapter. Prose callers use the separate
   `src/app/book-persistence.js` session; `P2-01` owns editor adoption.
-- `P1-06` owns folder linking and conflict decisions. Editor-pending and sync-dirty states remain separate under
-  D-021.
+- `P1-07` must implement the abstract adapter used by `ProseBookSync`, repeat the expected fingerprint check inside
+  each atomic native command, keep authority process-local, and turn watch events into full bounded rescans (D-022).
+- P1-06 deliberately does not make browser directory handles part of the Prose contract. `BookArchive` is the browser
+  transfer boundary; inherited generic studio folder code remains outside the callable Prose session until P2-01.
 - Range identities belong to one `book.txt` revision. A caller rereads after applying an accepted P1-03 edit; it never
   reuses the old model.
 - Installed external binaries and loopback tests can be blocked by the workspace sandbox even when present. Record
@@ -90,8 +89,8 @@ the v3 session.
 ## Next steps
 
 1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
-2. Start P1-06 by specifying folder snapshots, canonical newline handling, fingerprints, conflict choices, and the
-   browser import or export boundary against the v3 book revision APIs.
+2. Start P1-07 with the dialog-scoped root registry, confined relative-path resolver, bounded scanner, atomic
+   expected-fingerprint replacement, deletion recovery, and coalesced watch-event contract from D-008 and D-022.
 
 ## Open questions for maintainers
 
@@ -100,6 +99,49 @@ the v3 session.
 ## Session log
 
 Earlier completed sessions are in [the November 2026 archive](archive/SESSION_LOG_2026_11.md).
+
+### Session 12: 2026-11-15: implement folder synchronization decisions and browser transfer
+
+**Contributor:** Maintainer and Codex
+
+**Goal:** Complete P1-06 with exact three-way folder decisions, conflict-preserving writes, path-free link metadata,
+and explicit browser transfer while leaving real native authority to P1-07.
+
+**Done:** P1-06.
+
+**Changed:** Replaced the inherited single-file timestamp decision in `src/filesync.js` with a bounded multi-file
+three-way planner. Added `src/app/book-sync.js` for Web Crypto fingerprints, one-live-folder ownership, exact
+preflights, CRLF-preserving writes, version-before-load behavior, and an abstract native adapter. Added
+`src/book-archive.js` for explicit bounded ZIP import and export. Folder-link validation accepts the new exact and
+canonical fingerprints while preserving legacy metadata as non-authoritative data.
+
+**Decisions:** D-022 records canonical newline handling, exact and canonical SHA-256 identities, whole-folder pause,
+conflict choices, additions, deletion, rename evidence, path collisions, interrupted progress, process-only authority,
+and the explicit browser package limits.
+
+**Verified:** `npm test` passed 256/256. `npm run test:browser` passed the starter 1/1 and the IndexedDB, persistence,
+folder-sync, and transfer 32/32 cases in Google Chrome 157.0.8103.78. The browser cases prove Web Crypto hashing,
+newline preservation, version-before-load, simultaneous-change pause, a late exact-fingerprint refusal, one live
+folder owner, ZIP byte preservation, and traversal refusal. Removing the final exact preflight produced the expected
+targeted failure before restoration. The final documentation, Rust, and repeat-browser results are recorded in
+Current state.
+
+**Not verified:** A real Tauri folder, native dialogs, symlink confinement, atomic replacement, watcher behavior, the
+retained UI's adoption, visible conflict choices, a packaged window, other browsers, or assistive technology.
+
+**Problems / surprises:** The workspace sandbox refused loopback binding, so the maintained browser suite required its
+approved unsandboxed command. The retained generic folder code persists paths and browser handles in legacy v2 data;
+the new Prose session neither calls nor imports that authority.
+
+**Corrections:** Canonicalization preserves trailing newlines and empty content instead of inheriting Scribe's
+exactly-one-final-newline rule. A second preflight runs immediately before each replacement after the group preflight.
+Browser package text retains a UTF-8 byte-order mark.
+
+**Left undone:** P1-07 native commands and real-folder evidence, P2-01 editor and conflict UI adoption, service-worker
+workflow tests, and release checks.
+
+**Next session should start with:** Claim P1-07 and draft the process-local selected-root and command schemas against
+`ProseBookSync` before replacing retained broad Rust project-folder commands.
 
 ### Session 11: 2026-11-15: implement autosave and crash reconciliation
 
@@ -454,32 +496,3 @@ Prose domain implementation.
 
 **Next session should start with:** Claim P0-04, inventory every inherited identifier, then rename and harden the shell
 without mixing in P0-05 feature removal.
-
-### Session 2: 2026-11-13: settle blueprint choices and add the licence
-
-**Contributor:** Maintainer and Codex
-
-**Goal:** Answer the six open design choices and adapt the supplied AI-assisted MIT licence.
-
-**Done:** `P0-02`; design questions Q-001 through Q-006.
-
-**Changed:** Added `LICENSE` and `.gitignore`; recorded `master`, the GitHub `origin`, and baseline commit `5f04650`;
-accepted D-007 and D-010; added D-011 through D-015; resolved T-001; updated the roadmap, architecture, testing,
-security, contribution, README, AGENTS, and handoff claims.
-
-**Decisions:** Standard `##` through `######` headings; optional ignored `research/`; IndexedDB-only histories in v0.1;
-Tauri-only linked folders; Linux desktop and Chromium browser or PWA support; AI-assisted MIT terms with Andrew Edmark
-and Arantor as the Humans; GitHub private vulnerability reporting as the maintainer-enabled security channel.
-
-**Verified:** `python3 tools/check_docs.py`: 0 errors, 0 warnings in 13 files.
-
-**Not verified:** Licence interpretation by counsel; every application behaviour; no code exists.
-
-**Problems / surprises:** Q-006 combined licence and reporting contact; separate decisions record each part.
-
-**Corrections:** Research and platform conventions are now decided. Earlier current-state text that called them open is
-superseded by this session.
-
-**Left undone:** Enabling private vulnerability reporting, source copy, and all implementation.
-
-**Next session should start with:** Claim `P0-03` and record the exact Plainchant source commit before copying.

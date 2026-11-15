@@ -413,6 +413,51 @@ past 30 days until the writer explicitly deletes them.
 browsers cannot finish the synchronous lifecycle write, or editor integration needs a recovery choice absent from the
 state machine.
 
+## D-022 Folder synchronization uses exact preflights and user-resolved three-way conflicts  (2026-11-15, status: accepted)
+
+**Context:** `P1-06` needs one conflict contract for a multi-file book while `P1-07` still owns the native commands.
+Newline-only differences must not cause unnecessary writes, and canonical comparison must not erase byte-order marks,
+blank endings, or an external edit that lands after a scan. Browser transfer needs the same book-folder limits without
+retaining browser directory authority.
+
+**Decision:** A last-synced snapshot, the IndexedDB working copy, and a fresh folder snapshot form the three-way input.
+Each entry carries SHA-256 fingerprints for exact bytes and canonical content. Canonical text changes CRLF and lone CR
+to LF and preserves every other character, including empty content, trailing newlines, and a byte-order mark. Existing
+disk newline style is retained when Prose writes text; a new file uses LF. Modification times and watcher events only
+request another complete bounded scan.
+
+Local-only change writes, disk-only change creates a working-copy version and loads, and equal canonical changes only
+advance the snapshot. A simultaneous change, external deletion, unconfirmed local deletion, disk addition, path
+collision, or ambiguous rename pauses all folder mutation. The writer chooses use disk, keep the Prose copy while
+paused or unlinked, export elsewhere, or compare. Disk additions require import or ignore. Disk deletion requires
+restore or acceptance. A Prose deletion can reach disk only after explicit confirmation, an unchanged exact disk
+fingerprint, and a recovery snapshot. Rename evidence is advisory only when one removed and one added path have the
+same unique exact fingerprint. Case or Unicode-normalization aliases remain conflicts.
+
+Every write rereads the exact fingerprint before replacement. A mismatch leaves both disk and IndexedDB unchanged by
+that operation. An unresolved issue anywhere pauses every disk mutation in that scan. A partial multi-file attempt
+does not advance the last-synced snapshot; the next complete scan derives the remaining operations from the old
+snapshot and current bytes. Folder-link persistence contains display metadata and bounded fingerprints only. Native
+paths, dialog grants, and process authority remain in Tauri memory and require explicit relinking after restart.
+
+Chromium and the PWA use an explicit bounded ZIP containing `book.txt`, chapter `.md` files, and `research/` content.
+They never persist a directory handle. The package caps entries at 10,000, one file at 64 MiB, and total expanded
+content at 256 MiB; it rejects absolute, traversal, control-character, duplicate, case-colliding, and
+Unicode-colliding names before import.
+
+**Alternatives:** Modification times miss replacements and coarse-timestamp edits. Normalizing a final newline changes
+source meaning. Per-file conflict progress can leave a folder in an unexplained mixed state. Persisted paths or browser
+handles turn display metadata into durable filesystem authority.
+
+**Consequences:** `src/filesync.js` owns pure snapshot decisions. `src/app/book-sync.js` owns Web Crypto fingerprints,
+IndexedDB versions, preflight coordination, and an abstract in-memory folder adapter; `P1-07` supplies the concrete
+Tauri implementation and repeats the expected fingerprint inside each atomic native command. `src/book-archive.js`
+owns explicit browser transfer. The retained studio UI does not call these Prose APIs; `P2-01` adopts them with the
+editor and conflict interface.
+
+**Review trigger:** A supported filesystem cannot provide an atomic expected-fingerprint replacement, real books
+exceed a package limit, or conflict usability needs another preserving choice.
+
 ## Held tensions
 
 ### T-001 Portable writing history and clean book folders  (2026-11-12, status: resolved by D-007)

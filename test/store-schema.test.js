@@ -84,12 +84,25 @@ test('store schema: a version is a complete bounded book snapshot', () => {
 });
 
 test('store schema: folder-link metadata records fingerprints but cannot carry filesystem authority', () => {
+    const hash = 'sha256:' + 'a'.repeat(64);
     const link = { bookId: 'book-1', displayName: 'Novel', platform: 'linux',
-        fingerprints: [{ path: 'book.txt', fingerprint: 'sha256:abc' }] };
+        fingerprints: [{ path: 'book.txt', kind: 'text', exact: hash, canonical: hash }] };
     assert.ok(StoreSchema.validateAuxiliary('folder-link', link).ok);
+    assert.ok(StoreSchema.validateAuxiliary('folder-link', { bookId: 'book-1', displayName: 'Old', platform: 'linux',
+        fingerprints: [{ path: 'book.txt', fingerprint: 'sha256:legacy' }] }).ok,
+    'pre-P1-06 metadata stays readable but cannot grant authority');
+    assert.equal(StoreSchema.validateAuxiliary('folder-link', Object.assign({}, link, {
+        fingerprints: [{ path: 'book.txt', kind: 'binary', exact: hash, canonical: 'sha256:' + 'b'.repeat(64) }]
+    })).code, 'folder-link-fingerprint-invalid');
     assert.equal(StoreSchema.validateAuxiliary('folder-link', Object.assign({}, link, {
         rootPath: '/home/writer/novel'
     })).code, 'folder-link-authority-invalid');
+    assert.equal(StoreSchema.validateAuxiliary('folder-link', Object.assign({}, link, {
+        handle: { kind: 'directory' }
+    })).code, 'folder-link-authority-invalid');
+    assert.equal(StoreSchema.validateAuxiliary('folder-link', Object.assign({}, link, {
+        fingerprints: [Object.assign({}, link.fingerprints[0], { authorityId: 'grant-1' })]
+    })).code, 'folder-link-fingerprint-invalid');
     const source = fsStore.readFileSync(pathStore.join(__dirname, '..', 'src', 'store-schema.js'), 'utf8');
     assert.excludes(source, 'canonicalRoot');
 });

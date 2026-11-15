@@ -40,8 +40,9 @@ Markdown, and EPUB-package seams for later adaptation. `P0-06` adapts the retain
 and Rust commands. Phase 0 is complete; `P1-01` specifies the Prose source grammar and fixtures, `P1-02` implements
 the pure ranged parser and safe renderer, and `P1-03` implements lossless `book.txt` order splices. `P1-04` adopts the
 IndexedDB v3 schema and transaction adapter. `P1-05` adds the callable multi-file autosave, emergency recovery, and
-soft-delete session; the retained generic UI has not adopted these Prose book APIs. `P1-06` is the next implementation
-item. See
+soft-delete session. `P1-06` adds the pure three-way folder-conflict rules, callable fingerprint-checked sync session,
+and bounded explicit browser book package. The retained generic UI has not adopted these Prose book APIs. `P1-07`
+supplies the confined Tauri commands next. See
 [the lineage record](docs/archive/plainchant-lineage.md) and [the roadmap](ROADMAP.md).
 
 ## Documentation check

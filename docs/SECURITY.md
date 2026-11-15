@@ -78,8 +78,10 @@ and an exact stale-source refusal before an order edit. P1-04 adds non-destructi
 read-only recovery, bounded separate file records, fingerprinted binary research, serialized revision checks, exact
 intent resolution, real quota exhaustion, v2 rollback, unknown-store preservation, and a persistent-folder-record
 guard that rejects path or grant authority. P1-05 adds bounded per-book emergency text, exact revision
-reconciliation, last-chapter preservation, explicit deletion confirmation, and forced-close browser evidence. This
-does not establish Prose's complete native boundary;
+reconciliation, last-chapter preservation, explicit deletion confirmation, and forced-close browser evidence. P1-06
+adds exact and canonical SHA-256 folder snapshots, whole-folder conflict pause, a second exact preflight immediately
+before replacement, path-free persisted link metadata, one-live-folder ownership, and bounded explicit browser ZIP
+transfer with hostile path and collision refusal. This does not establish Prose's complete native boundary;
 dialog-scoped folder confinement and command limits remain under proposed D-008 and P1-07.
 
 Planned Prose security evidence includes:

@@ -277,7 +277,8 @@
         if (kind === 'book-ui') return accepted();
         if (kind === 'target') return accepted();
         if (kind === 'folder-link') {
-            if (['path', 'rootPath', 'permissionToken', 'grant', 'grantId'].some(function (key) {
+            if (['path', 'rootPath', 'permissionToken', 'grant', 'grantId', 'handle', 'directoryHandle',
+                'authorityId'].some(function (key) {
                 return Object.prototype.hasOwnProperty.call(record, key);
             })) return refused('folder-link-authority-invalid',
                 'Persisted folder metadata cannot contain filesystem authority.');
@@ -288,8 +289,18 @@
             }
             const paths = new Set();
             for (const item of record.fingerprints) {
-                if (!plainObject(item) || !validPath(item.path) || typeof item.fingerprint !== 'string' ||
-                    !item.fingerprint || item.fingerprint.length > 256 || paths.has(item.path)) {
+                const carriesAuthority = plainObject(item) && ['rootPath', 'permissionToken', 'grant', 'grantId',
+                    'handle', 'directoryHandle', 'authorityId'].some(function (key) {
+                        return Object.prototype.hasOwnProperty.call(item, key);
+                    });
+                const current = plainObject(item) && ['text', 'binary'].includes(item.kind) &&
+                    typeof item.exact === 'string' && /^sha256:[0-9a-f]{64}$/.test(item.exact) &&
+                    typeof item.canonical === 'string' && /^sha256:[0-9a-f]{64}$/.test(item.canonical) &&
+                    (item.kind !== 'binary' || item.canonical === item.exact);
+                const legacy = plainObject(item) && typeof item.fingerprint === 'string' &&
+                    item.fingerprint.length > 0 && item.fingerprint.length <= 256;
+                if (!plainObject(item) || carriesAuthority || !validPath(item.path) || (!current && !legacy) ||
+                    paths.has(item.path)) {
                     return refused('folder-link-fingerprint-invalid',
                     'A folder-link fingerprint is invalid.');
                 }

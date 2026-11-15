@@ -121,8 +121,9 @@
         results.push('intent prepare, apply, rollback, and cancel');
 
         await Store.putTarget(opened.db, { bookId: id, words: 80000 });
+        const linkHash = 'sha256:' + 'a'.repeat(64);
         await Store.putFolderLink(opened.db, { bookId: id, displayName: 'Test Book', platform: 'linux',
-            fingerprints: [{ path: 'book.txt', fingerprint: 'sha256:abc' }] });
+            fingerprints: [{ path: 'book.txt', kind: 'text', exact: linkHash, canonical: linkHash }] });
         await Store.addHandoff(opened.db, { id: 'handoff-1', bookId: id, createdAt: 8, sourceRevision: 3,
             fileName: 'test-book.epub', fingerprint: 'sha256:def' });
         check((await Store.loadTargets(opened.db)).length === 1 && (await Store.loadHandoffs(opened.db)).length === 1,
@@ -476,6 +477,152 @@
         return answer;
     }
 
+    function cloneEntry(entry) {
+        return entry.kind === 'text' ? { path: entry.path, kind: 'text', text: entry.text }
+            : { path: entry.path, kind: 'binary', bytes: new Uint8Array(entry.bytes) };
+    }
+
+    function memoryFolder(initial, authorityId) {
+        const files = new Map(initial.map(function (entry) { return [entry.path, cloneEntry(entry)]; }));
+        let readCount = 0;
+        let changeOnRead = null;
+        let scanCount = 0;
+        let changeOnScan = null;
+        return {
+            authorityId: authorityId,
+            displayName: 'Memory Book',
+            platform: 'test',
+            scan: function () {
+                scanCount++;
+                if (changeOnScan && scanCount === changeOnScan.at) {
+                    files.set(changeOnScan.entry.path, cloneEntry(changeOnScan.entry));
+                }
+                return Promise.resolve(Array.from(files.values()).map(cloneEntry));
+            },
+            read: function (path) {
+                readCount++;
+                if (changeOnRead && readCount === changeOnRead.at) files.set(path, cloneEntry(changeOnRead.entry));
+                return Promise.resolve(files.has(path) ? cloneEntry(files.get(path)) : null);
+            },
+            writeAtomic: function (path, entry) { files.set(path, cloneEntry(entry)); return Promise.resolve(); },
+            setText: function (path, value) { files.set(path, { path: path, kind: 'text', text: value }); },
+            text: function (path) { return files.get(path) && files.get(path).text; },
+            changeOnRead: function (at, entry) { readCount = 0; changeOnRead = { at: at, entry: entry }; },
+            changeOnScan: function (at, entry) { scanCount = 0; changeOnScan = { at: at, entry: entry }; }
+        };
+    }
+
+    async function folderSync(prefix) {
+        const results = [];
+        const name = prefix + '-sync';
+        await deleteDatabase(name);
+        const opened = await Store.openBooks(indexedDB, { name: name });
+        const id = 'sync-book';
+        await Store.createBook(opened.db, { book: book(id, 0, 1), files: initialFiles(id) });
+        const folder = memoryFolder([
+            { path: 'book.txt', kind: 'text', text: initialFiles(id)[0].text.replace(/\n/g, '\r\n') },
+            { path: 'one.md', kind: 'text', text: initialFiles(id)[1].text.replace(/\n/g, '\r\n') }
+        ], 'grant-1');
+        let tick = 20;
+        const firstSnapshot = await ProseBookSync.snapshot(await folder.scan(), crypto);
+        const link = { bookId: id, displayName: 'Memory Book', platform: 'test', fingerprints: firstSnapshot };
+        const registry = ProseBookSync.createRegistry();
+        const pending = ProseBookSync.create({ db: opened.db, bookId: id,
+            adapter: Object.assign({}, folder, { authorityId: 'grant-pending', scan: function () {
+                refuse('editor-pending session scanned the folder');
+            } }), registry: registry, hasEditorPending: function () { return true; } });
+        await pending.open();
+        check((await pending.sync()).status === 'editor-pending', 'editor-pending state did not pause folder sync');
+        pending.unlink();
+        const session = ProseBookSync.create({ db: opened.db, bookId: id, adapter: folder, link: link,
+            registry: registry, now: function () { return tick++; }, makeId: function () { return 'sync-version-' + tick; } });
+        await session.open();
+
+        await Store.applyBookChange(opened.db, { bookId: id, expectedRevision: 0, now: 10,
+            putFiles: [text(id, 'one.md', 'chapter', '# One\n\nLocal edit.\n', 0, 1)], removePaths: [] });
+        let state = await session.sync();
+        check(state.status === 'synchronized', 'local-only synchronization did not finish');
+        check(folder.text('one.md') === '# One\r\n\r\nLocal edit.\r\n', 'the existing CRLF style was not preserved');
+        results.push('local-only write preserves disk newline style');
+
+        folder.setText('one.md', '# One\r\n\r\nExternal edit.\r\n');
+        state = await session.sync();
+        let loaded = await Store.loadBook(opened.db, id);
+        check(state.status === 'synchronized' && loaded.files.find(function (file) { return file.path === 'one.md'; }).text ===
+            '# One\r\n\r\nExternal edit.\r\n', 'disk-only change did not load into a new working revision');
+        check((await Store.loadBookVersions(opened.db, id)).length === 1, 'disk load did not preserve the prior working snapshot');
+        results.push('disk-only change creates a version before loading');
+
+        const revision = loaded.book.revision;
+        await Store.applyBookChange(opened.db, { bookId: id, expectedRevision: revision, now: loaded.book.updatedAt + 1,
+            putFiles: [text(id, 'one.md', 'chapter', '# One\n\nProse side.\n', revision, loaded.book.updatedAt)], removePaths: [] });
+        folder.setText('one.md', '# One\n\nDisk side.\n');
+        state = await session.sync();
+        check(state.status === 'paused' && state.plan.conflicts[0].code === 'simultaneous-change',
+            'simultaneous edits did not pause the folder');
+        check(folder.text('one.md') === '# One\n\nDisk side.\n', 'a conflict overwrote disk');
+        results.push('simultaneous change pauses without a disk mutation');
+
+        session.unlink();
+        const current = await Store.loadBook(opened.db, id);
+        const stableDisk = '# One\n\nProse side.\n';
+        folder.setText('one.md', stableDisk);
+        const relinkSnapshot = await ProseBookSync.snapshot(await folder.scan(), crypto);
+        const relink = ProseBookSync.create({ db: opened.db, bookId: id, adapter: folder,
+            link: { bookId: id, displayName: 'Memory Book', platform: 'test', fingerprints: relinkSnapshot },
+            registry: registry, now: function () { return tick++; } });
+        await relink.open();
+        await Store.applyBookChange(opened.db, { bookId: id, expectedRevision: current.book.revision,
+            now: current.book.updatedAt + 1,
+            putFiles: [text(id, 'one.md', 'chapter', '# One\n\nFinal local.\n', current.book.revision, current.book.updatedAt)],
+            removePaths: [] });
+        folder.changeOnRead(2, { path: 'one.md', kind: 'text', text: '# One\n\nLate external.\n' });
+        await expectCode(function () { return relink.sync(); }, 'folder-changed-before-write');
+        check(folder.text('one.md') === '# One\n\nLate external.\n', 'stale preflight overwrote a late disk edit');
+        relink.unlink();
+
+        const afterPreflight = await Store.loadBook(opened.db, id);
+        folder.setText('one.md', afterPreflight.files.find(function (file) { return file.path === 'one.md'; }).text);
+        const finalSnapshot = await ProseBookSync.snapshot(await folder.scan(), crypto);
+        const finalSession = ProseBookSync.create({ db: opened.db, bookId: id, adapter: folder,
+            link: { bookId: id, displayName: 'Memory Book', platform: 'test', fingerprints: finalSnapshot },
+            registry: registry, now: function () { return tick++; } });
+        await finalSession.open();
+        await Store.applyBookChange(opened.db, { bookId: id, expectedRevision: afterPreflight.book.revision,
+            now: afterPreflight.book.updatedAt + 1,
+            putFiles: [text(id, 'one.md', 'chapter', '# One\n\nSnapshot local.\n', afterPreflight.book.revision,
+                afterPreflight.book.updatedAt)], removePaths: [] });
+        folder.changeOnScan(2, { path: 'one.md', kind: 'text', text: '# One\n\nAfter write external.\n' });
+        await expectCode(function () { return finalSession.sync(); }, 'folder-changed-after-sync');
+        check(folder.text('one.md') === '# One\n\nAfter write external.\n', 'final snapshot hid a late disk edit');
+        results.push('final preflight and final snapshot both refuse late changes');
+
+        const other = ProseBookSync.create({ db: opened.db, bookId: 'other-book', adapter: folder, registry: registry });
+        await expectCode(function () { return other.open(); }, 'folder-already-linked');
+        results.push('one session folder has one book owner');
+
+        finalSession.unlink();
+        opened.db.close();
+        return results;
+    }
+
+    async function bookTransfer() {
+        const bytes = await BookArchive.build([
+            { path: 'book.txt', kind: 'text', text: 'Title: Transfer\nAuthor: Writer\nLanguage: en\n\none.md\n' },
+            { path: 'one.md', kind: 'text', text: '\ufeff# One\r\n\r\nBrowser bytes.\r\n' },
+            { path: 'research/image.bin', kind: 'binary', bytes: Uint8Array.from([0, 17, 255]) }
+        ], new Date(0));
+        const read = await BookArchive.read(bytes);
+        check(read[1].text === '\ufeff# One\r\n\r\nBrowser bytes.\r\n', 'browser package changed manuscript bytes');
+        check(read[2].bytes[2] === 255, 'browser package changed research bytes');
+        let refused = false;
+        try { await BookArchive.build([{ path: 'book.txt', kind: 'text', text: 'x' },
+            { path: '../escape.md', kind: 'text', text: 'x' }]); }
+        catch (error) { refused = error.code === 'book-package-path-invalid'; }
+        check(refused, 'browser package accepted a traversal path');
+        return ['explicit ZIP round-trip preserves text and binary research', 'unsafe package path is refused'];
+    }
+
     root.StoreBrowserTests = {
         freshAndRecovery: freshAndRecovery,
         race: race,
@@ -489,6 +636,8 @@
         quota: quota,
         persistence: persistence,
         seedCrash: seedCrash,
-        recoverCrash: recoverCrash
+        recoverCrash: recoverCrash,
+        folderSync: folderSync,
+        bookTransfer: bookTransfer
     };
 })(window);

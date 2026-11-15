@@ -139,10 +139,13 @@
         });
     }
 
-    const KINDS = { epub: { noun: 'book', ext: '.epub', article: 'an' }, docx: { noun: 'document', ext: '.docx', article: 'a' } };
+    const KINDS = { epub: { noun: 'book', ext: '.epub', article: 'an' },
+        docx: { noun: 'document', ext: '.docx', article: 'a' },
+        'book-folder': { noun: 'book package', ext: '.zip', article: 'a' } };
 
     // Every entry of a zip archive, checked as described above: { raw: { name: Uint8Array }, list, skipped }. kind
-    // ('epub' or 'docx', P7-03) names the file in messages. Throws an Error with a code and a message.
+    // ('epub', 'docx', or the explicit Prose 'book-folder' package) names the file in messages. Throws an Error with
+    // a code and a message.
     async function unzip(bytes, options) {
         const o = options || {};
         const kind = KINDS[o.kind] || KINDS.epub;

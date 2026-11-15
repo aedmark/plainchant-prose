@@ -19,7 +19,8 @@ test('structure: the app scripts are loaded after the src/ modules they use, and
     [
         'src/html-ast.js', 'src/css-ast.js', 'src/code-shade.js', 'src/dom-outline.js',
         'src/project.js', 'src/editing.js', 'src/suggest.js', 'src/library.js',
-        'src/store-schema.js', 'src/book-recovery.js', 'src/store.js', 'src/versions.js', 'src/filesync.js', 'src/importing.js',
+        'src/store-schema.js', 'src/book-recovery.js', 'src/store.js', 'src/versions.js', 'src/filesync.js',
+        'src/book-archive.js', 'src/importing.js',
         'src/xml-ast.js', 'src/book-template.js', 'src/book.js', 'src/opf-edit.js', 'src/nav.js',
         'src/book-chapters.js', 'src/book-notes.js', 'src/book-blocks.js', 'src/book-export.js',
         'src/epub.js', 'src/markdown-import.js', 'src/xhtml.js', 'src/book-lang.js',
@@ -162,6 +163,18 @@ test('structure: the Export dialog offers a whole-project .zip built by zip.js',
     assert.ok(order.indexOf('src/zip.js') !== -1 && order.indexOf('src/zip.js') < order.indexOf('src/app/core.js'), 'zip.js loads before the app scripts');
     assert.ok(listed.indexOf('zip-ui.js') > listed.indexOf('tauri-files.js'), 'zip-ui.js loads after tauri-files.js (it uses hasTauri)');
     assert.includes(readRoot('src/app/zip-ui.js'), 'Zip.build');
+});
+
+test('structure: Prose folder sync keeps authority in memory and browser transfer is explicit', () => {
+    const order = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
+    assert.ok(order.indexOf('src/book-archive.js') > order.indexOf('src/zip.js'));
+    assert.ok(order.indexOf('src/book-archive.js') < order.indexOf('src/app/core.js'));
+    const sync = readRoot('src/app/book-sync.js');
+    ['showDirectoryPicker', 'FileSystemDirectoryHandle', 'permissionToken', 'rootPath'].forEach((needle) => {
+        assert.excludes(sync, needle);
+    });
+    assert.includes(sync, "subtle.digest('SHA-256'");
+    assert.includes(sync, 'FileSync.preflight');
 });
 
 test('structure: the Problems filter, hints.js, and the problemsFilter setting are wired in', () => {

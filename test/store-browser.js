@@ -21,7 +21,9 @@ function findChrome() {
 function startServer() {
     const html = '<!doctype html><meta charset="utf-8"><title>Store test</title>' +
         '<script src="/src/store-schema.js"></script><script src="/src/book-recovery.js"></script>' +
-        '<script src="/src/store.js"></script><script src="/src/app/book-persistence.js"></script>' +
+        '<script src="/src/store.js"></script><script src="/src/filesync.js"></script>' +
+        '<script src="/src/zip.js"></script><script src="/src/epub.js"></script><script src="/src/book-archive.js"></script>' +
+        '<script src="/src/app/book-persistence.js"></script><script src="/src/app/book-sync.js"></script>' +
         '<script src="/test/store-browser-probe.js"></script>';
     const server = http.createServer(function (req, res) {
         const pathname = decodeURIComponent(new URL(req.url, 'http://127.0.0.1').pathname);
@@ -143,6 +145,12 @@ async function main() {
         const persistence = await evaluate(cdp, a.session, call('persistence', ['p105']));
         persistence.forEach(function (name) { console.log('  ok   persistence: ' + name); });
 
+        const sync = await evaluate(cdp, a.session, call('folderSync', ['p106']));
+        sync.forEach(function (name) { console.log('  ok   folder sync: ' + name); });
+
+        const transfer = await evaluate(cdp, a.session, call('bookTransfer'));
+        transfer.forEach(function (name) { console.log('  ok   book transfer: ' + name); });
+
         await evaluate(cdp, a.session, call('seedCrash', ['p105-crash']));
         await cdp.send('Target.closeTarget', { targetId: a.targetId });
         const recoveredPage = await page(cdp, origin + '/__store_test.html');
@@ -179,7 +187,7 @@ async function main() {
         } finally {
             await new Promise((resolve) => quotaServer.close(resolve));
         }
-        const total = checks.length + persistence.length + 5;
+        const total = checks.length + persistence.length + sync.length + transfer.length + 5;
         console.log('\n' + total + '/' + total + ' passed');
     } finally {
         clearTimeout(timer);
