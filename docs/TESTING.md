@@ -2,8 +2,8 @@
 
 This document defines the evidence required as Plainchant Prose is implemented. The repository currently carries
 trimmed Scribe-derived Node and Rust suites, the normative `P1-01` source fixtures, the pure `P1-02` parser and
-`P1-03` range-splice suites, the `P1-04` IndexedDB rules, the `P1-05` recovery suite, and the `P1-06` folder-conflict
-and explicit-transfer suites.
+`P1-03` range-splice suites, the `P1-04` IndexedDB rules, the `P1-05` recovery suite, the `P1-06` folder-conflict
+and explicit-transfer suites, and the `P1-07` native selected-root suite.
 
 ## Suites
 
@@ -11,12 +11,11 @@ and explicit-transfer suites.
 | --- | --- | --- | --- | --- |
 | Documentation, current | `python3 tools/check_docs.py` | Active documents agree on IDs, links, paths, placeholders, and handoff shape | Product design is correct or code exists | Python 3 |
 | Node foundation and Prose domain, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, source fixtures, parsing, escaping, lossless index splices, IndexedDB record rules, recovery decisions, three-way sync rules, and bounded book packages remain green | DOM, real IndexedDB, native files, or writing UI | Node and optional external tools |
-| Retained Rust foundation, current | `cargo test --manifest-path src-tauri/Cargo.toml` | Retained native unit tests remain green | Prose path policy, native dialogs, or a packaged window | Rust and Cargo |
+| Native Rust shell, current | `cargo test --manifest-path src-tauri/Cargo.toml` | Selected-root ownership, managed-path confinement, fingerprints, limits, rollback, recovery warning, permission loss, and watch coalescing pass on temporary Linux folders | A clicked native dialog, real Tauri event delivery, disk-full behavior, or a packaged window | Rust and Cargo on Linux |
 | Later Prose unit and structure, planned | Expanded `npm test` | Book-change, sync, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | Later Phase 1 implementation |
 | Browser foundation and persistence, current | `npm run test:browser` | The starter Stage loads under the exact CSP; real Chromium proves schema recovery, concurrency, autosave, emergency text, forced-close reconciliation, folder fingerprints and preflights, explicit ZIP transfer, pending-intent pause, deletion, quota, and lifecycle behavior | Writing UI adoption, real native files, service-worker upgrades, other browsers, assistive technology, or visible layout | Installed Chrome or Chromium |
 | Browser workflows, planned | Expanded `npm run test:browser` | Editor, undo, IndexedDB, recovery, accessibility mechanics, service worker, and main workflows in one headless engine | Other browsers, real assistive technology, or a human-visible layout | Phase 1 implementation |
-| Desktop foundation, current | `npm run tauri:test` | Retained path, filename, and decoding helpers pass in Rust | Full Prose confinement, native dialogs, command registration, or a packaged window | Rust and Cargo |
-| Desktop shell, planned | Expanded `npm run tauri:test` | Path confinement, size limits, atomic-write rules, permission state, and command registration | Native dialogs and a real packaged window | Phase 1 implementation |
+| Desktop shell, current | `npm run tauri:test` | The native Rust shell suite runs through the maintained package command | Native dialogs, real watcher delivery through a packaged webview, and a human-visible window | Rust and Cargo on Linux |
 | EPUB oracle, current when configured | Part of `npm test` | Retained handoff fixtures satisfy the observed EPUBCheck version | Future Prose output, Scribe interpretation, or reading-system rendering | Java and EPUBCheck |
 | Accessibility oracle, current when configured | Part of `npm test` | Ace can produce a report for the retained EPUB export | Future Prose accessibility or reading-system behaviour | Ace and Chrome or Chromium |
 | Scribe compatibility, planned | Dedicated fixture runner from `P3-05` | The recorded Scribe commit imports and re-exports expected structure | Future Scribe versions or visual quality | Sibling repository at recorded commit |
@@ -91,11 +90,13 @@ duplicate-identity, stale-source, and ambiguous-unknown-line checks. P1-04 adds 
 intent, folder-authority, and failure-classification checks. P1-05 adds per-book emergency-record validation, exact
 reconciliation decisions, empty-text handling, and 30-day boundary rules. P1-06 adds the full three-way matrix,
 newline-only equality, additions, missing files, confirmed-deletion decisions, unique and ambiguous rename evidence,
-case and Unicode collision refusal, exact final preflight, archive byte preservation, and package limits. Later
-Phase 1 suites must add coverage for:
+case and Unicode collision refusal, exact final preflight, archive byte preservation, and package limits. P1-07 adds
+structure rejection of the removed broad commands plus native path, symlink, alias, duplicate-owner, release,
+permission-loss, UTF-8, file-count, byte-limit, fingerprint, create, replace, delete, move, rollback, interruption, and
+watch-coalescing cases. Later Phase 1 suites must add coverage for:
 
 - multi-file transaction planning, interruption, rollback, and stale-before-image refusal;
-- native folder interruption, deletion recovery, watch coalescing, and real-filesystem conflict cases;
+- packaged-window native dialog and watcher delivery, disk-full recovery, and real user-visible conflict cases;
 - XHTML and archive output at byte and structure levels;
 - inherited-name rejection, classic-script duplicate globals, local-only assets, and service-worker list agreement.
 
@@ -119,7 +120,9 @@ ordering, immediate binary storage, empty content, last-chapter refusal, intent 
 transaction retention, soft-delete restore, explicit permanent deletion, and 30-day retention coverage. Clearing the
 emergency record before transaction completion produces the expected targeted failure. P1-06 adds Web Crypto
 fingerprinting, CRLF-preserving local writes, version-before-load behavior, simultaneous-edit pause, a late-change
-preflight refusal, one live folder owner, and explicit ZIP round-trip and unsafe-path refusal.
+preflight refusal, one live folder owner, and explicit ZIP round-trip and unsafe-path refusal. P1-07 reuses native
+scan descriptors without rehashing file contents, finalizes recovery identifiers only after the durable final folder
+snapshot, and retains those identifiers when a late change makes the final scan fail.
 
 Later Phase 1 work expands the same command to cover type, undo, binder and corkboard keyboard movement, preview
 escaping, find and replace, theme contrast, zoom, focus order, accessible names,
@@ -134,10 +137,12 @@ and do not extend the supported matrix without a later decision (D-013).
 npm run tauri:test
 ```
 
-The current Rust suite covers retained relative-path rejection, canonical directory handling, safe filenames, and
-base64 decoding. Phase 1 adds temporary selected-root cases for symlink escape, Unicode and case aliases, permission
-revocation, file-count and byte limits, stale fingerprints, atomic replacement, watcher coalescing, and command
-registration. A real-window check remains manual.
+The current Rust suite uses fresh temporary selected roots. It covers traversal, absolute and malformed paths,
+symlinks, Unicode and case aliases, duplicate ownership and release, permission loss, invalid UTF-8, file-count and
+byte limits, stale fingerprints, confined create and replacement, recoverable deletion and move, reverse rollback,
+interruption warning, and deterministic 250-millisecond watch coalescing. Structure tests reject the old renderer-path
+commands and loopback server and require every narrow command registration. A real dialog, real watcher event through
+the webview, disk-full injection, and a packaged-window check remain manual.
 
 ## Handoff oracles
 

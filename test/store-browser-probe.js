@@ -488,6 +488,9 @@
         let changeOnRead = null;
         let scanCount = 0;
         let changeOnScan = null;
+        let operation = 0;
+        const pendingOperations = new Set();
+        const finalizedOperations = [];
         return {
             authorityId: authorityId,
             displayName: 'Memory Book',
@@ -504,11 +507,26 @@
                 if (changeOnRead && readCount === changeOnRead.at) files.set(path, cloneEntry(changeOnRead.entry));
                 return Promise.resolve(files.has(path) ? cloneEntry(files.get(path)) : null);
             },
-            writeAtomic: function (path, entry) { files.set(path, cloneEntry(entry)); return Promise.resolve(); },
+            writeAtomic: function (path, entry) {
+                files.set(path, cloneEntry(entry));
+                const operationId = 'memory-operation-' + (++operation);
+                pendingOperations.add(operationId);
+                return Promise.resolve({ operationId: operationId });
+            },
+            finalize: function (operationIds) {
+                operationIds.forEach(function (id) {
+                    check(pendingOperations.has(id), 'sync finalized an unknown recovery operation');
+                    pendingOperations.delete(id);
+                    finalizedOperations.push(id);
+                });
+                return Promise.resolve();
+            },
             setText: function (path, value) { files.set(path, { path: path, kind: 'text', text: value }); },
             text: function (path) { return files.get(path) && files.get(path).text; },
             changeOnRead: function (at, entry) { readCount = 0; changeOnRead = { at: at, entry: entry }; },
-            changeOnScan: function (at, entry) { scanCount = 0; changeOnScan = { at: at, entry: entry }; }
+            changeOnScan: function (at, entry) { scanCount = 0; changeOnScan = { at: at, entry: entry }; },
+            pendingCount: function () { return pendingOperations.size; },
+            finalizedCount: function () { return finalizedOperations.length; }
         };
     }
 
@@ -525,6 +543,8 @@
         ], 'grant-1');
         let tick = 20;
         const firstSnapshot = await ProseBookSync.snapshot(await folder.scan(), crypto);
+        check((await ProseBookSync.snapshot(firstSnapshot, null))[0].exact === firstSnapshot[0].exact,
+            'native fingerprint descriptors were rehashed in the webview');
         const link = { bookId: id, displayName: 'Memory Book', platform: 'test', fingerprints: firstSnapshot };
         const registry = ProseBookSync.createRegistry();
         const pending = ProseBookSync.create({ db: opened.db, bookId: id,
@@ -543,6 +563,8 @@
         let state = await session.sync();
         check(state.status === 'synchronized', 'local-only synchronization did not finish');
         check(folder.text('one.md') === '# One\r\n\r\nLocal edit.\r\n', 'the existing CRLF style was not preserved');
+        check(folder.pendingCount() === 0 && folder.finalizedCount() === 1,
+            'native recovery was not finalized after the durable final snapshot');
         results.push('local-only write preserves disk newline style');
 
         folder.setText('one.md', '# One\r\n\r\nExternal edit.\r\n');
@@ -593,8 +615,11 @@
             putFiles: [text(id, 'one.md', 'chapter', '# One\n\nSnapshot local.\n', afterPreflight.book.revision,
                 afterPreflight.book.updatedAt)], removePaths: [] });
         folder.changeOnScan(2, { path: 'one.md', kind: 'text', text: '# One\n\nAfter write external.\n' });
+        const finalizedBeforeLateChange = folder.finalizedCount();
         await expectCode(function () { return finalSession.sync(); }, 'folder-changed-after-sync');
         check(folder.text('one.md') === '# One\n\nAfter write external.\n', 'final snapshot hid a late disk edit');
+        check(folder.pendingCount() === 1 && folder.finalizedCount() === finalizedBeforeLateChange,
+            'a failed final scan discarded native recovery material');
         results.push('final preflight and final snapshot both refuse late changes');
 
         const other = ProseBookSync.create({ db: opened.db, bookId: 'other-book', adapter: folder, registry: registry });

@@ -9,8 +9,8 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-15, session 12, on `master` tracking `origin/master`: P1-06 implements the pure folder-conflict
-contract, callable Web Crypto synchronization session, and bounded explicit browser book package._
+_Last updated: 2026-11-15, session 13, on `master` tracking `origin/master`: P1-07 implements the dialog-scoped,
+Linux-confined native book-folder boundary and retained native-operation recovery. The change is not committed._
 
 **Session owner:** None.
 
@@ -24,51 +24,52 @@ and an IndexedDB v3 adapter for separate books, files, versions, intents, target
 adds pure recovery and retention rules plus a callable browser persistence session for all dirty book files. The
 retained shell still has generic studio concepts and uses the preserved v2 stores; the Prose editor has not adopted
 the v3 session. P1-06 adds pure three-way folder decisions, a callable path-free synchronization coordinator, and an
-explicit bounded ZIP for Chromium or PWA book transfer. P1-07 still owns real Tauri filesystem authority and commands.
+explicit bounded ZIP for Chromium or PWA book transfer. P1-07 replaces the inherited broad native project-folder
+commands and loopback server with opaque selected-root
+authority, bounded native scans, exact preflighted mutations, recoverable rollback, and coalesced watch notifications.
 
 **Verified** (2026-11-15; Node 22.23.5, Python 3.14.10, Google Chrome 157.0.8103.78, current Rust toolchain)
 
 | Suite | Result |
 | --- | --- |
-| `npm test` | **256/256 passed**; sync and transfer rules passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| `npm test` | **257/257 passed**; native-boundary structure, sync, and transfer rules passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
 | Fingerprint-preflight mutation | **Expected failure** when the final exact disk fingerprint check was removed; implementation restored |
+| Native-preflight mutation | **Expected failure** when Rust's exact expected-fingerprint refusal was disabled; implementation restored |
+| Recovery-finalization mutation | **Expected failure** when sync skipped native recovery finalization; implementation restored |
 | `npm run test:browser` | **1/1 starter and 32/32 storage, persistence, sync, and transfer passed** in a disposable Chrome profile and origins under the exact CSP |
-| `npm run tauri:test` | **5 passed, 0 failed** |
-| `python3 tools/check_docs.py` | **0 errors, 0 warnings in 14 files** |
+| `npm run tauri:test` | **16 passed, 0 failed** on temporary Linux folders |
+| `python3 tools/check_docs.py` | **0 errors, 0 warnings in 15 files** |
 
 **What works**
 
-- The complete source grammar, ranged immutable parser, escaped renderer, export gate, and lossless `book.txt` splice
-  planner are implemented with exact CRLF, byte-order-mark, unknown-source, and inverse-edit coverage.
-- IndexedDB v3 stores Prose books, files, UI state, versions, version files, prepared or applied intents, targets,
-  folder-link metadata, and handoffs separately while preserving inherited v2 records unchanged.
-- Book writes serialize expected revisions. Versions are atomic, intents remain recoverable, and corrupt, unknown,
-  quota, upgrade, abort, stale-revision, and closed states stay distinct without destructive repair.
-- Folder-link records retain display metadata and bounded fingerprints but reject persisted paths or permission grants.
-- Text changes write a versioned per-book emergency record after 250 milliseconds of idle time and synchronously on
-  manual save or lifecycle loss; all observed dirty files commit in one IndexedDB revision after 1,500 milliseconds.
-- Startup applies an exact base revision, clears an already-durable image, and retains conflicts, pending intents,
-  deleted or missing books, and invalid records without choosing a winner.
-- Generation tokens preserve typing during an in-flight save. Binary research commits immediately, empty text remains
-  content, explicit removal cannot erase the last durable chapter, and a failed transaction keeps emergency text.
-- Soft-deleted books remain recoverable for at least 30 days and are never erased on a timer. Delete forever requires
-  exact confirmation, removes every local record owned by the book, and does not touch disk.
-- Folder decisions compare last-synced, IndexedDB, and fresh-disk SHA-256 snapshots. Canonical comparison changes only
-  newline encoding; local writes preserve existing disk newlines and never normalize trailing blank lines or a BOM.
-- Additions, missing files, simultaneous edits, unconfirmed deletion, path collisions, and ambiguous renames pause the
-  whole folder. Unique exact rename evidence is advisory and every conflict retains explicit preserving choices.
-- The callable sync session uses Web Crypto, requires one in-memory authority per book, rereads the exact disk
-  fingerprint before every replacement, and versions the working copy before loading an external edit.
+- The source grammar, immutable ranged parser, escaped renderer, export gate, and lossless `book.txt` splice planner
+  preserve CRLF, byte-order marks, unknown source, and exact ranges.
+- IndexedDB v3 separates books, files, versions, intents, targets, folder metadata, and handoffs while preserving v2.
+  Serialized revisions, emergency text, atomic versions, recoverable intents, and explicit deletion cover failure and
+  restart states without destructive repair.
+- Folder decisions compare last-synced, IndexedDB, and disk SHA-256 snapshots. Canonical equality changes newlines
+  only; unresolved additions, deletions, simultaneous edits, aliases, and renames pause every mutation.
+- The sync session requires one in-memory authority per book, repeats exact preflights, versions before external loads,
+  and stores display metadata and bounded fingerprints without native paths or grants.
+- Tauri folder selection returns an opaque process-only authority. Rust retains the canonical root and owning book,
+  confines managed paths through Linux `openat2`, hashes scans natively, and rejects traversal, symlinks, normalized
+  aliases, duplicate owners, invalid text, permission loss, stale fingerprints, and configured limits.
+- Native create, replace, delete, and move operations retain journals and before images until the final folder scan
+  and IndexedDB link snapshot are durable. Exact rollback refuses a later external edit; restart reports pending
+  recovery without expiring it.
+- Watch events expose only authority and generation, coalesce at 250 milliseconds, and request a full scan. The broad
+  renderer-path project commands and loopback asset server are removed; the unrelated EPUB Save dialog remains.
 - Chromium and PWA transfer uses an explicit ZIP limited to `book.txt`, `.md` chapters, and `research/`, with bounded
   entry count and bytes plus unsafe-name and collision refusal. It retains no browser directory handle.
 
 **Not verified**
 
-- No retained UI behaviour or real folder workflow uses the Prose parser, index writer, v3 persistence session, or
-  P1-06 synchronization session yet.
+- No retained UI behaviour uses the Prose parser, index writer, v3 persistence session, or native synchronization
+  adapter yet. P2-01 owns that adoption.
 - EPUBCheck and Ace were not run because their optional tools are absent. No Prose output has run through Scribe.
-- The headless CSP path was tested, but a real packaged Tauri window, manual accessibility, and reading-system
-  behaviour were not tested.
+- The headless CSP path and real temporary Linux folders were tested, but a clicked native dialog, packaged watcher
+  delivery, disk-full injection, a real packaged Tauri window, manual accessibility, and reading-system behaviour were
+  not tested.
 
 **Gotchas for the next session**
 
@@ -77,20 +78,20 @@ explicit bounded ZIP for Chromium or PWA book transfer. P1-07 still owns real Ta
 - The physical version stores are `bookVersions` and `bookVersionFiles`; the inherited `versions` name remains occupied.
 - `src/app/persistence.js` remains the generic inherited adapter. Prose callers use the separate
   `src/app/book-persistence.js` session; `P2-01` owns editor adoption.
-- `P1-07` must implement the abstract adapter used by `ProseBookSync`, repeat the expected fingerprint check inside
-  each atomic native command, keep authority process-local, and turn watch events into full bounded rescans (D-022).
+- `.plainchant-prose-recovery/` is a reserved native recovery area. A warning means an interrupted or unfinalized
+  operation remains. Do not delete it automatically; P2-01 needs to surface finalize or exact rollback.
+- The retained generic desktop folder buttons now explain that broad project-folder access is disabled. They do not
+  call removed path-based commands. `ProseNativeFolders` is the supported Tauri adapter.
 - P1-06 deliberately does not make browser directory handles part of the Prose contract. `BookArchive` is the browser
   transfer boundary; inherited generic studio folder code remains outside the callable Prose session until P2-01.
-- Range identities belong to one `book.txt` revision. A caller rereads after applying an accepted P1-03 edit; it never
-  reuses the old model.
 - Installed external binaries and loopback tests can be blocked by the workspace sandbox even when present. Record
   that refusal separately from an absent optional oracle.
 
 ## Next steps
 
 1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
-2. Start P1-07 with the dialog-scoped root registry, confined relative-path resolver, bounded scanner, atomic
-   expected-fingerprint replacement, deletion recovery, and coalesced watch-event contract from D-008 and D-022.
+2. Start P2-01 by adapting the inherited editor to the Prose book session, including folder relink, recovery warning,
+   conflict choices, and visible reasons when colour hints disengage.
 
 ## Open questions for maintainers
 
@@ -99,6 +100,47 @@ explicit bounded ZIP for Chromium or PWA book transfer. P1-07 still owns real Ta
 ## Session log
 
 Earlier completed sessions are in [the November 2026 archive](archive/SESSION_LOG_2026_11.md).
+
+### Session 13: 2026-11-15: implement confined native book folders
+
+**Contributor:** Maintainer and Codex
+
+**Goal:** Complete P1-07 with dialog-only authority, Linux folder confinement, bounded native fingerprints, exact
+mutation preflights, recoverable native operations, and coalesced watch notifications.
+
+**Done:** P1-07 implementation and documentation; commit and push remain maintainer-controlled.
+
+**Changed:** Replaced the inherited broad Tauri project-folder commands and loopback asset server with a process-local
+selected-root registry and narrow book commands. Added `src-tauri/src/native_books.rs` for managed-set validation,
+Linux `openat2` confinement, native SHA-256 scans, limits, atomic create and replacement, recoverable delete and move,
+rollback, finalization, and watch coalescing. Added `src/app/tauri-book-folder.js` as the path-free adapter. Extended
+`ProseBookSync` to accept native scan descriptors, read disk-only content lazily, retain operation identifiers through
+the final scan and IndexedDB snapshot, and finalize only after both are durable. Disabled legacy Tauri project-folder
+buttons while retaining explicit browser folder behavior and the unrelated EPUB Save dialog.
+
+**Decisions:** D-008 is accepted with the selected-root and fail-closed Linux contract. D-023 records same-filesystem
+recovery material, exact reverse rollback, finalization timing, restart warnings, and no automatic expiry.
+
+**Verified:** `npm test` passed 257/257. `npm run test:browser` passed starter 1/1 and storage, persistence, sync, and
+transfer 32/32 in Google Chrome 157.0.8103.78. `npm run tauri:test` passed 16/16 on temporary Linux folders, including
+path, symlink, collision, ownership, permission, limit, fingerprint, interruption, rollback, and coalescing cases.
+Both P1-07 mutations failed for their intended reasons and were restored. The final documentation result is recorded
+in Current state.
+
+**Not verified:** A clicked native dialog, actual Tauri watcher event delivery through a packaged webview, disk-full
+injection, other desktop platforms, P2-01 UI adoption, or a packaged application window.
+
+**Problems / surprises:** The sandbox blocked Cargo index access until the approved dependency download ran outside
+the sandbox. It also blocked the loopback browser harness until the maintained browser command used its approved
+unsandboxed execution.
+
+**Corrections:** Native scan descriptors now avoid reading every file into the webview. Recovery finalization follows
+the durable final snapshot instead of each rename. Legacy renderer paths no longer restore filesystem authority.
+
+**Left undone:** P2-01 editor adoption and visible native recovery or conflict UI, packaged-window validation,
+disk-full injection, EPUB handoff, and release checks.
+
+**Next session should start with:** Inspect P2-01 and propose the editor-to-book-session adoption slice before editing.
 
 ### Session 12: 2026-11-15: implement folder synchronization decisions and browser transfer
 
@@ -462,37 +504,3 @@ adoption, and all Prose domain implementation.
 
 **Next session should start with:** Claim P0-05, map each removal through HTML, app script, pure module, persistence,
 native command, service-worker entry, and test before deleting it.
-
-### Session 3: 2026-11-13: adopt the Scribe foundation
-
-**Contributor:** Maintainer and Codex
-
-**Goal:** Use Plainchant Scribe as the known-green foundation and preserve exact lineage before adaptation.
-
-**Done:** P0-03.
-
-**Changed:** Copied the pinned Scribe static app, test harness, fonts, icons, Tauri shell, linked manual, and round-trip
-tool; added the exact copied-file manifest and removal map; added Prism's notice to the Prose licence; updated current
-architecture, testing, security, roadmap, README, and handoff claims.
-
-**Decisions:** D-016 establishes Scribe as the primary foundation and Plainchant as the later writing-source reference.
-
-**Verified:** Every copied blob matches Scribe commit `e2b22186a481afb6b0180d0883ce21d393ae7352`;
-`npm test` passed 313/313; the Rust suite passed 15/15. Installed external executables and temporary loopback servers
-required execution outside the workspace sandbox.
-
-**Not verified:** Prose behaviour, EPUBCheck, Ace, browser workflows, packaged desktop behaviour, or manual release
-claims.
-
-**Problems / surprises:** The first archive selection omitted a linked manual and the test-only round-trip helper.
-The inherited structure test also required Prism's third-party notice. The sandbox refused QR tools and loopback
-sockets despite their presence.
-
-**Corrections:** Added the omitted dependency closure without copying Scribe's active project documentation or Git
-history. The lineage record names each copied file and the reasons for retaining or removing it.
-
-**Left undone:** Product rename, CSP and global-Tauri hardening, Scribe feature removal, Prose test adaptation, and all
-Prose domain implementation.
-
-**Next session should start with:** Claim P0-04, inventory every inherited identifier, then rename and harden the shell
-without mixing in P0-05 feature removal.

@@ -189,7 +189,7 @@ test('structure: the Explorer + Folder button, folder rows, and explorer-move.js
     assert.includes(html, 'id="newFolderBtn"');
     assert.ok(listed.indexOf('explorer-move.js') > listed.indexOf('asset-ui.js') && listed.indexOf('explorer-move.js') > listed.indexOf('explorer-ui.js'), 'explorer-move.js loads after explorer-ui.js and asset-ui.js');
     assert.includes(readRoot('src/app/core.js'), 'decorateExplorerDir', 'directory rows are decorated');
-    assert.includes(readRoot('src-tauri/src/main.rs'), 'dirs: Option<Vec<String>>', 'the desktop export creates empty folders');
+    assert.includes(readRoot('src/app/tauri-files.js'), 'writeBrowserDirEntries', 'the explicit browser export creates empty folders');
 });
 
 test('structure: the Assets modal, Browse button, image library, and asset-ui.js are wired in', () => {
@@ -203,7 +203,7 @@ test('structure: the Assets modal, Browse button, image library, and asset-ui.js
     assert.includes(html, 'id="cssBgImageBrowseBtn"');
     assert.includes(html, 'id="cssBgImage"');
     assert.includes(readRoot('src/app/typing.js'), 'restoreProjectAssets(snap.assets)', 'asset changes are part of undo history');
-    assert.includes(readRoot('src-tauri/src/main.rs'), 'assets: Option<BTreeMap<String, String>>', 'the desktop export writes added images');
+    assert.includes(readRoot('src/app/tauri-files.js'), 'encodeProjectAssets', 'the explicit browser export writes added images');
 });
 
 
@@ -252,8 +252,27 @@ test('structure: Open file / Open folder / Open project, saved folder links, and
     ['folderOwner', 'openExistingFolderProject', 'adoptExportFolder', 'markLinkSynced', 'detachProjectFolder'].forEach((needle) => assert.includes(tauri, needle));
     assert.includes(readRoot('src/app/persistence.js'), 'Store.loadLinks');
     assert.includes(readRoot('src/app/persistence.js'), 'restoreProjectLink');
-    assert.includes(readRoot('src-tauri/src/main.rs'), 'use_project_folder,');
-    assert.includes(readRoot('src/app/project-links.js'), "tauriInvoke('use_project_folder'");
+    assert.excludes(readRoot('src-tauri/src/main.rs'), 'use_project_folder');
+    assert.excludes(readRoot('src/app/project-links.js'), "tauriInvoke('use_project_folder'");
+});
+
+test('desktop: book folders use opaque dialog authority, confined commands, and retained recovery (P1-07)', () => {
+    const main = readRoot('src-tauri/src/main.rs');
+    const native = readRoot('src-tauri/src/native_books.rs');
+    const adapter = readRoot('src/app/tauri-book-folder.js');
+    ['open_project_folder', 'open_project_folder_at', 'use_project_folder', 'save_project_folder', 'TcpListener']
+        .forEach((needle) => assert.excludes(main, needle));
+    ['select_book_folder', 'scan_book_folder', 'read_book_entry', 'write_book_entry', 'delete_book_entry',
+        'move_book_entry', 'finalize_book_operations', 'rollback_book_operations', 'start_book_folder_watch',
+        'stop_book_folder_watch', 'release_book_folder'].forEach((needle) => assert.includes(main, needle));
+    ['openat2', 'ResolveFlags::BENEATH', 'ResolveFlags::NO_SYMLINKS', 'folder-changed-before-write',
+        '.plainchant-prose-recovery', 'unicode_normalization', 'Duration::from_millis(250)']
+        .forEach((needle) => assert.includes(native, needle));
+    ['authorityId', "invoke('select_book_folder'", "invoke('finalize_book_operations'", 'expectedExact']
+        .forEach((needle) => assert.includes(adapter, needle));
+    ['rootPath', 'permissionToken', 'showDirectoryPicker'].forEach((needle) => assert.excludes(adapter, needle));
+    assert.includes(html, '<script src="src/app/tauri-book-folder.js"></script>');
+    assert.includes(readRoot('sw.js'), "'src/app/tauri-book-folder.js'");
 });
 
 test('structure: the home page is a self-contained how-to whose links and anchors resolve (index.html)', () => {

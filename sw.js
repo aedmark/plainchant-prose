@@ -54,6 +54,7 @@ const APP_FILES = [
     'src/app/persistence.js',
     'src/app/book-persistence.js',
     'src/app/book-sync.js',
+    'src/app/tauri-book-folder.js',
     'src/app/assets.js',
     'src/app/dialogs.js',
     'src/app/library-ui.js',

@@ -23,6 +23,7 @@ revision. Nothing leaves the device, and no network resource is required.
 | Book transactions | `src/book-change.js` | `BookChange.plan`, `BookChange.apply` | Parser and splice modules |
 | Search, counts, outline, compare, narration | `src/finding.js`, `stats.js`, `outline.js`, `compare.js`, `narration.js` | One pure API per module | Parsed books or source maps |
 | Folder conflict rules | `src/filesync.js`, `src/app/book-sync.js` | `FileSync.plan`, `ProseBookSync.create` | Canonical text, Web Crypto fingerprints, IndexedDB, abstract native adapter |
+| Native book folders | `src/app/tauri-book-folder.js`, `src-tauri/src/native_books.rs` | `ProseNativeFolders.select`, narrow Tauri commands | Dialog authority, Linux-confined managed files, recovery journal, native watcher |
 | Browser book transfer | `src/book-archive.js` | `BookArchive.build`, `BookArchive.read` | Bounded explicit ZIP packages |
 | EPUB handoff | `src/prose-xhtml.js`, `src/epub-handoff.js`, copied archive modules | `EpubHandoff.build` | Parsed book and source files |
 | IndexedDB rules and adapter | `src/store-schema.js`, `src/book-recovery.js`, `src/store.js`, `src/app/book-persistence.js` | `StoreSchema`, `BookRecovery`, `Store`, `ProsePersistence` | IndexedDB and emergency storage |
@@ -205,6 +206,28 @@ access (D-012). Packages contain exactly the book contract (`book.txt`, chapter 
 cap entries at 10,000, cap one entry at 64 MiB, cap expanded content at 256 MiB, and reject unsafe or colliding paths.
 The retained generic studio UI has not adopted this Prose session; `P2-01` replaces that inherited workflow.
 
+### Native book-folder authority
+
+`P1-07` replaces the inherited renderer-path project commands and loopback asset server with one selected-root
+registry. `select_book_folder(bookId)` opens the native dialog and returns an opaque authority identifier, display
+name, and platform label. Rust alone retains the canonical root, root descriptor, and owning book identifier. A
+restart or released authority requires another dialog. One canonical root has one live book owner.
+
+The managed set is `book.txt`, root chapter `.md` files, and ordinary `research/` descendants. Root entries outside
+that set produce relative warnings. Managed symlinks, traversal, absolute paths, malformed components, and case or NFC
+aliases block access. Linux opens resolve beneath the retained root descriptor with `openat2` and no-symlink flags;
+unsupported kernels fail closed. A scan returns no contents, only relative path, kind, size, exact SHA-256, and
+canonical SHA-256. Text is fetched separately for a selected load; binary research crosses the command boundary as
+bounded base64.
+
+Native writes repeat the expected exact fingerprint. Replacement exchanges the live entry with a same-directory
+temporary file and verifies the exact bytes actually displaced; deletion quarantines and verifies likewise. A
+mismatch restores those displaced bytes. Each create, replacement, deletion, or move first places a journal and prior
+bytes in `.plainchant-prose-recovery/`.
+`ProseBookSync` finalizes operation identifiers only after its final complete scan and folder-link transaction. A
+failure retains the journal; rollback verifies the written after-image before restoring the prior bytes. Watch events
+contain only authority identifier and generation, coalesce at 250 milliseconds, and cause a full scan (D-008, D-023).
+
 ## Invariants
 
 - **Book files are authoritative.** Enforced by parser range and splice-preservation tests (`P1-02`, `P1-03`; D-002,
@@ -225,8 +248,8 @@ The retained generic studio UI has not adopted this Prose session; `P2-01` repla
   (`P1-02`, `P3-01`).
 - **The static app loads nothing from another host.** Enforced by the structure test and offline browser test (`P0-05`,
   `P5-01`).
-- **Native file access stays under a dialog-selected root.** Enforced by Rust traversal, symlink, alias, and revocation
-  tests (`P1-07`; proposed D-008).
+- **Native file access stays under a dialog-selected root.** Enforced by Rust traversal, symlink, alias, ownership,
+  expected-fingerprint, and rollback tests (`P1-07`; D-008, D-023).
 - **A handoff never changes the source book.** Enforced by before-and-after folder fingerprints (`P3-03`; D-005).
 - **Missing external oracles report "not run."** Enforced by the harness control tests (`P0-05`; D-006).
 
@@ -252,7 +275,9 @@ and local font files with their licence notices.
 | --- | --- | --- | --- |
 | Chromium browser APIs | Release-tested version recorded for each release | Static app, IndexedDB, service worker, explicit import and export | No persistent browser directory handles in v0.1 (D-012, D-013) |
 | Node.js | 18 or newer (`package.json`) | Pure, structure, and browser-runner tests | Development only |
-| Tauri | v2, exact crates locked at implementation | Desktop shell | Build and native runtime only |
+| Tauri | v2, lockfile-resolved | Desktop shell | Build and native runtime only |
+| `sha2`, `getrandom`, `notify`, `rustix`, `unicode-normalization` | Exact direct versions in `Cargo.toml` | Native fingerprints, opaque identifiers, watching, Linux confinement, collision checks | Rust shell only; no frontend dependency |
+| `tempfile` | Exact direct development version | Native temporary-folder tests | Development only |
 | Python | 3.x standard library | `tools/check_docs.py` and static server | Development only |
 | EPUBCheck | Exact observed version in each result | EPUB conformance oracle | Optional development and release tool |
 | Plainchant Scribe | Exact commit in each result | Handoff compatibility oracle | Sibling application, never a runtime import |
@@ -268,7 +293,8 @@ Any new dependency requires maintainer approval and an accepted decision.
 | Versions and deleted books | IndexedDB | Store and versions modules | Retention rules and explicit action | No |
 | Multi-file intent and emergency text | IndexedDB plus per-book localStorage buffer | Persistence adapter | Exact base-revision reconciliation at startup | No |
 | Targets, streaks, handoff log | IndexedDB `plainchant-prose` | Stats and handoff modules | Explicit reset; portable backup is later work (`P6-05`) | No |
-| Folder grants and fingerprints | IndexedDB and Tauri process state | Folder adapter | Permission revocation or unlink | No |
+| Folder grants and fingerprints | IndexedDB metadata and Tauri process state | Folder adapter | Permission revocation, release, or restart | No |
+| Pending native before images | Selected root `.plainchant-prose-recovery/` | Rust shell | Explicit finalize or exact rollback; no timed expiry | No |
 | Offline application copy | Cache API | Service worker | Versioned cache activation | No |
 | Test profiles and generated archives | Fresh temporary directories | Test runners | Deleted by runner | No, except named fixtures |
 
@@ -281,6 +307,7 @@ Any new dependency requires maintainer approval and an accepted decision.
 | Another tab commits the expected revision first | Later write is refused without changing files | Revision check inside the serialized readwrite transaction | Reload the current book revision and reapply an explicit edit |
 | Tab or process closes mid-edit | Recovery state identifies dirty files and pending intent | Emergency buffer and intent record | Apply the exact base revision, clear an already-durable image, or require an explicit conflict choice |
 | Disk file changed elsewhere | Conflict names every changed file and shows both revisions | Fingerprint differs from last sync | Load disk, keep working copy as a new file, or compare; no automatic overwrite |
+| Native operation stops before sync is durable | Recovery warning names the reserved relative directory | Journal remains after restart or failed final scan | Verify current exact bytes, then explicitly finalize or roll back |
 | Tauri folder permission disappears | Linked status pauses with relink action | Native permission failure | Select the folder again; IndexedDB copy remains available |
 | `book.txt` is invalid | Binder shows source-located problems; editing remains possible | Pure index diagnostics | Writer fixes explicit lines; no guessed order |
 | Index source changes before reorder | Reorder produces no edit | Exact ordered-source comparison | Read the current source and request the order again |
@@ -306,11 +333,11 @@ manuscript text, research notes, absolute personal paths, or recovered version c
 - EPUBCheck and Scribe compatibility are planned evidence. No Prose EPUB has been generated or tested.
 - The supported v0.1 environments are Linux Tauri and Chromium browser or PWA (D-013). No release evidence exists yet.
 - The IndexedDB v3 schema and transaction adapter implement D-007 under P1-04. P1-05 implements a callable Prose
-  autosave and recovery session, while the retained generic UI has not adopted it. The native boundary in D-008 stays
-  proposed until its roadmap item supplies executable evidence and maintainer acceptance.
+  autosave and recovery session, while the retained generic UI has not adopted it. P1-07 implements the accepted
+  D-008 Linux native boundary and D-023 recovery lifecycle; the retained generic UI still awaits P2-01 adoption.
 - The complete source grammar and normative fixture expectations exist under `P1-01`. The pure ranged parser and safe
   renderer exist under `P1-02`; the lossless book-index reader, strict splice primitive, and order planner exist under
   `P1-03`. No retained UI or persistence path uses them yet.
 - The Tauri page disables the public global object and enforces the D-017 CSP. P0-05 removed the inherited preview,
-  EPUBCheck, cover-save, desktop-open, and EPUB-association boundaries. D-008 stays proposed until folder-confinement
-  work supplies its full evidence.
+  EPUBCheck, cover-save, desktop-open, and EPUB-association boundaries. P1-07 removes the inherited broad project
+  commands and loopback asset server, then registers only the managed-book commands plus the unrelated EPUB Save dialog.

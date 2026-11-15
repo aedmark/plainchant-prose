@@ -74,8 +74,11 @@ Goal: open, edit, recover, and safely synchronize a multi-file book without refo
   explicit choices. Browser books use explicit import and export instead of persistent directory handles (D-012).
   Evidence: D-022, `src/filesync.js`, `src/app/book-sync.js`, `src/book-archive.js`, the Node sync and archive suites,
   and real-Chromium SHA-256, late-change, version-before-load, one-owner, and explicit-transfer cases (2026-11-15).
-- [ ] P1-07 Implement narrow Tauri commands for native folder selection, reading, writing, and watching. Commands
+- [x] P1-07 Implement narrow Tauri commands for native folder selection, reading, writing, and watching. Commands
   accept only canonical paths under a folder selected in a native dialog, enforce size limits, and expose no shell.
+  Evidence: accepted D-008 and D-023, `src-tauri/src/native_books.rs`, `src/app/tauri-book-folder.js`, 16 Rust
+  temporary-folder tests, 257/257 Node and structure tests, and Chromium synchronization recovery-finalization cases
+  (2026-11-15).
 
 **Gate 1:** a fixture book opens from a real folder, edits one chapter, reloads from IndexedDB, writes only the changed
 range, survives a forced-close recovery, and refuses to overwrite a simulated external change. Unit, browser, and Rust

@@ -41,8 +41,9 @@ and Rust commands. Phase 0 is complete; `P1-01` specifies the Prose source gramm
 the pure ranged parser and safe renderer, and `P1-03` implements lossless `book.txt` order splices. `P1-04` adopts the
 IndexedDB v3 schema and transaction adapter. `P1-05` adds the callable multi-file autosave, emergency recovery, and
 soft-delete session. `P1-06` adds the pure three-way folder-conflict rules, callable fingerprint-checked sync session,
-and bounded explicit browser book package. The retained generic UI has not adopted these Prose book APIs. `P1-07`
-supplies the confined Tauri commands next. See
+and bounded explicit browser book package. `P1-07` adds dialog-scoped, Linux-confined Tauri book-folder commands with
+exact native preflights and retained rollback material. The retained generic UI has not adopted these Prose book APIs.
+See
 [the lineage record](docs/archive/plainchant-lineage.md) and [the roadmap](ROADMAP.md).
 
 ## Documentation check

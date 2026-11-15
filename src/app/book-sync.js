@@ -35,6 +35,12 @@
         if (!entry || !FileSync.validPath(entry.path) || !['text', 'binary'].includes(entry.kind)) {
             return Promise.reject(problem('sync-entry-invalid', 'A folder snapshot entry is invalid.'));
         }
+        // P1-07 native scans hash bytes inside the confined Rust boundary. Reusing those validated marks avoids
+        // reading every file into the webview merely to discover whether it changed.
+        if (FileSync.validateEntry(entry) && entry.text === undefined && entry.bytes === undefined && !entry.blob) {
+            return Promise.resolve(Object.freeze({ path: entry.path, kind: entry.kind,
+                exact: entry.exact, canonical: entry.canonical }));
+        }
         const exactBytes = entry.kind === 'text' ? textBytes(entry.text) : bytesOf(entry.bytes || entry.blob);
         return Promise.resolve(exactBytes).then(function (bytes) {
             const canonical = entry.kind === 'text' ? textBytes(FileSync.canonicalText(entry.text)) : bytes;
@@ -196,6 +202,14 @@
         }
 
         function sync() {
+            const pendingOperations = [];
+            function rememberOperations(receipt) {
+                if (receipt && typeof receipt.operationId === 'string') pendingOperations.push(receipt.operationId);
+                if (receipt && Array.isArray(receipt.operationIds)) receipt.operationIds.forEach(function (id) {
+                    if (typeof id === 'string') pendingOperations.push(id);
+                });
+                return receipt;
+            }
             return inspectDetails().then(function (result) {
                 if (!result.state.plan || result.state.plan.blocked || result.state.status === 'editor-pending') return result.state;
                 const writes = result.state.plan.actions.filter(function (action) { return action.type === 'write'; });
@@ -208,14 +222,27 @@
                 return Promise.all(writes.map(preflight)).then(function () {
                     status = 'syncing';
                     let chain = Promise.resolve();
-                    writes.forEach(function (action) { chain = chain.then(function () { return writeAction(action, localData); }); });
+                    writes.forEach(function (action) {
+                        chain = chain.then(function () { return writeAction(action, localData); }).then(rememberOperations);
+                    });
                     return chain;
                 }).then(function () {
                     if (!loads.length) return result.book;
                     return Store.createBookVersion(db, { id: makeId(), bookId: bookId, takenAt: now(),
                         revision: result.book.book.revision }).then(function () {
                             return Promise.all(loads.map(function (action) {
-                                return Promise.resolve(storedFile(bookId, diskData.get(action.path), cryptoApi));
+                                const scanned = diskData.get(action.path);
+                                if (scanned && (scanned.text !== undefined || scanned.bytes !== undefined || scanned.blob)) {
+                                    return Promise.resolve(storedFile(bookId, scanned, cryptoApi));
+                                }
+                                return adapter.read(action.path, action.expectedExact).then(function (entry) {
+                                    return fingerprint(entry, cryptoApi).then(function (mark) {
+                                        const check = FileSync.preflight(action.expectedExact, mark);
+                                        if (!check.ok) throw problem('folder-changed-before-read',
+                                            'The folder changed before Prose could load ' + action.path + '.');
+                                        return storedFile(bookId, entry, cryptoApi);
+                                    });
+                                });
                             }));
                         }).then(function (files) {
                             return Store.applyBookChange(db, { bookId: bookId,
@@ -234,6 +261,10 @@
                     if (settled.status !== 'synchronized') throw problem('folder-changed-after-sync',
                         'The folder changed before synchronization could record its final snapshot.');
                     return saveLink(marks[1]);
+                }).then(function () {
+                    if (pendingOperations.length && typeof adapter.finalize === 'function') {
+                        return adapter.finalize(pendingOperations);
+                    }
                 }).then(function () {
                     status = 'synchronized';
                     return publicState();

@@ -117,21 +117,37 @@ time as identity misses replacements and coarse timestamp changes. Treating Inde
 handoff records remain in IndexedDB for v0.1. A portable backup is later work, and moving only the book folder does not
 move this history.
 
-## D-008 Native access is dialog-scoped and folder-confined  (2026-11-12, status: proposed)
+## D-008 Native access is dialog-scoped and folder-confined  (2026-11-12, status: accepted 2026-11-15)
 
 **Context:** A Tauri webview with general filesystem or shell access would turn rendered manuscript content into a
 native security boundary.
 
-**Decision:** Rust commands accept paths only after a native folder choice and only while their canonical form remains
-inside that selected folder. The shell enforces file-count and size limits, uses atomic replacement for writes where
-the platform permits, exposes no shell command, disables the global Tauri object, and applies a strict content-security
-policy.
+**Decision:** `select_book_folder(bookId)` is the only grant entry point. Rust keeps the canonical selected root,
+owning book identifier, root descriptor, and random opaque authority identifier in process memory. Renderer absolute
+paths never grant or restore access, the same root cannot belong to two live books, and restart requires another native
+dialog. Commands accept validated relative managed paths only: `book.txt`, root chapter `.md` files, and ordinary
+descendants of `research/`.
+
+Linux file reads and mutations resolve from the retained root descriptor with `openat2`, `RESOLVE_BENEATH`,
+`RESOLVE_NO_SYMLINKS`, and `RESOLVE_NO_MAGICLINKS`. A system that cannot provide that confinement fails closed.
+Symlinks in the managed set block the operation. Case-folded NFC aliases block the scan. Unknown root entries are
+reported as ignored warnings. Scans cap the managed set at 10,000 files and 256 MiB, one research file at 64 MiB, and
+manuscript text at the existing 5,242,880 UTF-16-code-unit limit. Results expose relative paths, kinds, sizes, and
+exact and canonical SHA-256 only.
+
+Every mutation repeats the expected exact fingerprint inside Rust. Replacement atomically exchanges a same-directory
+temporary file with the live entry and verifies the exact bytes actually displaced; a mismatch exchanges them back.
+Deletion similarly quarantines, verifies, and restores a mismatched entry. New files use no-replace semantics. Watch
+events carry only the authority identifier and a generation, coalesce at 250 milliseconds, and request a complete
+scan. The shell exposes no general filesystem, loopback asset server, or shell command. The public Tauri global
+remains disabled under the strict CSP.
 
 **Alternatives:** Tauri's broad filesystem plugin exposes more capability than the writing workflow needs. Browser-only
 directory access does not cover all intended desktop platforms.
 
-**Consequences:** Folder identity and permission revocation need platform-specific tests. Symlinks and path aliases are
-resolved before authorization.
+**Consequences:** Native linked folders are a Linux v0.1 capability. Relative diagnostics can name a failed file;
+absolute personal paths and manuscript bytes stay inside Rust. Permission loss pauses synchronization and requires a
+new dialog selection. P2-01 still owns adoption by the retained editor UI.
 
 ## D-009 Manifold documentation is repository memory  (2026-11-12, status: accepted)
 
@@ -457,6 +473,31 @@ editor and conflict interface.
 
 **Review trigger:** A supported filesystem cannot provide an atomic expected-fingerprint replacement, real books
 exceed a package limit, or conflict usability needs another preserving choice.
+
+## D-023 Native mutations retain recovery material until synchronization is durable  (2026-11-15, status: accepted)
+
+**Context:** An atomic replacement protects one file from a torn write, but a multi-file synchronization can still
+stop after some replacements. IndexedDB and the last-synced folder snapshot must become durable before native before
+images can be discarded.
+
+**Decision:** Before create, replace, delete, or move changes a managed file, Rust writes a journal and any prior bytes
+under `.plainchant-prose-recovery/` on the selected filesystem. The hidden directory is the sole exception to the
+ordinary book-folder contract and is never a manuscript or research entry. Each operation returns an opaque identifier.
+`ProseBookSync` retains those identifiers through its final full folder scan and `folderLinks` transaction, then calls
+the native finalize command. A failed final scan or IndexedDB write leaves recovery material in place. Rollback first
+checks the operation's resulting exact fingerprint, restores the before image in reverse order, and refuses to erase a
+later external edit. Recovery files do not expire automatically. A restart reports their presence as a warning.
+
+**Alternatives:** Removing a backup immediately after rename loses the only native before image during partial group
+failure. Time-based cleanup can erase the evidence needed after a long interruption. Storing recovery bytes in
+IndexedDB splits the native operation across filesystems before disk mutation is safe.
+
+**Consequences:** A failed finalize can leave a small hidden recovery directory that the writer must resolve through a
+later UI. Scans ignore its contents except for the warning. Finalization is a separate privileged command and accepts
+only operation identifiers owned by the active authority.
+
+**Review trigger:** A supported filesystem cannot keep recovery and managed files on the same filesystem, or P2-01
+needs a richer interrupted-operation recovery interface.
 
 ## Held tensions
 

@@ -12,3 +12,11 @@ tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rfd = "0.15"
+getrandom = "=0.2.17"
+notify = "=8.2.1"
+rustix = { version = "=1.1.6", features = ["fs"] }
+sha2 = "=0.10.9"
+unicode-normalization = "=0.1.25"
+
+[dev-dependencies]
+tempfile = "=3.27.0"

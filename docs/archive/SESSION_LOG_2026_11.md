@@ -60,3 +60,37 @@ superseded by this session.
 **Left undone:** Enabling private vulnerability reporting, source copy, and all implementation.
 
 **Next session should start with:** Claim `P0-03` and record the exact Plainchant source commit before copying.
+
+## Session 3: 2026-11-13: adopt the Scribe foundation
+
+**Contributor:** Maintainer and Codex
+
+**Goal:** Use Plainchant Scribe as the known-green foundation and preserve exact lineage before adaptation.
+
+**Done:** P0-03.
+
+**Changed:** Copied the pinned Scribe static app, test harness, fonts, icons, Tauri shell, linked manual, and round-trip
+tool; added the exact copied-file manifest and removal map; added Prism's notice to the Prose licence; updated current
+architecture, testing, security, roadmap, README, and handoff claims.
+
+**Decisions:** D-016 establishes Scribe as the primary foundation and Plainchant as the later writing-source reference.
+
+**Verified:** Every copied blob matches Scribe commit `e2b22186a481afb6b0180d0883ce21d393ae7352`;
+`npm test` passed 313/313; the Rust suite passed 15/15. Installed external executables and temporary loopback servers
+required execution outside the workspace sandbox.
+
+**Not verified:** Prose behaviour, EPUBCheck, Ace, browser workflows, packaged desktop behaviour, or manual release
+claims.
+
+**Problems / surprises:** The first archive selection omitted a linked manual and the test-only round-trip helper.
+The inherited structure test also required Prism's third-party notice. The sandbox refused QR tools and loopback
+sockets despite their presence.
+
+**Corrections:** Added the omitted dependency closure without copying Scribe's active project documentation or Git
+history. The lineage record names each copied file and the reasons for retaining or removing it.
+
+**Left undone:** Product rename, CSP and global-Tauri hardening, Scribe feature removal, Prose test adaptation, and all
+Prose domain implementation.
+
+**Next session should start with:** Claim P0-04, inventory every inherited identifier, then rename and harden the shell
+without mixing in P0-05 feature removal.

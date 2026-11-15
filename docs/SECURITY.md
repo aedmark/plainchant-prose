@@ -81,14 +81,16 @@ guard that rejects path or grant authority. P1-05 adds bounded per-book emergenc
 reconciliation, last-chapter preservation, explicit deletion confirmation, and forced-close browser evidence. P1-06
 adds exact and canonical SHA-256 folder snapshots, whole-folder conflict pause, a second exact preflight immediately
 before replacement, path-free persisted link metadata, one-live-folder ownership, and bounded explicit browser ZIP
-transfer with hostile path and collision refusal. This does not establish Prose's complete native boundary;
-dialog-scoped folder confinement and command limits remain under proposed D-008 and P1-07.
+transfer with hostile path and collision refusal. P1-07 accepts D-008 and implements process-only dialog authority,
+Linux `openat2` confinement, managed-set and size limits, symlink and normalized-alias refusal, exact native
+preflights, atomic replacement, opaque watch events, and recoverable create, replace, delete, and move operations
+(D-023). Structure tests reject the removed broad renderer-path commands and loopback asset server. The remaining
+manual boundary evidence is a packaged dialog and watcher flow, disk-full injection, and targeted release review.
 
 Planned Prose security evidence includes:
 
 - hostile metadata in filenames and later EPUB XHTML or error-message boundaries;
-- path traversal, absolute path, control character, Unicode collision, case collision, symlink escape, and permission
-  revocation tests;
+- packaged-window native dialog and watcher delivery plus disk-full recovery;
 - archive count, size, inflation, duplicate-name, and malformed-structure tests;
 - IndexedDB corruption, interrupted intent, quota, two-tab, upgrade, and recovery tests;
 - content-security policy, local-resource, service-worker update, and offline tests;

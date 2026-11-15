@@ -163,16 +163,7 @@ async function encodeProjectAssets() {
 
 async function openProjectFolder() {
     if (hasTauri()) {
-        try {
-            const res = await tauriInvoke('open_project_folder', {});
-            if (!res || !res.path) return;
-            const meta = { kind: 'Tauri disk', name: res.path, path: res.path, baseUrl: res.base_url || '' };
-            const owner = await folderOwner(meta, null);
-            if (owner) { await openExistingFolderProject(owner, meta, { files: res.files || {}, tree: res.tree || [] }); return; }
-            activateImportedFolderProject(meta, { entries: res.files || {}, tree: res.tree || [] }, res.base_url || '');
-        } catch (err) {
-            showNotice('Folder open failed: ' + (err.message || err), true);
-        }
+        showNotice('Desktop folder selection is available from the Prose book workflow. The inherited project-folder importer is disabled.', true);
         return;
     }
 
@@ -204,23 +195,7 @@ async function exportProjectToFolder(forceNewFolder = false) {
     const fileCount = Object.keys(projectFiles.entries || {}).length;
 
     if (hasTauri()) {
-        try {
-            const targetPath = (!forceNewFolder && linkedFolder && linkedFolder.path) ? linkedFolder.path : null;
-            const savedPath = await tauriInvoke('save_project_folder', {
-                path: targetPath,
-                files: projectFiles.entries,
-                assets: await encodeProjectAssets(),
-                dirs: projectFolderPaths()
-            });
-            if (!savedPath) return;
-            await adoptExportFolder({ kind: 'Tauri disk', name: savedPath, path: savedPath, baseUrl: projectBaseUrl || '' });
-            if (typeof refreshExportModal === 'function') refreshExportModal();
-            markFilesSaved();
-            if (linkedFolder) markLinkSynced();
-            showNotice('Exported ' + fileCount + ' project files (retaining folder structure) to ' + savedPath);
-        } catch (err) {
-            showNotice('Disk export failed: ' + (err.message || err), true);
-        }
+        showNotice('Desktop book-folder writes require the Prose synchronization workflow. Broad project export is disabled.', true);
         return;
     }
 

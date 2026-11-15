@@ -57,16 +57,8 @@ async function restoreProjectLink(id) {
     const link = projectLinks[id];
     if (!link || id !== currentScriptId) return;
     if (link.kind === 'Tauri disk' && hasTauri()) {
-        try {
-            const baseUrl = await tauriInvoke('use_project_folder', { path: link.path });
-            if (id !== currentScriptId) return;
-            linkedFolder = { kind: link.kind, name: link.name, path: link.path, baseUrl: baseUrl };
-            projectBaseUrl = baseUrl;
-            drawStageNow();
-        } catch (err) {
-            if (id === currentScriptId) showNotice('The folder for this project is no longer at ' + link.path + '. Export to a folder to link it again.', true);
-            return;
-        }
+        showNotice('This inherited desktop folder link cannot be restored. Select the book folder again from the Prose workflow.', true);
+        return;
     } else if (link.handle) {
         linkedFolder = { kind: 'Browser Directory', name: link.name, handle: link.handle };
     } else return;
