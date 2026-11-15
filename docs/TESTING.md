@@ -2,15 +2,15 @@
 
 This document defines the evidence required as Plainchant Prose is implemented. The repository currently carries
 trimmed Scribe-derived Node and Rust suites as foundation checks, the normative `P1-01` source fixtures, and the pure
-`P1-02` parser suite. Their results prove the retained foundation seams, P0-05 removal guards, fixture consistency,
-and the named pure parsing and rendering contracts.
+`P1-02` parser and `P1-03` range-splice suites. Their results prove the retained foundation seams, P0-05 removal
+guards, fixture consistency, and the named pure parsing, rendering, and lossless order-edit contracts.
 
 ## Suites
 
 | Suite | Planned file or command | Proves | Does not prove | Needs |
 | --- | --- | --- | --- | --- |
 | Documentation, current | `python3 tools/check_docs.py` | Active documents agree on IDs, links, paths, placeholders, and handoff shape | Product design is correct or code exists | Python 3 |
-| Node foundation and Prose parser, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, P0-05 removals, P1-01 fixtures, and P1-02 parsing and escaping remain green | DOM, real IndexedDB, native files, browser integration, or writing UI | Node and optional external tools |
+| Node foundation and Prose domain, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, P0-05 removals, source fixtures, parsing, escaping, and lossless index splices remain green | DOM, real IndexedDB, native files, browser integration, or writing UI | Node and optional external tools |
 | Retained Rust foundation, current | `cargo test --manifest-path src-tauri/Cargo.toml` | Retained native unit tests remain green | Prose path policy, native dialogs, or a packaged window | Rust and Cargo |
 | Later Prose unit and structure, planned | Expanded `npm test` | Splice, book-change, sync, store-rule, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | Later Phase 1 implementation |
 | Browser foundation, current | `npm run test:browser` | The starter Stage and interaction bridge load under the exact Tauri CSP in Chromium with a disposable profile | Editing workflows, IndexedDB recovery, service-worker upgrades, other browsers, assistive technology, or visible layout | Installed Chrome or Chromium |
@@ -85,10 +85,10 @@ npm test
 The current runner derives from Scribe. P0-05 trimmed discarded feature suites; P0-06 removed stale source-roadmap
 citations and optional-oracle references to discarded modules without losing the retained baseline. P1-02 adds exact
 fixture-diagnostic comparison, UTF-16 range checks, escaping and nonprinting tests, immutable and pure boundary checks,
-a configurable size refusal, and 200 deterministic bounded hostile strings. Later Phase 1 suites must add coverage
-for:
+a configurable size refusal, and 200 deterministic bounded hostile strings. P1-03 adds strict edit validation,
+single-reader integration, exact metadata and suffix preservation, inverse-order equality, CRLF, BOM, astral,
+duplicate-identity, stale-source, and ambiguous-unknown-line checks. Later Phase 1 suites must add coverage for:
 
-- byte-preserving range splices and index-order edits;
 - multi-file transaction planning, interruption, rollback, and stale-before-image refusal;
 - folder conflict states for identical, local-only, disk-only, simultaneous, missing, added, and renamed files;
 - IndexedDB schema rules separately from its browser adapter;

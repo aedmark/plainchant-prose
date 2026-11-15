@@ -52,8 +52,9 @@ letters, numbers, spaces, hyphens, or underscores. Leading and trailing horizont
 and preserved in source. Repeated custom names use the same user-selected resolution as duplicate standard keys.
 Custom metadata is preserved in the book model. It has no EPUB mapping until a later accepted rule defines one.
 
-`book.txt` has no comment syntax in v0.1. An unrecognized nonblank line in either block remains source and is an
-unresolved conflict.
+`book.txt` has no comment syntax in v0.1. A comment-like or other unrecognized nonblank line in either block remains
+source and is an unresolved conflict. An order operation refuses an unknown line between the first and last recognized
+order record because the application cannot infer which record owns it (D-019).
 
 ### Ordered section
 
@@ -78,6 +79,11 @@ Duplicate paths and paths that collide after Unicode normalization or case-foldi
 chapter must exist, be readable, and be a regular file. Every manuscript `.md` file outside `research/` must be
 listed. Missing, unreadable, duplicate, colliding, and unlisted files produce diagnostics; the application never
 guesses reading order.
+
+Every recognized part and chapter line has a source-range identity. Reordering requires a complete permutation of
+those identities, then replaces only the span from the first through last recognized order record. Metadata, leading
+and trailing ordered-section source, blank-line positions, unknown lines outside the changed span, and original line
+endings remain unchanged. A stale source range or incomplete identity list produces no edit (D-019).
 
 ## Chapter files
 

@@ -95,12 +95,19 @@ Both parse entry points return UTF-16 ranges, diagnostics, the observed newline 
 default per-file parser cap is 5,242,880 UTF-16 code units; callers may supply a lower tested cap at a trust boundary.
 No parser result is serialized over source.
 
+`P1-03` implements `src/book-index.js` as the sole `book.txt` grammar reader and `src/splice.js` as the strict range
+primitive. `Prose.parseBook` consumes `BookIndex.read` and adds folder-level missing, unreadable, and unlisted-file
+diagnostics. `BookIndex.reorder(source, index, orderedIds)` accepts one complete permutation of range identities and
+returns either one explicit order-span edit or a structured refusal. `Splice.apply(source, edits)` rejects invalid,
+overlapping, or same-start ranges before applying replacements from the end of the string. Neither module mutates
+source or touches an environment API.
+
 ## Interfaces and data flow
 
 ```text
 folder or IndexedDB files
     -> boundary validation
-    -> Prose.parse + BookIndex.read
+    -> Prose.parse via BookIndex.read
     -> one ranged derived book
        -> editor hints / binder / corkboard / preview / search / counts
        -> range edit or multi-file BookChange
@@ -121,10 +128,10 @@ folder or IndexedDB files
 
 ## Invariants
 
-- **Book files are authoritative.** Enforced by planned parser round-trip and splice-preservation tests (`P1-02`,
-  `P1-03`; D-002).
+- **Book files are authoritative.** Enforced by parser range and splice-preservation tests (`P1-02`, `P1-03`; D-002,
+  D-019).
 - **A derived parse is never serialized over source.** Enforced by pure APIs accepting source plus explicit ranges;
-  planned structure and mutation tests (`P1-02`, `P1-03`).
+  structure and mutation tests (`P1-02`, `P1-03`).
 - **Every user-visible text edit preserves browser undo.** Enforced by the shared edit entry point and browser tests
   (`P2-01`).
 - **Every persisted multi-file change is recoverable as one intent.** Enforced by IndexedDB transaction and injected
@@ -193,6 +200,8 @@ Any new dependency requires maintainer approval and an accepted decision.
 | Disk file changed elsewhere | Conflict names every changed file and shows both revisions | Fingerprint differs from last sync | Load disk, keep working copy as a new file, or compare; no automatic overwrite |
 | Tauri folder permission disappears | Linked status pauses with relink action | Native permission failure | Select the folder again; IndexedDB copy remains available |
 | `book.txt` is invalid | Binder shows source-located problems; editing remains possible | Pure index diagnostics | Writer fixes explicit lines; no guessed order |
+| Index source changes before reorder | Reorder produces no edit | Exact ordered-source comparison | Read the current source and request the order again |
+| Unknown line lies inside reordered records | Reorder produces no edit and names the ambiguity | Ranged unknown-line model | Writer rejects, converts, or moves the unknown source explicitly |
 | Parser sees malformed marks | Source remains editable; preview omits unsafe interpretation and shows diagnostics | Pure parser diagnostics | Writer closes or escapes the mark |
 | Multi-file scene move is interrupted | Startup reports an incomplete operation | Intent state and before fingerprints | Complete or roll back from stored before images |
 | Handoff fails validation | No success record; output is labelled invalid or withheld | Built-in checks and EPUBCheck | Fix source-located problem and rebuild |
@@ -216,7 +225,8 @@ manuscript text, research notes, absolute personal paths, or recovered version c
 - The IndexedDB transaction design in D-007 is accepted but remains unimplemented. The native boundary in D-008 stays
   proposed until its roadmap item supplies executable evidence and maintainer acceptance.
 - The complete source grammar and normative fixture expectations exist under `P1-01`. The pure ranged parser and safe
-  renderer exist under `P1-02`; the source-splicing book-index writer remains unimplemented until `P1-03`.
+  renderer exist under `P1-02`; the lossless book-index reader, strict splice primitive, and order planner exist under
+  `P1-03`. No retained UI or persistence path uses them yet.
 - The Tauri page disables the public global object and enforces the D-017 CSP. P0-05 removed the inherited preview,
   EPUBCheck, cover-save, desktop-open, and EPUB-association boundaries. D-008 stays proposed until folder-confinement
   work supplies its full evidence.

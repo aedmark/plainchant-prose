@@ -38,7 +38,8 @@ The Scribe foundation is recorded under `P0-03`; `P0-04` renames it to Prose and
 surfaces. The retained shell preserves the multi-file, persistence, versions, library, find, offline, native-folder,
 Markdown, and EPUB-package seams for later adaptation. `P0-06` adapts the retained harness and adds maintained browser
 and Rust commands. Phase 0 is complete; `P1-01` specifies the Prose source grammar and fixtures, `P1-02` implements
-the pure ranged parser and safe renderer, and `P1-03` is the next implementation item. See
+the pure ranged parser and safe renderer, and `P1-03` implements lossless `book.txt` order splices. `P1-04` is the
+next implementation item. See
 [the lineage record](docs/archive/plainchant-lineage.md) and [the roadmap](ROADMAP.md).
 
 ## Documentation check

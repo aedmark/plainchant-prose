@@ -294,9 +294,9 @@ test('prose: emphasis whitespace, combined forms, and hard breaks remain literal
     ]);
 });
 
-test('prose: pure parser has no browser, storage, native, or Node dependency', function () {
+test('prose: pure parser has no browser, storage, or native dependency', function () {
     const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'prose.js'), 'utf8');
-    ['window', 'document', 'indexedDB', '__TAURI', 'require('].forEach(function (name) {
+    ['window', 'document', 'indexedDB', '__TAURI'].forEach(function (name) {
         assert.excludes(source, name, 'pure parser excludes ' + name);
     });
     const files = {

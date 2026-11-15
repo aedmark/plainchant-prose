@@ -73,8 +73,9 @@ guards. P0-04 disabled the public Tauri global and added the D-017 CSP, includin
 script even when it copies the Stage bridge nonce. P0-05 removed unused network preview, Java EPUBCheck, cover-save,
 desktop-open, event-listener, and EPUB-association authority. P1-02 adds contextual escaping, private-source omission,
 path and metadata conflicts, a 5,242,880-code-unit default per-file parser limit, and bounded hostile-input checks. This
-does not establish Prose's complete native boundary; dialog-scoped folder confinement and command limits remain under
-proposed D-008 and P1-07.
+P1-03 adds strict range validation, overlap and same-start refusal, bounded index reads, complete permutation checks,
+and an exact stale-source refusal before an order edit. This does not establish Prose's complete native boundary;
+dialog-scoped folder confinement and command limits remain under proposed D-008 and P1-07.
 
 Planned Prose security evidence includes:
 

@@ -9,50 +9,34 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-14, session 8, on `master` tracking `origin/master`: P1-02 implements the pure ranged Prose
-parser and safe preview renderer; source-splicing index work begins at P1-03._
+_Last updated: 2026-11-15, session 9, on `master` tracking `origin/master`: P1-03 implements the lossless `book.txt`
+reader, strict range splices, and source-preserving order edits; IndexedDB schema work begins at P1-04._
 
 **Session owner:** None.
 
-**Where things stand:** `BRIEF.md` remains the maintainer-owned source. Plainchant Prose uses `.md` chapters, standard
-`##` through `######` headings, an ignored optional `research/` directory, IndexedDB-only writing history in v0.1,
-Tauri-only linked folders, and Linux desktop plus Chromium browser or PWA support. `LICENSE` contains the supplied
-AI-assisted MIT terms adapted for Plainchant Prose and names Andrew Edmark and Arantor as the Humans. The private
-security channel is GitHub private vulnerability reporting, which the maintainer will enable on the existing
-repository. Git uses `master` and the GitHub `origin`. The application foundation comes from Plainchant Scribe commit
-`e2b22186a481afb6b0180d0883ce21d393ae7352`; P0-04 renames its identifiers and hardens its page boundary. P0-05
-removes Scribe-only publication, reader, layout, cover, font, checking, preview-server, file-association, and help
-surfaces. P0-06 adapts the retained tests, removes dormant oracle references to discarded modules, and adds maintained
-browser and Rust commands. P1-01 adds the normative `docs/SOURCE_FORMAT.md`, D-018, and seven fixture cases with exact
-UTF-16 source ranges and diagnostics. P1-02 adds `src/prose.js`, which parses in-memory book maps and isolated chapters
-into immutable ranged models and renders escaped preview HTML. The retained shell still has generic studio concepts;
-the parser is not connected to its UI or persistence. The complete provenance and removal map are in
-`docs/archive/plainchant-lineage.md`.
+**Where things stand:** `BRIEF.md` remains the maintainer-owned source. Prose uses `.md` chapters, an ignored optional
+`research/` directory, IndexedDB-only history, Tauri-only linked folders, and Linux desktop plus Chromium browser or
+PWA support. The renamed and trimmed Scribe foundation comes from commit
+`e2b22186a481afb6b0180d0883ce21d393ae7352`; its provenance is in `docs/archive/plainchant-lineage.md`. P1-01 defines
+the source grammar and fixtures. P1-02 parses immutable ranged books and renders escaped preview HTML. P1-03 adds the
+sole lossless `book.txt` reader, strict splices, and stale-source-checked order planning. The retained shell still has
+generic studio concepts; Prose domain modules are not connected to its UI or persistence.
 
-**Verified** (2026-11-14; Node 22.23.5, Rust and Cargo 1.99.1, Google Chrome 157.0.8103.78, Python 3.14.10)
+**Verified** (2026-11-15; Node 22.23.5, Python 3.14.10; retained browser and Rust results below are from 2026-11-14)
 
 | Suite | Result |
 | --- | --- |
-| `npm test` | **218/218 passed**; P1-01 fixture and P1-02 parser checks passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
-| Fixture-range mutation | **Expected failure, 201/202 passed** after shortening one recorded range; fixture restored |
-| Parser-escaping mutation | **Expected failure, 214/215 passed** after disabling less-than escaping; implementation restored |
-| Explicit all-oracle skip run | **197/197 passed**; EPUBCheck, Ace, and LibreOffice each reported `not run` with its configured reason |
+| `npm test` | **229/229 passed**; P1-03 exact preservation and refusal checks passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| Stale-source mutation | **Expected failure** after weakening the exact ordered-source comparison; implementation restored |
 | `npm run test:browser` | **1/1 passed twice** after the final timing adjustment, in disposable Chrome profiles under the exact CSP |
-| Browser-runner mutation | **Expected failure** for the deliberately changed page title; production title restored |
 | `npm run tauri:test` | **5 passed, 0 failed** |
 | `python3 tools/check_docs.py` | **0 errors, 0 warnings in 14 files** |
 
 **What works**
 
-- The original brief is preserved unchanged.
-- The repository contains the selected licence text with the requested project and contributor names.
-- The trimmed static shell retains multi-file projects, Markdown import, EPUB packaging, versions, library, find,
-  offline assets, generic Stage rendering, IndexedDB, native folders, and the Node and Rust harnesses.
 - Application identity and persistent keys belong to Plainchant Prose; a structure guard rejects inherited machine
   identifiers in runtime paths and files.
 - The native page has a strict local-only CSP, no public Tauri global, and a tested internal invoke bridge.
-- Structure checks reject the removed Scribe-only source, tests, HTML controls, CSS surfaces, native commands,
-  capabilities, EPUB association, and inherited manual.
 - `npm test`, `npm run test:browser`, and `npm run tauri:test` are maintained entry points for the retained foundation;
   optional oracles distinguish a named skip from a pass.
 - The source-format contract settles required and optional metadata, generalized custom keys, user-resolved
@@ -63,10 +47,16 @@ the parser is not connected to its UI or persistence. The complete provenance an
   footnotes, diagnostics, and the complete export gate from an in-memory book map.
 - `Prose.parseChapter` supports isolated editor parsing; `Prose.toHTML` escapes writer text, omits recognized private
   source, and leaves ambiguous footnotes literal.
+- `BookIndex.read` owns the `book.txt` grammar used by `Prose.parseBook`; it returns immutable metadata, order records,
+  exact identities, unknown lines, diagnostics, and source spans.
+- `BookIndex.reorder` returns one explicit order-span edit or a structured refusal for stale, incomplete, repeated,
+  unknown, or ambiguous input. `Splice.apply` rejects invalid or overlapping ranges before applying any replacement.
+- No-op and inverse reorder tests preserve every original UTF-16 code unit, including metadata spacing, CRLF, a byte
+  order mark, blank lines, comment-like unknown source outside the changed span, and trailing source.
 
 **Not verified**
 
-- No range-splice writer, retained UI behaviour, recovery path, or folder workflow uses the Prose parser yet.
+- No retained UI behaviour, recovery path, or folder workflow uses the Prose parser and index writer yet.
 - EPUBCheck and Ace were not run because their optional tools are absent. No Prose output has run through Scribe.
 - The headless CSP path was tested, but a real packaged Tauri window, manual accessibility, and reading-system
   behaviour were not tested.
@@ -75,8 +65,10 @@ the parser is not connected to its UI or persistence. The complete provenance an
 
 - `BRIEF.md` contains an unavailable embedded-plan marker. The maintainer called it noise and instructed the blueprint
   to ignore it on 2026-11-12.
-- The retained shell is still a generic web studio. P1-03 owns source-preserving index writes; it must not serialize
-  the P1-02 derived model over `book.txt`.
+- The retained shell is still a generic web studio. P1-04 must define Prose records without treating the inherited
+  Scribe store schema as accepted product behaviour.
+- Range identities belong to one `book.txt` revision. A caller rereads after applying an accepted P1-03 edit; it never
+  reuses the old model.
 - The D-017 Stage nonce is an authorization marker, not a secret. The generic Stage strips imported scripts before
   inserting its marked interaction bridge.
 - `test/epub-fixture.js` is test-only. It preserves direct coverage for retained EPUB packaging without restoring an
@@ -88,13 +80,54 @@ the parser is not connected to its UI or persistence. The complete provenance an
 ## Next steps
 
 1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
-2. Start P1-03 with a pure book-index reader and range-splice writer that preserves untouched `book.txt` source.
+2. Start P1-04 by designing the multi-store IndexedDB schema, transaction boundary, upgrade refusal, and recovery
+   states before adapting the inherited store.
 
 ## Open questions for maintainers
 
 - None. Q-001 through Q-006 are answered in DECISIONS.
 
 ## Session log
+
+### Session 9: 2026-11-15: implement lossless book-index splices
+
+**Contributor:** Maintainer and Codex
+
+**Goal:** Complete P1-03 without adding comment syntax, normalizing hand-edited `book.txt` source, or keeping a second
+book-index grammar inside the parser.
+
+**Done:** P1-03.
+
+**Changed:** Added `src/book-index.js` as the immutable source-only reader and order planner, added `src/splice.js` as
+the strict UTF-16 range primitive, and made `Prose.parseBook` consume the index result. Added tests for exact inverse
+reordering, untouched source, CRLF, BOM, astral offsets, duplicate text identities, unknown-line ambiguity, stale
+source, invalid permutations, overlap, size limits, purity, and source-map immutability.
+
+**Decisions:** D-019 records range identities, complete permutations, fixed intervening source, one recognized-span
+splice, exact stale-source comparison, and refusal when an unknown line lies inside the moved records. Comment-like
+lines remain unknown conflicts under D-018 rather than gaining v0.1 comment semantics.
+
+**Verified:** `npm test` passed 229/229. A no-op returned no edits, an order and its inverse reproduced every original
+code unit, and exact prefix and suffix comparisons covered metadata and trailing source. Weakening stale-source refusal
+produced the expected targeted failure before restoration. The final documentation and syntax results are recorded in
+Current state.
+
+**Not verified:** Binder or editor integration, browser undo, IndexedDB transactions, real folder writes, multi-file
+changes, EPUB handoff, and real reading-system behaviour.
+
+**Problems / surprises:** The retained assertion helper does not expose Node's `assert.notEqual`; the test now uses an
+equivalent strict inequality assertion. Reusing the parser's embedded book grammar would have created two owners, so
+the parser now delegates to `BookIndex.read` and adds only folder-level diagnostics.
+
+**Corrections:** The roadmap's inherited word “comments” now says “comment-like unknown lines,” matching the approved
+P1-01 rule that `book.txt` has no comment syntax. Unknown source inside a moved span blocks that operation; unknown
+source outside it remains byte-identical.
+
+**Left undone:** P1-04 durable working-copy schema, later multi-file transactions, UI integration, folder sync, and
+handoff output.
+
+**Next session should start with:** Claim P1-04 and settle record keys, transaction ownership, quota and corruption
+states, version retention, two-tab coordination, and upgrade recovery before changing inherited persistence code.
 
 ### Session 8: 2026-11-14: implement the pure Prose parser
 

@@ -53,8 +53,11 @@ Goal: open, edit, recover, and safely synchronize a multi-file book without refo
   Evidence: `src/prose.js`, `npm test` (218/218 including exact fixture diagnostics, bounded hostile cases, and pure
   boundary checks), an expected 214/215 failure after disabling less-than escaping, and
   `python3 tools/check_docs.py` (2026-11-14).
-- [ ] P1-03 Build the pure book-index reader and range-splice writer. It preserves comments, spacing, unknown metadata,
-  and untouched lines; an order edit changes only the ordered-file region.
+- [x] P1-03 Build the pure book-index reader and range-splice writer. It preserves spacing, comment-like unknown lines,
+  unknown metadata, and untouched source; an order edit changes only the recognized ordered-file span (D-019).
+  Evidence: `src/book-index.js`, `src/splice.js`, `npm test` (229/229 including exact inverse and untouched-source
+  checks), an expected mutation failure after weakening stale-source refusal, and `python3 tools/check_docs.py`
+  (2026-11-15).
 - [ ] P1-04 Design and implement the multi-file IndexedDB schema for books, files, versions, targets, folder links, and
   handoff records. Include upgrade, rollback or recovery, quota-failure, and two-tab tests before adopting the schema.
 - [ ] P1-05 Implement debounced autosave, a synchronous emergency buffer, 30-day soft-delete recovery, and crash

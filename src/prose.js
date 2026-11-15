@@ -3,21 +3,13 @@
  * Ranges are zero-based, half-open UTF-16 code-unit offsets so they can be passed directly to String.slice.
  */
 (function (root, factory) {
-    const api = factory();
+    const api = factory(typeof module === 'object' && module.exports ? require('./book-index.js') : root.BookIndex);
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.Prose = api;
-})(typeof self !== 'undefined' ? self : this, function () {
+})(typeof self !== 'undefined' ? self : this, function (BookIndex) {
     'use strict';
 
     const DEFAULT_MAX_SOURCE_LENGTH = 5 * 1024 * 1024;
-    const STANDARD_KEYS = {
-        title: { name: 'Title', property: 'title', required: true },
-        author: { name: 'Author', property: 'author', required: true },
-        language: { name: 'Language', property: 'language', required: true },
-        'publish date': { name: 'Publish Date', property: 'publishDate', required: false },
-        publisher: { name: 'Publisher', property: 'publisher', required: false },
-        series: { name: 'Series', property: 'series', required: false }
-    };
     const ASCII_PUNCTUATION = /[!-/:-@\[-`{-~]/;
 
     function ranged(start, end) {
@@ -102,247 +94,25 @@
         return makeDiagnostic(source, path, 'source-too-large', 'conflict', true, 0, Math.min(source.length, 1));
     }
 
-    function parseMetadataLine(source, path, line, diagnostics) {
-        const colon = line.text.indexOf(':');
-        if (colon === -1) return null;
-        const keyBits = trimHorizontal(line.text.slice(0, colon));
-        const valueBits = trimHorizontal(line.text.slice(colon + 1));
-        const key = keyBits.text;
-        const value = valueBits.text;
-        const standard = STANDARD_KEYS[key.toLowerCase()];
-        const node = {
-            type: 'metadata',
-            key: key,
-            value: value,
-            range: ranged(line.start, line.end),
-            keyRange: ranged(line.start + keyBits.start, line.start + keyBits.end),
-            valueRange: ranged(line.start + colon + 1 + valueBits.start, line.start + colon + 1 + valueBits.end)
-        };
-        if (standard) {
-            node.canonicalKey = standard.name;
-            node.property = standard.property;
-            if (key !== standard.name) {
-                diagnostics.push(makeDiagnostic(source, path, 'metadata-key-case', 'warning', false,
-                    line.start, line.end));
-            }
-            return node;
-        }
-        if (key.toLowerCase() !== 'custom') return node;
-        node.canonicalKey = 'Custom';
-        node.property = 'custom';
-        if (key !== 'Custom') {
-            diagnostics.push(makeDiagnostic(source, path, 'metadata-key-case', 'warning', false,
-                line.start, line.end));
-        }
-        const equals = value.indexOf('=');
-        if (equals === -1) return node;
-        const nameBits = trimHorizontal(value.slice(0, equals));
-        const customValueBits = trimHorizontal(value.slice(equals + 1));
-        node.customName = nameBits.text;
-        node.value = customValueBits.text;
-        const valueBase = node.valueRange.start;
-        node.customNameRange = ranged(valueBase + nameBits.start, valueBase + nameBits.end);
-        node.valueRange = ranged(valueBase + equals + 1 + customValueBits.start,
-            valueBase + equals + 1 + customValueBits.end);
-        return node;
-    }
-
-    function validLanguage(value) {
-        return /^(?:[A-Za-z]{2,8})(?:-[A-Za-z0-9]{1,8})*$/.test(value);
-    }
-
-    function validDate(value) {
-        const match = /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(value);
-        if (!match) return false;
-        if (match[2] && (Number(match[2]) < 1 || Number(match[2]) > 12)) return false;
-        if (match[3]) {
-            const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
-            return date.getUTCFullYear() === Number(match[1]) && date.getUTCMonth() === Number(match[2]) - 1 &&
-                date.getUTCDate() === Number(match[3]);
-        }
-        return true;
-    }
-
-    function duplicateCode(property) {
-        return 'metadata-duplicate-' + property.replace(/[A-Z]/g, function (letter) {
-            return '-' + letter.toLowerCase();
-        });
-    }
-
-    function unsafePathCode(path) {
-        if (path.indexOf('\\') !== -1) return 'chapter-path-backslash';
-        if (/^[A-Za-z]:/.test(path) || path.startsWith('/')) return 'chapter-path-absolute';
-        if (/[\x00-\x1f\x7f]/.test(path)) return 'chapter-path-control';
-        const parts = path.split('/');
-        if (parts.some(function (part) { return !part || part === '.' || part === '..'; })) {
-            return 'chapter-path-traversal';
-        }
-        if (parts[0].toLowerCase() === 'research') return 'chapter-path-research';
-        return null;
-    }
-
     function parseBook(files, options) {
         files = files && typeof files === 'object' ? files : {};
         const source = typeof files['book.txt'] === 'string' ? files['book.txt'] : '';
         const path = 'book.txt';
-        const diagnostics = [];
-        const limitProblem = sourceLimitDiagnostic(source, path, options);
-        if (limitProblem) {
-            diagnostics.push(limitProblem);
+        const index = BookIndex.read(source, options);
+        const diagnostics = index.diagnostics.slice();
+        if (diagnostics.some(function (problem) { return problem.code === 'source-too-large'; })) {
             return deepFreeze({
-                type: 'book', rangeUnit: 'utf16-code-unit', lineEnding: '', metadata: {}, metadataEntries: [],
-                customMetadata: [], parts: [], chapterEntries: [], chapters: [], diagnostics: diagnostics,
-                exportBlocking: true
+                type: 'book', rangeUnit: index.rangeUnit, lineEnding: index.lineEnding, metadata: index.metadata,
+                metadataEntries: index.metadataEntries, customMetadata: index.customMetadata, parts: index.parts,
+                chapterEntries: index.chapterEntries, chapters: [], diagnostics: diagnostics, exportBlocking: true
             });
         }
         if (!Object.prototype.hasOwnProperty.call(files, 'book.txt')) {
             diagnostics.push(makeDiagnostic(source, path, 'book-index-missing', 'conflict', true));
         }
-        const lines = lineRecords(source);
-        let split = lines.findIndex(function (line) { return /^[ \t]*$/.test(line.text); });
-        if (split === -1) split = lines.length;
-        const metadataEntries = [];
-        for (let i = 0; i < split; i++) {
-            const line = lines[i];
-            const entry = parseMetadataLine(source, path, line, diagnostics);
-            if (!entry) {
-                diagnostics.push(makeDiagnostic(source, path, 'metadata-unknown-line', 'conflict', true,
-                    line.start, line.end));
-                continue;
-            }
-            if (!entry.canonicalKey) {
-                diagnostics.push(makeDiagnostic(source, path, 'metadata-unknown-key', 'conflict', true,
-                    line.start, line.end));
-            } else if (entry.property === 'custom') {
-                if (!entry.customName || !/^[A-Za-z0-9 _-]+$/.test(entry.customName)) {
-                    diagnostics.push(makeDiagnostic(source, path, 'metadata-custom-invalid', 'conflict', true,
-                        line.start, line.end));
-                }
-            }
-            metadataEntries.push(entry);
-        }
-
-        const metadata = {};
-        const customMetadata = [];
-        Object.keys(STANDARD_KEYS).forEach(function (lookup) {
-            const spec = STANDARD_KEYS[lookup];
-            const entries = metadataEntries.filter(function (entry) { return entry.property === spec.property; });
-            if (!entries.length) {
-                if (spec.required) {
-                    diagnostics.push(makeDiagnostic(source, path, 'metadata-required-missing', 'conflict', true));
-                }
-                return;
-            }
-            if (entries.length > 1) {
-                entries.slice(1).forEach(function (entry) {
-                    diagnostics.push(makeDiagnostic(source, path, duplicateCode(spec.property), 'warning', true,
-                        entry.range.start, entry.range.end));
-                });
-                metadata[spec.property] = null;
-                return;
-            }
-            const entry = entries[0];
-            if (!entry.value && spec.required) {
-                diagnostics.push(makeDiagnostic(source, path, 'metadata-required-empty', 'conflict', true,
-                    entry.range.start, entry.range.end));
-                metadata[spec.property] = null;
-            } else {
-                metadata[spec.property] = entry;
-            }
-            if (entry.value && spec.property === 'language' && !validLanguage(entry.value)) {
-                diagnostics.push(makeDiagnostic(source, path, 'metadata-language-invalid', 'conflict', true,
-                    entry.range.start, entry.range.end));
-            }
-            if (entry.value && spec.property === 'publishDate' && !validDate(entry.value)) {
-                diagnostics.push(makeDiagnostic(source, path, 'metadata-publish-date-invalid', 'conflict', true,
-                    entry.range.start, entry.range.end));
-            }
-        });
-
-        const customGroups = new Map();
-        metadataEntries.filter(function (entry) { return entry.property === 'custom' && entry.customName; })
-            .forEach(function (entry) {
-                if (!customGroups.has(entry.customName)) customGroups.set(entry.customName, []);
-                customGroups.get(entry.customName).push(entry);
-            });
-        customGroups.forEach(function (entries) {
-            if (entries.length > 1) {
-                entries.slice(1).forEach(function (entry) {
-                    diagnostics.push(makeDiagnostic(source, path, 'metadata-duplicate-custom', 'warning', true,
-                        entry.range.start, entry.range.end));
-                });
-            } else customMetadata.push(entries[0]);
-        });
-
-        const parts = [];
-        const chapterEntries = [];
-        let currentPart = null;
-        const exactPaths = new Map();
-        const foldedPaths = new Map();
-        for (let i = split + 1; i < lines.length; i++) {
-            const line = lines[i];
-            if (/^[ \t]*$/.test(line.text)) continue;
-            const outer = trimHorizontal(line.text);
-            const partMatch = /^Part[ \t]*:(.*)$/.exec(outer.text);
-            if (partMatch) {
-                const titleBits = trimHorizontal(partMatch[1]);
-                currentPart = {
-                    type: 'part',
-                    title: titleBits.text,
-                    range: ranged(line.start, line.end),
-                    chapters: []
-                };
-                parts.push(currentPart);
-                if (!currentPart.title) {
-                    diagnostics.push(makeDiagnostic(source, path, 'part-empty', 'warning', false,
-                        line.start, line.end));
-                }
-                continue;
-            }
-            if (!outer.text.endsWith('.md')) {
-                diagnostics.push(makeDiagnostic(source, path, 'index-unknown-line', 'conflict', true,
-                    line.start, line.end));
-                continue;
-            }
-            const chapterPath = outer.text;
-            const entry = {
-                type: 'chapter-entry',
-                path: chapterPath,
-                range: ranged(line.start, line.end),
-                part: currentPart ? currentPart.title : null,
-                valid: true
-            };
-            chapterEntries.push(entry);
-            if (currentPart) currentPart.chapters.push(chapterPath);
-            const unsafe = unsafePathCode(chapterPath);
-            if (unsafe) {
-                entry.valid = false;
-                diagnostics.push(makeDiagnostic(source, path, unsafe, 'conflict', true, line.start, line.end));
-                continue;
-            }
-            if (exactPaths.has(chapterPath)) {
-                entry.valid = false;
-                diagnostics.push(makeDiagnostic(source, path, 'chapter-path-duplicate', 'conflict', true,
-                    line.start, line.end));
-                continue;
-            }
-            exactPaths.set(chapterPath, entry);
-            const normalized = chapterPath.normalize('NFC');
-            const folded = normalized.toLowerCase();
-            if (foldedPaths.has(folded)) {
-                entry.valid = false;
-                const prior = foldedPaths.get(folded).path;
-                const code = prior !== chapterPath && prior.normalize('NFC') === normalized
-                    ? 'chapter-path-unicode-collision' : 'chapter-path-case-collision';
-                diagnostics.push(makeDiagnostic(source, path, code, 'conflict', true, line.start, line.end));
-                continue;
-            }
-            foldedPaths.set(folded, entry);
-        }
-
         const chapters = [];
         const parsedPaths = new Set();
-        chapterEntries.forEach(function (entry) {
+        index.chapterEntries.forEach(function (entry) {
             if (!entry.valid || parsedPaths.has(entry.path)) return;
             parsedPaths.add(entry.path);
             if (!Object.prototype.hasOwnProperty.call(files, entry.path)) {
@@ -363,7 +133,7 @@
         Object.keys(files).forEach(function (filePath) {
             if (filePath === 'book.txt' || !filePath.endsWith('.md')) return;
             if (filePath.split('/')[0].toLowerCase() === 'research') return;
-            if (!exactPaths.has(filePath)) {
+            if (!index.chapterEntries.some(function (entry) { return entry.indexed && entry.path === filePath; })) {
                 diagnostics.push(makeDiagnostic('', filePath, 'chapter-unlisted', 'conflict', true));
             }
         });
@@ -371,12 +141,12 @@
         return deepFreeze({
             type: 'book',
             rangeUnit: 'utf16-code-unit',
-            lineEnding: detectedLineEnding(lines),
-            metadata: metadata,
-            metadataEntries: metadataEntries,
-            customMetadata: customMetadata,
-            parts: parts,
-            chapterEntries: chapterEntries,
+            lineEnding: index.lineEnding,
+            metadata: index.metadata,
+            metadataEntries: index.metadataEntries,
+            customMetadata: index.customMetadata,
+            parts: index.parts,
+            chapterEntries: index.chapterEntries,
             chapters: chapters,
             diagnostics: diagnostics,
             exportBlocking: diagnostics.some(function (problem) { return problem.exportBlocking; })

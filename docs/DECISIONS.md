@@ -320,6 +320,30 @@ selection, and later splices share one coordinate system. Safely literal unsuppo
 **Review trigger:** Real books require repeatable duplicate precedence, custom metadata needs an accepted handoff
 mapping, or UTF-16 ranges cannot support a target editor without lossy conversion.
 
+## D-019 Order splices preserve ambiguous source in place  (2026-11-15, status: accepted)
+
+**Context:** `P1-03` needs to reorder parts and chapters without reserializing `book.txt`. Blank lines, unusual spacing,
+duplicate text, and comment-like unknown lines may carry meaning to a person even though the v0.1 grammar does not
+interpret them.
+
+**Decision:** The lossless index reader gives every recognized part and chapter line a source-range identity. A reorder
+accepts exactly one complete permutation of those identities and returns one splice spanning the first through last
+recognized order record. Recognized line bodies move between the existing record slots; intervening blank-line source
+stays in place. Metadata and source outside the splice remain byte-identical. An unknown line within that span blocks
+the operation until the writer explicitly resolves it. Unknown lines outside the span remain untouched. Exact ordered
+source comparison rejects a stale index before producing an edit.
+
+**Alternatives:** Serializing a derived model would normalize hand formatting and discard unknown source. Attaching an
+unknown line to the preceding or following record would guess intent. Path text cannot identify duplicate lines, while
+range identities remain distinct.
+
+**Consequences:** Reordering remains available while ordinary path conflicts are visible, but an ambiguous unknown
+line pauses the specific structural operation. Applying the inverse permutation restores every original UTF-16 code
+unit. A later UI must reread after each accepted edit because ranges and identities belong to one source revision.
+
+**Review trigger:** Real books need comments with defined attachment semantics, or retaining blank lines in fixed slots
+produces surprising part or chapter movement.
+
 ## Held tensions
 
 ### T-001 Portable writing history and clean book folders  (2026-11-12, status: resolved by D-007)

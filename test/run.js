@@ -39,6 +39,8 @@ globalThis.DocxImport = require('../src/docx-import.js');
 globalThis.Format = require('../src/format.js');
 globalThis.Shortcuts = require('../src/shortcuts.js');
 globalThis.ProjectLink = require('../src/projectlink.js');
+globalThis.Splice = require('../src/splice.js');
+globalThis.BookIndex = require('../src/book-index.js');
 globalThis.Prose = require('../src/prose.js');
 
 globalThis.withTestCover = function (files, path) {
@@ -74,6 +76,7 @@ require('./format.test.js');
 require('./shortcuts.test.js');
 require('./projectlink.test.js');
 require('./source-fixtures.test.js');
+require('./book-index.test.js');
 require('./prose.test.js');
 require('./codeshade.test.js');
 require('./theme.test.js');
