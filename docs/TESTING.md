@@ -1,18 +1,18 @@
 # Testing
 
 This document defines the evidence required as Plainchant Prose is implemented. The repository currently carries
-trimmed Scribe-derived Node and Rust suites as foundation checks plus the normative `P1-01` source fixtures. Their
-results prove the retained foundation seams, P0-05 removal guards, and fixture consistency; parser behaviour still
-waits for `P1-02`.
+trimmed Scribe-derived Node and Rust suites as foundation checks, the normative `P1-01` source fixtures, and the pure
+`P1-02` parser suite. Their results prove the retained foundation seams, P0-05 removal guards, fixture consistency,
+and the named pure parsing and rendering contracts.
 
 ## Suites
 
 | Suite | Planned file or command | Proves | Does not prove | Needs |
 | --- | --- | --- | --- | --- |
 | Documentation, current | `python3 tools/check_docs.py` | Active documents agree on IDs, links, paths, placeholders, and handoff shape | Product design is correct or code exists | Python 3 |
-| Node foundation and source fixtures, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, P0-05 removals, and P1-01 fixture consistency remain green | Prose parsing behaviour, DOM, real IndexedDB, native files, or writing UI | Node and optional external tools |
+| Node foundation and Prose parser, current | `npm test` through `test/run.js` | Retained pure modules, structure, packaging, configured oracles, P0-05 removals, P1-01 fixtures, and P1-02 parsing and escaping remain green | DOM, real IndexedDB, native files, browser integration, or writing UI | Node and optional external tools |
 | Retained Rust foundation, current | `cargo test --manifest-path src-tauri/Cargo.toml` | Retained native unit tests remain green | Prose path policy, native dialogs, or a packaged window | Rust and Cargo |
-| Prose unit and structure, planned | Expanded `npm test` | Parser, splice, book, sync, store-rule, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | Phase 1 implementation |
+| Later Prose unit and structure, planned | Expanded `npm test` | Splice, book-change, sync, store-rule, structure, and export contracts | DOM, real IndexedDB, native files, or writing UI | Later Phase 1 implementation |
 | Browser foundation, current | `npm run test:browser` | The starter Stage and interaction bridge load under the exact Tauri CSP in Chromium with a disposable profile | Editing workflows, IndexedDB recovery, service-worker upgrades, other browsers, assistive technology, or visible layout | Installed Chrome or Chromium |
 | Browser workflows, planned | Expanded `npm run test:browser` | Editor, undo, IndexedDB, recovery, accessibility mechanics, service worker, and main workflows in one headless engine | Other browsers, real assistive technology, or a human-visible layout | Phase 1 implementation |
 | Desktop foundation, current | `npm run tauri:test` | Retained path, filename, and decoding helpers pass in Rust | Full Prose confinement, native dialogs, command registration, or a packaged window | Rust and Cargo |
@@ -61,15 +61,16 @@ npm run tauri:test
 
 A documentation pass ends with zero errors. Warnings require review and may indicate that HANDOFF needs
 consolidation. The retained code suites must end with their own passing summaries. Optional oracles report `not run`
-and a reason. The source-fixture checks validate the written contract and exact ranges, not a parser implementation.
+and a reason. The source-fixture checks validate the written contract and exact ranges; the separate parser tests
+exercise the implementation against them.
 
 ## Source grammar fixtures
 
 `test/fixtures/prose-source/` contains seven normative cases for minimal and full books, metadata conflicts, index
 conflicts, malformed chapters, delimiter precedence, escaping, CRLF, a byte-order mark, Unicode normalization, and
 astral UTF-16 ranges. Each `expected.json` records features, exact source slices, derived expectations, diagnostics,
-and its export gate. `test/source-fixtures.test.js` verifies those records without duplicating the parser planned by
-`P1-02`.
+and its export gate. `test/source-fixtures.test.js` verifies those records without duplicating the parser implemented
+by `P1-02`.
 
 Every physical source file in a case must appear in its manifest. Encoding-only examples may embed source in JSON so
 CRLF and byte-order-mark evidence remains visible in review. Adding or changing grammar updates the normative format,
@@ -82,10 +83,11 @@ npm test
 ```
 
 The current runner derives from Scribe. P0-05 trimmed discarded feature suites; P0-06 removed stale source-roadmap
-citations and optional-oracle references to discarded modules without losing the retained baseline. Phase 1 suites
-must add coverage for:
+citations and optional-oracle references to discarded modules without losing the retained baseline. P1-02 adds exact
+fixture-diagnostic comparison, UTF-16 range checks, escaping and nonprinting tests, immutable and pure boundary checks,
+a configurable size refusal, and 200 deterministic bounded hostile strings. Later Phase 1 suites must add coverage
+for:
 
-- grammar precedence, malformed recovery, escaping, half-open source ranges, CRLF, Unicode, and large input;
 - byte-preserving range splices and index-order edits;
 - multi-file transaction planning, interruption, rollback, and stale-before-image refusal;
 - folder conflict states for identical, local-only, disk-only, simultaneous, missing, added, and renamed files;

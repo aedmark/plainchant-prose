@@ -2,8 +2,8 @@
 
 This document is the normative v0.1 source grammar for Plainchant Prose. It defines the writer-owned `book.txt`
 index, chapter files, diagnostics, recovery, and source ranges. The fixture books under
-`test/fixtures/prose-source/` provide executable examples. `P1-02` implements this contract; this document does not
-claim that the current application parses Prose source yet.
+`test/fixtures/prose-source/` provide executable examples. `P1-02` implements this contract as a pure parser and safe
+renderer; browser-shell integration remains later work.
 
 ## Shared rules
 

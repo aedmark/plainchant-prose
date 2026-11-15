@@ -9,8 +9,8 @@ Security: [SECURITY.md](SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md). His
 
 ## Current state
 
-_Last updated: 2026-11-14, session 7, on `master` tracking `origin/master`: P1-01 defines the complete Prose source
-grammar and normative fixtures; parser implementation begins at P1-02._
+_Last updated: 2026-11-14, session 8, on `master` tracking `origin/master`: P1-02 implements the pure ranged Prose
+parser and safe preview renderer; source-splicing index work begins at P1-03._
 
 **Session owner:** None.
 
@@ -24,15 +24,18 @@ repository. Git uses `master` and the GitHub `origin`. The application foundatio
 removes Scribe-only publication, reader, layout, cover, font, checking, preview-server, file-association, and help
 surfaces. P0-06 adapts the retained tests, removes dormant oracle references to discarded modules, and adds maintained
 browser and Rust commands. P1-01 adds the normative `docs/SOURCE_FORMAT.md`, D-018, and seven fixture cases with exact
-UTF-16 source ranges and diagnostics. The retained shell still has generic studio concepts; no Prose parser or book
-model exists yet. The complete provenance and removal map are in `docs/archive/plainchant-lineage.md`.
+UTF-16 source ranges and diagnostics. P1-02 adds `src/prose.js`, which parses in-memory book maps and isolated chapters
+into immutable ranged models and renders escaped preview HTML. The retained shell still has generic studio concepts;
+the parser is not connected to its UI or persistence. The complete provenance and removal map are in
+`docs/archive/plainchant-lineage.md`.
 
 **Verified** (2026-11-14; Node 22.23.5, Rust and Cargo 1.99.1, Google Chrome 157.0.8103.78, Python 3.14.10)
 
 | Suite | Result |
 | --- | --- |
-| `npm test` | **202/202 passed**; four P1-01 fixture checks passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
+| `npm test` | **218/218 passed**; P1-01 fixture and P1-02 parser checks passed, LibreOffice ran, EPUBCheck and Ace reported `not run` with reasons |
 | Fixture-range mutation | **Expected failure, 201/202 passed** after shortening one recorded range; fixture restored |
+| Parser-escaping mutation | **Expected failure, 214/215 passed** after disabling less-than escaping; implementation restored |
 | Explicit all-oracle skip run | **197/197 passed**; EPUBCheck, Ace, and LibreOffice each reported `not run` with its configured reason |
 | `npm run test:browser` | **1/1 passed twice** after the final timing adjustment, in disposable Chrome profiles under the exact CSP |
 | Browser-runner mutation | **Expected failure** for the deliberately changed page title; production title restored |
@@ -56,15 +59,14 @@ model exists yet. The complete provenance and removal map are in `docs/archive/p
   duplicates, index safety, chapter syntax, malformed recovery, precedence, exact ranges, and export blockers.
 - Seven normative fixture cases cover valid books, conflicts, malformed source, unsupported literal Markdown,
   escaping, line endings, a byte-order mark, Unicode normalization, and astral UTF-16 offsets.
-- The blueprint separates observed sibling-repository evidence, accepted product choices, proposed implementation
-  choices, and the resolved maintainer questions.
-- The roadmap puts safe multi-file storage before UI expansion and places the Scribe handoff before secondary writing
-  aids.
+- `Prose.parse` returns immutable ranged metadata, parts, chapters, scenes, printable blocks, notes, boneyards,
+  footnotes, diagnostics, and the complete export gate from an in-memory book map.
+- `Prose.parseChapter` supports isolated editor parsing; `Prose.toHTML` escapes writer text, omits recognized private
+  source, and leaves ambiguous footnotes literal.
 
 **Not verified**
 
-- No parser, book-index reader, retained UI behaviour, recovery path, or folder workflow implements the Prose source
-  grammar yet.
+- No range-splice writer, retained UI behaviour, recovery path, or folder workflow uses the Prose parser yet.
 - EPUBCheck and Ace were not run because their optional tools are absent. No Prose output has run through Scribe.
 - The headless CSP path was tested, but a real packaged Tauri window, manual accessibility, and reading-system
   behaviour were not tested.
@@ -73,8 +75,8 @@ model exists yet. The complete provenance and removal map are in `docs/archive/p
 
 - `BRIEF.md` contains an unavailable embedded-plan marker. The maintainer called it noise and instructed the blueprint
   to ignore it on 2026-11-12.
-- The retained shell is still a generic web studio. P1-02 must implement the fixtures without weakening their
-  conflicts into automatic choices.
+- The retained shell is still a generic web studio. P1-03 owns source-preserving index writes; it must not serialize
+  the P1-02 derived model over `book.txt`.
 - The D-017 Stage nonce is an authorization marker, not a secret. The generic Stage strips imported scripts before
   inserting its marked interaction bridge.
 - `test/epub-fixture.js` is test-only. It preserves direct coverage for retained EPUB packaging without restoring an
@@ -86,13 +88,53 @@ model exists yet. The complete provenance and removal map are in `docs/archive/p
 ## Next steps
 
 1. The maintainer enables GitHub private vulnerability reporting and confirms it before `P5-07`.
-2. Start P1-02 with a pure parser that satisfies the normative source fixtures and returns exact UTF-16 ranges.
+2. Start P1-03 with a pure book-index reader and range-splice writer that preserves untouched `book.txt` source.
 
 ## Open questions for maintainers
 
 - None. Q-001 through Q-006 are answered in DECISIONS.
 
 ## Session log
+
+### Session 8: 2026-11-14: implement the pure Prose parser
+
+**Contributor:** Codex
+
+**Goal:** Complete P1-02 as a pure, immutable parser and safe renderer without coupling source interpretation to the
+browser shell or persistence.
+
+**Done:** P1-02.
+
+**Changed:** Added `src/prose.js` with whole-book and isolated-chapter entry points, exact UTF-16 ranges, metadata and
+path conflict detection, chapters, scenes, synopses, headings, paragraphs, quotes, emphasis, notes, boneyards,
+footnotes, diagnostics, an export gate, and escaped HTML rendering. Added fixture-exact, hostile-input, encoding,
+immutability, purity, size-limit, and precedence tests.
+
+**Decisions:** Parser results are deeply immutable and use a 5,242,880 UTF-16-code-unit default per-file limit.
+Recognized closed notes and boneyards outrank block-looking lines. Footnote-definition content treats note and
+boneyard marks as diagnosed literal text. Preview renders only footnote labels with exactly one reference and one
+definition; ambiguous labels remain literal.
+
+**Verified:** `npm test` passed 218/218. The parser matched every normative fixture diagnostic and export gate; 200
+deterministic bounded hostile strings returned in-range models; raw writer HTML stayed escaped; and pure-boundary
+checks found no browser, storage, native, or Node dependency. Disabling less-than escaping produced the expected
+214/215 failure before restoration. The documentation result is recorded in Current state after the final run.
+
+**Not verified:** Browser integration, editor behavior, `book.txt` splices, IndexedDB, native folders, EPUB output,
+performance on the later 120,000-word fixture, or reading-system behavior.
+
+**Problems / surprises:** A first block pass could interpret heading, scene, quote, list, and definition-shaped lines
+inside multiline private source. Applying the hidden ranges to block recognition restored the specified precedence.
+Ambiguous footnotes also needed a renderer gate so preview did not imply a winner.
+
+**Corrections:** The block scanner masks recognized notes and boneyards while preserving source offsets. A preliminary
+hidden scan prevents definition-shaped lines inside private source from becoming footnotes, while definition content
+keeps private delimiters literal with a diagnostic.
+
+**Left undone:** P1-03 index splices, durable working copy, folder synchronization, writing UI, and handoff output.
+
+**Next session should start with:** Claim P1-03, define the exact ordered-region range in `book.txt`, and prove that
+metadata spacing, unknown lines, newline style, and all untouched bytes survive an order edit.
 
 ### Session 7: 2026-11-14: specify the Prose source grammar
 

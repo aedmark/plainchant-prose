@@ -84,6 +84,17 @@ it as part of the writer-owned book folder. Prose does not interpret citations f
 
 The parser returns source ranges and diagnostics. It does not mutate text or touch environment APIs.
 
+`P1-02` implements `src/prose.js` as a UMD pure module:
+
+- `Prose.parse(files, options)` reads an in-memory `book.txt` plus chapter map and returns one deeply immutable book;
+- `Prose.parseChapter(source, path, options)` returns an isolated immutable chapter for editor work; and
+- `Prose.toHTML(chapter)` renders recognized printable nodes, contextually escapes all writer text, omits recognized
+  notes and boneyards, and leaves ambiguous footnote references literal.
+
+Both parse entry points return UTF-16 ranges, diagnostics, the observed newline style, and `exportBlocking`. The
+default per-file parser cap is 5,242,880 UTF-16 code units; callers may supply a lower tested cap at a trust boundary.
+No parser result is serialized over source.
+
 ## Interfaces and data flow
 
 ```text
@@ -204,8 +215,8 @@ manuscript text, research notes, absolute personal paths, or recovered version c
 - The supported v0.1 environments are Linux Tauri and Chromium browser or PWA (D-013). No release evidence exists yet.
 - The IndexedDB transaction design in D-007 is accepted but remains unimplemented. The native boundary in D-008 stays
   proposed until its roadmap item supplies executable evidence and maintainer acceptance.
-- The complete source grammar and normative fixture expectations exist under `P1-01`; the parser and book-index
-  reader remain unimplemented until `P1-02` and `P1-03`.
+- The complete source grammar and normative fixture expectations exist under `P1-01`. The pure ranged parser and safe
+  renderer exist under `P1-02`; the source-splicing book-index writer remains unimplemented until `P1-03`.
 - The Tauri page disables the public global object and enforces the D-017 CSP. P0-05 removed the inherited preview,
   EPUBCheck, cover-save, desktop-open, and EPUB-association boundaries. D-008 stays proposed until folder-confinement
   work supplies its full evidence.

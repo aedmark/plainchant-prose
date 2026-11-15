@@ -71,12 +71,14 @@ authorize writes to sibling Zones.
 The retained Node suite exercises archive limits, XML hostile input, path validation, local assets, and structure
 guards. P0-04 disabled the public Tauri global and added the D-017 CSP, including negative tests that strip an imported
 script even when it copies the Stage bridge nonce. P0-05 removed unused network preview, Java EPUBCheck, cover-save,
-desktop-open, event-listener, and EPUB-association authority. This does not establish Prose's complete native boundary;
-dialog-scoped folder confinement and command limits remain under proposed D-008 and P1-07.
+desktop-open, event-listener, and EPUB-association authority. P1-02 adds contextual escaping, private-source omission,
+path and metadata conflicts, a 5,242,880-code-unit default per-file parser limit, and bounded hostile-input checks. This
+does not establish Prose's complete native boundary; dialog-scoped folder confinement and command limits remain under
+proposed D-008 and P1-07.
 
 Planned Prose security evidence includes:
 
-- hostile Markdown and metadata escaping in preview, EPUB XHTML, error messages, and filenames;
+- hostile metadata in filenames and later EPUB XHTML or error-message boundaries;
 - path traversal, absolute path, control character, Unicode collision, case collision, symlink escape, and permission
   revocation tests;
 - archive count, size, inflation, duplicate-name, and malformed-structure tests;
